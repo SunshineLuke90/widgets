@@ -1,0 +1,22 @@
+{
+  "name": "CamViewer",
+  "label": "Camera Viewer",
+  "type": "widget",
+  "version": "1.18.0",
+  "exbVersion": "1.18.0",
+  "author": "Lucius Creamer",
+  "description": "This widget allows users to view and interact with camera feeds in a map context.",
+  "copyright": "",
+  "dependency": [
+    "jimu-arcgis"
+  ],
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "properties": {},
+  "translatedLocales": [
+    "en"
+  ],
+  "defaultSize": {
+    "width": 800,
+    "height": 500
+  }
+}

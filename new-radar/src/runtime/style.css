@@ -1,0 +1,47 @@
+.radar-panel * {
+    --calcite-color-brand-press: color-mix(in hsl, var(--primary), #000 30%);
+    --calcite-color-brand-hover: color-mix(in hsl, var(--primary), #000 20%);
+    --calcite-color-brand: var(--primary);
+}
+
+.radar-panel {
+    width: auto;
+    text-align: center;
+    padding: 10px;
+}
+
+.radar-status {
+    font-size: x-small;
+}
+
+.control-row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-around;
+}
+
+.radar-play-pause {
+    height: calc(auto + 5px);
+    min-width: 70px;
+    width: 30%;
+    padding: 10px;
+}
+
+.timestamp {
+    height: fit-content
+}
+
+.timeline-slider {
+    width: 100%;
+}
+
+.speed-container {
+    display: flex;
+    flex-direction: column;
+    width: 70%;
+}
+
+.speed-slider {
+    width: 100%;
+}

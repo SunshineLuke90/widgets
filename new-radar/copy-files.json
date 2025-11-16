@@ -1,0 +1,6 @@
+[
+    {
+        "from": "src/runtime/assets/sw-radar.js",
+        "to": "../../sw-radar.js"
+    }
+]

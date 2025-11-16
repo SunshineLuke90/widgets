@@ -1,0 +1,14 @@
+.widget-setting-abls .view-config-container {
+    padding: 10px;
+    overflow-y: auto;
+    border: 1px solid var(--light-500);
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.widget-setting-abls .layer-list {
+    max-height: 200px;
+    overflow-y: auto;
+    padding-left: 10px;
+    margin-top: 5px;
+}

@@ -1,0 +1,49 @@
+:root {
+  --calcite-color-brand: var(--primary)
+}
+
+.widget-abls .view-buttons-container {
+  display: flex;
+  gap: 4px;
+  /* Space between buttons */
+  padding: 3px 25px;
+}
+
+.widget-abls .view-button {
+  flex-grow: 1;
+  padding: 3px 12px;
+  text-align: center;
+  cursor: pointer;
+  /* Default state using theme variables */
+  background-color: transparent;
+  color: var(--dark-800);
+  border-radius: 15px;
+  /* Rounded corners */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 15px;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.widget-abls .view-button.active {
+  /* Active state using the theme's primary color */
+  background-color: var(--primary);
+  color: var(--white);
+  border-color: var(--primary);
+}
+
+.widget-abls .view-button:not(.active):hover {
+  /* Hover state for non-active buttons */
+  background-color: var(--light-300);
+}
+
+.widget-abls .view-button.active:hover {
+  /* Hover state for the active button, using a darker shade of primary */
+  background-color: var(--primary-700);
+  border-color: var(--primary-700);
+}

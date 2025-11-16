@@ -1,0 +1,29 @@
+{
+  "name": "FIMLS",
+  "label": "Flood Inundation Map Layer Switcher",
+  "type": "widget",
+  "version": "1.18.0",
+  "exbVersion": "1.18.0",
+  "author": "Lucius Creamer",
+  "description": "This widget allows for users to use a slider to swipe through levels of flood inundation for various areas, allowing for quick and easy layer toggling without reloading the entire page.",
+  "copyright": "",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "properties": {
+    "hasSettingPage": true,
+    "hasStylePage": false,
+    "hasConfig": true
+  },
+  "dependency": [
+    "jimu-arcgis"
+  ],
+  "settingDependency": [
+    "jimu-arcgis"
+  ],
+  "translatedLocales": [
+    "en"
+  ],
+  "defaultSize": {
+    "width": 800,
+    "height": 500
+  }
+}

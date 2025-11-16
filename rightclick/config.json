@@ -1,0 +1,83 @@
+{
+  "useMapWidgetIds": [],
+  "enabledActions": {
+    "zoomIn": true,
+    "zoomOut": true,
+    "centerHere": true,
+    "copyCoordinates": true,
+    "plotCoordinates": true,
+    "plotMarker": true,
+    "addText": true,
+    "streetView": true,
+    "pictometry": true,
+    "measureDistance": true,
+    "measureArea": true,
+    "whatsHere": true
+  },
+  "coordinateSystem": "map",
+  "measurementSettings": {
+    "defaultUnits": "feet",
+    "unitDisplay": "single"
+  },
+  "plotSettings": {
+    "markerSize": 12,
+    "markerColor": "#ff6b6b",
+    "markerStyle": "circle",
+    "markerOutlineColor": "#ffffff",
+    "markerOutlineWidth": 2,
+    "markerOpacity": 1,
+    "markerAngle": 0,
+    "markerXOffset": 0,
+    "markerYOffset": 0,
+    "textColor": "#ffffff",
+    "textSize": 10,
+    "showCoordinateText": true,
+    "showCoordinateLabels": true,
+    "coordinateSystem": "map",
+    "customWkid": null,
+    "coordinateFormat": "decimal",
+    "decimalPlaces": 6,
+    "labelOffset": 20,
+    "labelTextSize": 10,
+    "labelTextColor": "#000000"
+  },
+  "markerSettings": {
+    "markerSize": 8,
+    "markerColor": "#0078ff",
+    "markerStyle": "circle",
+    "markerOutlineColor": "#ffffff",
+    "markerOutlineWidth": 1,
+    "markerOpacity": 1,
+    "markerAngle": 0,
+    "markerXOffset": 0,
+    "markerYOffset": 0
+  },
+  "textSettings": {
+    "fontSize": 14,
+    "fontColor": "#000000",
+    "fontFamily": "Arial",
+    "fontWeight": "bold",
+    "haloColor": "#ffffff",
+    "haloSize": 2,
+    "backgroundColor": "transparent",
+    "backgroundOpacity": 0.8
+  },
+  "reverseGeocodeUrl": "",
+  "reverseGeocodeWkid": 4326,
+  "pictometryUrl": "",
+  "featureLayers": [],
+  "whatsHereSettings": {
+    "maxResults": 10,
+    "searchRadius": 10,
+    "includeGeometry": false,
+    "spatialRelationship": "intersects",
+    "orderBy": ""
+  },
+  "uiSettings": {
+    "popupWidth": 350,
+    "popupMaxHeight": 450,
+    "showLayerNames": true,
+    "groupByLayer": true,
+    "showFieldAliases": true
+  }
+}
