@@ -154,9 +154,9 @@ export default function Radar({ mapElementId = 'radar-map' }) {
                     }
                     try {
                         console.debug('Registering service worker...');
-                        console.debug('location:', location.origin);
-                        const swUrl = new URL('sw-radar.js', location.origin).href;
-                        await navigator.serviceWorker.register(swUrl, { scope: location.origin });
+                        const scopeUrl = window.location.origin + window.location.pathname
+                        const swUrl = new URL('sw-radar.js', scopeUrl).href;
+                        await navigator.serviceWorker.register(swUrl, {scope: scopeUrl}); //{ scope: location.origin }
                         console.log('Service worker registered:', swUrl);
                     } catch (e) {
                         console.debug('Service worker registration failed:', e);
