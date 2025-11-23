@@ -1,7 +1,3 @@
-:root {
-  --calcite-color-brand: var(--primary)
-}
-
 .widget-abls .view-buttons-container {
   display: flex;
   gap: 4px;

@@ -1,6 +1,6 @@
 import { React, jsx } from 'jimu-core'
-//import { lazy } from 'react'
-import { type AllWidgetProps, DataSource, DataSourceComponent, FeatureLayerQueryParams, IMDataSourceInfo, DataSourceStatus } from 'jimu-core'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { type AllWidgetProps, DataSource, DataSourceComponent, FeatureLayerQueryParams, IMDataSourceInfo, DataSourceStatus, DataRecord } from 'jimu-core'
 import { JimuMapViewComponent, type JimuMapView } from 'jimu-arcgis'
 import type { IMConfig } from '../config'
 import { Icon } from 'jimu-ui'
@@ -9,73 +9,95 @@ import './style.css'
 import { CalciteSlider } from '@esri/calcite-components-react';
 import TimeExtent from '@arcgis/core/time/TimeExtent'
 import FeatureLayer from 'esri/layers/FeatureLayer'
+import { createPortal } from 'react-dom'
+
 
 export default function Widget(props: AllWidgetProps<IMConfig>) {
   const { config, useDataSources, useMapWidgetIds } = props
   const [jimuMapView, setJimuMapView] = React.useState<JimuMapView>(null)
   const [activeViewId, setActiveViewId] = React.useState<string>(null)
 
+  const [layerVis, setLayerVis] = useState(false)
+  const [activeLayer, setActiveLayer] = useState("")
+  const [numLayer, setNumLayer] = useState(0)
+  const [activeName, setActiveName] = useState("")
+  var toggleArr = []
+  var toggleLayers = []
+  const [activeLayerIds, setActiveLayerIds] = useState([])
+
+  let timer
+
   const isConfigured = useMapWidgetIds?.length > 0
 
-  /*
-    const handleViewChange = (view: ABLSView) => {
-      if (!jimuMapView || !jimuMapView.view) return
-  
-      setActiveViewId(view.id)
-  
-      // 1. Handle Layer Visibility
-      const findLayerById = (layerId: string) => {
-        return jimuMapView.view.map.allLayers.find(l => l.id === layerId)
-      }
-  
-      // First, turn all layers off (or handle as needed)
-      // For simplicity, we only manage layers defined in our views.
-      // A better approach might be to turn ALL layers off first, then turn on the selected ones.
-      jimuMapView.view.map.allLayers.forEach(layer => {
-        layer.visible = false
-      })
-  
-      // Now, turn on the layers specified in the selected view
-      view.layerIds.forEach(layerId => {
-        const layer = findLayerById(layerId)
-        if (layer) {
-          layer.visible = true
-        }
-      })
-      if (view.timeEnabled) {
-        const startOffset = view.startOffset ?? 0
-        const endOffset = view.endOffset ?? 0
-  
-        //Calculate the start date
-        const startDate = new Date()
-        startDate.setDate(startDate.getDate() + startOffset)
-        startDate.setHours(0, 0, 0, 0) // set time to very beginning of day
-  
-        //Calculate the end date
-        const endDate = new Date()
-        endDate.setDate(endDate.getDate() + endOffset)
-        endDate.setHours(23, 59, 59, 999) // set time to very end of day
-  
-        // If time is enabled for this view, apply the time extent
-        jimuMapView.view.timeExtent = new TimeExtent({
-          start: startDate,
-          end: endDate
-        })
-  
-      } else {
-        // Otherwise, clear the map's time extent
-        jimuMapView.view.timeExtent = null
-      }
+  const handleViewChange = (fullList: string[], activeLayer: string) => {
+    if (!jimuMapView || !jimuMapView.view) return
+
+    setActiveLayer(activeLayer)
+
+    // Define function to return a layer from a given layerid. This gets used further down.
+    const findLayerById = (layerId: string) => {
+      return jimuMapView.view.map.allLayers.find(l => l.id === layerId)
     }
-  
-    React.useEffect(() => {
-      // Check if the map is loaded, if views are configured, and if no view is active yet.
-      if (jimuMapView && !activeViewId) {
-        // Trigger the handler for the first view in the configuration.
-        handleViewChange()
+
+    // Turn all layers in the list off, then turn the active layer on.
+    fullList.forEach(layerId => {
+      const layer = findLayerById(layerId)
+      if (layer) {
+        layer.visible = false
       }
-    }, [jimuMapView, activeViewId]) // Dependencies for the effect
-  */
+    })
+
+    // Turn on "active" layer
+    findLayerById(activeLayer).visible = true
+  }
+
+  const handleFIMChange = (selectedRecords: DataRecord[]) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => {
+      if (activeName != "" && activeName === selectedRecords[0].getFieldValue(config.nameField)) {
+        console.debug("Same feature selected. Do nothing.")
+        return null
+      }
+      setLayerVis(true)
+      setActiveName(selectedRecords[0].getFieldValue(config.nameField))
+      toggleArr = selectedRecords[0].getFieldValue(config.toggleItemUrlArrayField).split(',')
+      setNumLayer(toggleArr.length)
+      const layers = []
+      const layerIds = []
+      for (var x in toggleArr) {
+        layers.push(
+          new FeatureLayer({
+            url: selectedRecords[0].getFieldValue(config.toggleBaseUrlField) + "/" + toggleArr[x],
+            id: "sixseven" + x,
+            visible: false
+          })
+        )
+        layerIds.push("sixseven" + x)
+      }
+      setActiveLayerIds(layerIds)
+      toggleLayers = layers
+      jimuMapView.view.map.addMany(toggleLayers)
+      handleViewChange(activeLayerIds, "sixseven0")
+    }, 1000)
+  }
+
+  const handleFIMClose = () => {
+
+    const findLayerById = (layerId: string) => {
+      return jimuMapView.view.map.allLayers.find(l => l.id === layerId)
+    }
+
+    activeLayerIds.forEach(layerId => {
+      const layer = findLayerById(layerId)
+      jimuMapView.view.map.remove(layer)
+    })
+    setActiveLayer("")
+    setNumLayer(0)
+    setActiveName("")
+    setActiveLayerIds([])
+    setLayerVis(false)
+  }
+
   if (!isConfigured) {
     return (
       <div className="widget-abls text-center">
@@ -87,45 +109,78 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 
   const dataRender = (ds: DataSource, info: IMDataSourceInfo) => {
     const selectedRecords = ds.getSelectedRecords()
-    if (selectedRecords.length > 0) {
-      const toggleArr = selectedRecords[0].getFieldValue(config.toggleItemUrlArrayField).split(',')
-      console.log(toggleArr)
-      const layers = []
-      for (var x in toggleArr) {
-        layers.push(
-          new FeatureLayer({
-            url: selectedRecords[0].getFieldValue(config.toggleBaseUrlField) + "/" + toggleArr[x]
-          })
-        )
-      }
-      jimuMapView.view.map.addMany(layers)
-      console.log(layers)
+    if (selectedRecords.length <= 0) {
+      return null
     }
-    return null
+    handleFIMChange(selectedRecords)
   }
 
-  return (
-    <div className="widget-abls jimu-widget">
-      {useMapWidgetIds?.length > 0 && (
-        <JimuMapViewComponent
-          useMapWidgetId={useMapWidgetIds?.[0]}
-          onActiveViewChange={(jmv) => { setJimuMapView(jmv) }}
-        />
-      )}
+  const sliderPortal = (layerVis && activeName) ? createPortal(
+    <div
+      style={{
+        position: 'fixed',
+        left: 400,
+        top: 400,
+        zIndex: 9999,
+        background: 'rgba(0,0,0,0.2)',
+        borderRadius: 10,
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+        padding: 4,
+        userSelect: 'none',
+        minWidth: 200,
+        minHeight: 68
+      }}
+    >
+      <div
+        className="video-close-btn"
+        style={{
+          position: 'absolute',
+          top: 2,
+          right: 6,
+          fontSize: 18,
+          color: '#fff',
+          background: 'rgba(0,0,0,0.5)',
+          borderRadius: '50%',
+          width: 24,
+          height: 24,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          zIndex: 2
+        }}
+        onClick={() => handleFIMClose()}
+        title="Close"
+      >×</div>
       <CalciteSlider
-        max={4}
+        max={numLayer - 1}
         snap
-        status="idle"
+        
         ticks={1}
         calcite-hydrated
-        style={{ width: '90%', marginLeft: 'auto', marginRight: 'auto' }}
-      //onCalciteSliderInput={
-      //  (e) => { handleViewChange(config.views[e.target.value as number]) }
-      //}
+        style={{ width: '90%', marginLeft: 'auto', marginRight: 'auto', marginTop: 30 }}
+        onCalciteSliderInput={
+          (e) => { handleViewChange(activeLayerIds, ("sixseven" + e.target.value)) }
+        }
       />
-      <DataSourceComponent useDataSource={props.useDataSources[0]} query={{ where: '1=1' } as FeatureLayerQueryParams} widgetId={props.id}>
-        {dataRender}
-      </DataSourceComponent>
-    </div>
+    </div>,
+    document.body
+  ) : null
+
+  return (
+    <>
+      <div className="widget-abls jimu-widget">
+        {useMapWidgetIds?.length > 0 && (
+          <JimuMapViewComponent
+            useMapWidgetId={useMapWidgetIds?.[0]}
+            onActiveViewChange={(jmv) => { setJimuMapView(jmv) }}
+          />
+        )}
+        <DataSourceComponent useDataSource={props.useDataSources[0]} query={{ where: '1=1' } as FeatureLayerQueryParams} widgetId={props.id}>
+          {dataRender}
+        </DataSourceComponent>
+      </div>
+      {sliderPortal}
+    </>
   )
 }

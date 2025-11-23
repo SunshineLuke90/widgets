@@ -2,19 +2,23 @@ import { React, jsx } from 'jimu-core'
 //import { lazy } from 'react'
 import type { AllWidgetProps } from 'jimu-core'
 import { JimuMapViewComponent, type JimuMapView } from 'jimu-arcgis'
-import type { IMConfig, ABLSView } from '../config'
-import { Icon } from 'jimu-ui'
+import type { Config, ABLSView } from '../config'
+import { Button, Icon } from 'jimu-ui'
 import defaultMessages from './translations/default'
 import './style.css'
 import TimeExtent from '@arcgis/core/time/TimeExtent'
 
-export default function Widget(props: AllWidgetProps<IMConfig>) {
+export default function Widget(props: AllWidgetProps<Config>) {
   const { config, useMapWidgetIds } = props
   const [jimuMapView, setJimuMapView] = React.useState<JimuMapView>(null)
   const [activeViewId, setActiveViewId] = React.useState<string>(null)
 
+
+  // This is the way that the widget prevents itself from running itself, and from crashing. It checks to see if any maps have been selected, and if any views have been configured.
   const isConfigured = useMapWidgetIds?.length > 0 && config.views?.length > 0
 
+
+  // The contained elements are performed every time a view button is clicked.
   const handleViewChange = (view: ABLSView) => {
     if (!jimuMapView || !jimuMapView.view) return
 
@@ -39,19 +43,30 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
         layer.visible = true
       }
     })
+
+
+    // Apply a time offset, if the enable time offest is selected.
     if (view.timeEnabled) {
       const startOffset = view.startOffset ?? 0
       const endOffset = view.endOffset ?? 0
 
       //Calculate the start date
       const startDate = new Date()
-      startDate.setDate(startDate.getDate() + startOffset)
-      startDate.setHours(0, 0, 0, 0) // set time to very beginning of day
-
-      //Calculate the end date
       const endDate = new Date()
-      endDate.setDate(endDate.getDate() + endOffset)
-      endDate.setHours(23, 59, 59, 999) // set time to very end of day
+
+      startDate.setDate(startDate.getDate() + startOffset)
+
+      if (view.timeRange) {
+        startDate.setHours(0, 0, 0, 0) // set start time to very beginning of day
+        //Calculate the end date
+        endDate.setDate(endDate.getDate() + endOffset)
+        endDate.setHours(23, 59, 59, 999) // set end time to very end of day 
+      }
+      else {
+        startDate.setHours(view.tod, 0, 0, 0)
+        //Calculate the end date
+        endDate.setTime(startDate.getTime())
+      }
 
       // If time is enabled for this view, apply the time extent
       jimuMapView.view.timeExtent = new TimeExtent({
@@ -71,8 +86,10 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
       // Trigger the handler for the first view in the configuration.
       handleViewChange(config.views[0])
     }
-  }, [jimuMapView, activeViewId, config.views]) // Dependencies for the effect
+  }, [jimuMapView, activeViewId, config.views]) // Dependencies for the view change to occur.
 
+
+  // A default display to show when the settings panel has not been completely configured. This is required so that the widget logic doesn't crash while the widget is being set up.
   if (!isConfigured) {
     return (
       <div className="widget-abls text-center">
@@ -82,24 +99,27 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
     )
   }
 
+  // This return statement will not be run unless the widget has been set up at least to some degree. This is what actually creates the UI for the widget that is visible to the end user
   return (
+    // Outer Div for the entire widget
     <div className="widget-abls jimu-widget">
       {useMapWidgetIds?.length > 0 && (
+        // Set a link to the map, so that when the views change, the layers on the map will actually change.
         <JimuMapViewComponent
           useMapWidgetId={useMapWidgetIds?.[0]}
           onActiveViewChange={(jmv) => { setJimuMapView(jmv) }}
         />
       )}
       <div className="view-buttons-container">
-        {config.views.map(view => (
+        {config.views.map(view => ( //The .map function creates the contained items multiple times, one button for each view in this case.
           <calcite-button
             key={view.id}
             className={`view-button ${activeViewId === view.id ? 'active' : ''}`}
             title={view.name}
             round={true}
+            onClick={() => handleViewChange(view)}
             appearance={`${activeViewId === view.id ? 'solid' : 'transparent'}`}
             kind={`${activeViewId === view.id ? 'brand' : 'neutral'}`}
-            onClick={() => handleViewChange(view)}
           >
             {view.icon && <Icon icon={view.icon.svg} size="16" className="mr-2" />}
             {view.name}
