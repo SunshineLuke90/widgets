@@ -1,6 +1,12 @@
 import type { ImmutableObject } from 'seamless-immutable'
 import type { IconResult } from 'jimu-core';
 
+export interface colorset {
+  id: string;
+  fieldValue: string;
+  color: string;
+}
+
 export interface Config {
   id: string // Unique ID for React keys
 
@@ -11,6 +17,11 @@ export interface Config {
   endDateField?: string
   allDayField?: string
   descriptionField?: string
+  colorsetField?: string
+
+  // Color settings
+  defaultEventColor?: string
+  colorsets?: colorset[]
 }
 
 export type IMConfig = ImmutableObject<Config>
