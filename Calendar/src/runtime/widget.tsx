@@ -1,27 +1,18 @@
-import { React, type AllWidgetProps, jsx, DataSource, DataSourceComponent, FeatureLayerQueryParams, IMDataSourceInfo, DataSourceStatus, MessageManager, DataRecordsSelectionChangeMessage } from 'jimu-core'
+import { type AllWidgetProps, DataSource, DataSourceComponent, FeatureLayerQueryParams, DataSourceStatus, MessageManager, DataRecordsSelectionChangeMessage } from 'jimu-core'
 import type { IMConfig } from '../config'
-import { DataSourceManager } from 'jimu-core'
 import defaultMessages from './translations/default'
-import { JimuMapViewComponent, JimuMapView, JimuLayerView, JimuLayerViews, JimuLayerViewComponent } from 'jimu-arcgis'
 import './style.css'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+import { useState } from 'react'
 
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import timeGridPlugin from '@fullcalendar/timegrid'
-import { Message } from 'jimu-ui'
-import { get } from 'http'
 import { cssVar } from 'polished'
 
-// You need to install hls.js into your client directory
-// Run npm install hls.js in your client directory to install.
-
-
 export default function Widget(props: AllWidgetProps<IMConfig>) {
-  const { config, useDataSources, useMapWidgetIds } = props
-  const [jimuMapView, setJimuMapView] = React.useState<JimuMapView>(null)
+  const { config } = props
+
   const [ds, setDs] = useState<DataSource>(null)
   const [events, setEvents] = useState<any[]>([])
 
@@ -38,7 +29,6 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
         const rawEnd = record.getFieldValue(config.endDateField) as any
         const rawAllDay = record.getFieldValue(config.allDayField) as string
         const description = record.getFieldValue(config.descriptionField) as string
-
         var start, end;
 
         const toISO = (v: any) => {
@@ -46,7 +36,6 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
           const d = (v instanceof Date) ? v : new Date(v)
           return isNaN(d.getTime()) ? undefined : d.toISOString()
         }
-
         const toISODateOnly = (v: any) => {          
           if (v == null) return undefined
           const d = (v instanceof Date) ? v : new Date(v)
@@ -71,7 +60,6 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
           description: description ?? ''
         }
       })
-
       setEvents(loadedEvents)
     } catch (e) {
       console.error('Failed to load events from datasource', e)
@@ -93,14 +81,9 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 
   const handleEventClick = (clickInfo) => {
     selectFeature(clickInfo.event.id);
-    console.debug('Event clicked, selecting record with ID:', clickInfo.event.id);
     const record = getRecordById(clickInfo.event.id);
-    console.debug('Retrieved record:', record);
-    console.debug(record.getGeometry());
     const message = new DataRecordsSelectionChangeMessage(props.widgetId, [record], [props.useDataSources[0].dataSourceId])
-    //new DataRecordsSelectionChangeMessage(props.widgetId, clickInfo.event.id, [props.useDataSources[0].dataSourceId]);
     MessageManager.getInstance().publishMessage(message)
-    //alert(`Event: ${clickInfo.event.title}\nStart: ${clickInfo.event.start}\nEnd: ${clickInfo.event.end}`);
   }
 
   return (

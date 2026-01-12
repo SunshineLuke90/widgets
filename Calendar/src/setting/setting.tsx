@@ -1,30 +1,20 @@
-import { React, Immutable, type UseDataSource, DataSourceTypes, type IMFieldSchema } from 'jimu-core'
+import { Immutable, type UseDataSource, DataSourceTypes, type IMFieldSchema } from 'jimu-core'
 import type { AllWidgetSettingProps } from 'jimu-for-builder'
 import {MapWidgetSelector,SettingRow,SettingSection} from 'jimu-ui/advanced/setting-components'
 import defaultI18nMessages from './translations/default'
 import type { IMConfig } from '../config'
 import { DataSourceSelector, FieldSelector } from 'jimu-ui/advanced/data-source-selector'
-import { IconPicker } from 'jimu-ui/advanced/resource-selector'
 
 // Need to install hls.js using node.js for the camera viewer of this widget to function
 // Run npm install hls.js in the client directory of your experience builder install
 
 export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
-  const { id, config, onSettingChange, useMapWidgetIds } = props
+  const { id, config, useMapWidgetIds } = props
 
   const onMapSelected = (useMapWidgetIds: string[]) => {
     props.onSettingChange({
       id: props.id,
       useMapWidgetIds: useMapWidgetIds
-    })
-  }
-
-  const onFieldsChange = (fields: IMFieldSchema[]) => {
-    const useDataSource = props.useDataSources[0].set('fields', fields?.map(f => f.jimuName)).asMutable({ deep: true })
-    // Save the selected fields to widget json.
-    props.onSettingChange({
-      id: props.id,
-      useDataSources: [useDataSource]
     })
   }
 

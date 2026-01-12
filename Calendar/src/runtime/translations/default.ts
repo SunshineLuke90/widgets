@@ -1,4 +1,4 @@
 export default {
-  _widgetLabel: 'Camera Viewer',
+  _widgetLabel: 'Calendar',
   notConfigured: 'Please configure the widget in the settings pane.'
 }
