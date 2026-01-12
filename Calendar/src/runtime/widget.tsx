@@ -9,6 +9,7 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { cssVar } from 'polished'
+import { color } from 'jimu-theme/lib/manager/mapping'
 
 export default function Widget(props: AllWidgetProps<IMConfig>) {
   const { config } = props
@@ -29,7 +30,9 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
         const rawEnd = record.getFieldValue(config.endDateField) as any
         const rawAllDay = record.getFieldValue(config.allDayField) as string
         const description = record.getFieldValue(config.descriptionField) as string
-        var start, end;
+        const colorFieldValue = record.getFieldValue(config.colorsetField) as string
+        
+        var start, end, color;
 
         const toISO = (v: any) => {
           if (v == null) return undefined
@@ -51,12 +54,25 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
           end = toISO(rawEnd) 
         }
 
+        if (config.colorsets && colorFieldValue) {
+          const matchedColorSet = config.colorsets.find(cs => cs.fieldValue === colorFieldValue)
+          if (matchedColorSet) {
+            color = matchedColorSet.color
+          }
+          else {
+            color = config.defaultEventColor || cssVar('--ref-palette-secondary-500')
+          }
+        }
+        else {
+          color = config.defaultEventColor || cssVar('--ref-palette-secondary-500')
+        }
+
         return {
           id: record.getId(),
           title: title ?? '',
           start: start,
           end: end ?? undefined,
-          color: cssVar('--ref-palette-secondary-500'),
+          color: color,
           description: description ?? ''
         }
       })
