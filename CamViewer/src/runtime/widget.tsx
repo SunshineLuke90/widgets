@@ -16,7 +16,6 @@ import Hls from 'hls.js'
 export default function Widget(props: AllWidgetProps<IMConfig>) {
   const { config, useDataSources, useMapWidgetIds } = props
   const [jimuMapView, setJimuMapView] = React.useState<JimuMapView>(null)
-  const videoRef = useRef()
 
   const isConfigured = useDataSources && useDataSources.length > 0 && useDataSources[0].dataSourceId && useDataSources[0].fields && useDataSources[0].fields.length > 0
 
@@ -35,6 +34,8 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
   const [currentURL, setCurrentURL] = React.useState<string | undefined>(undefined)
   const [layerView, setLayerView] = React.useState<JimuLayerView | undefined>(undefined)
   const [camLayerOn, setCamLayerOn] = React.useState(false)
+  const [ds, setDs] = useState<DataSource>(null)
+
 
   // State for video position and size
   const [videoPos, setVideoPos] = useState({ x: 100, y: 100 })
@@ -46,7 +47,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
   const [showVideo, setShowVideo] = useState(true)
   const [aspectRatio, setAspectRatio] = useState(16 / 9)
 
-  const dataRender = (ds: DataSource, info: IMDataSourceInfo) => {
+  const dataRender = (ds: DataSource) => {
     const selectedRecords = ds.getSelectedRecords()
     const fieldanme = props.useDataSources[0].fields[0]
     if (selectedRecords.length > 0) {
@@ -125,12 +126,14 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
           cursor: 'pointer',
           zIndex: 2
         }}
-        onClick={() => setShowVideo(false)}
+        onClick={() => {
+          ds.clearSelection();
+          setShowVideo(false);
+        }}
         title="Close"
       >×</div>
       {/* Video */}
       <video
-        ref={videoRef}
         src={currentURL}
         autoPlay={true}
         style={{ width: videoSize.width, height: videoSize.height, borderRadius: 10, display: 'block' }}
@@ -212,8 +215,6 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
     console.log("HLS instance created:", hls)
     if (Hls.isSupported() && currentURL) {
       hls.loadSource(currentURL)
-      console.log("HLS is supported, loading source:", currentURL)
-      hls.attachMedia(videoRef.current)
       hls.on(Hls.Events.ERROR, (err) => {
         console.log(err)
       })
@@ -246,7 +247,13 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
           </Button>
         </div>
         <DataSourceComponent useDataSource={props.useDataSources[0]} query={{ where: '1=1' } as FeatureLayerQueryParams} widgetId={props.id}>
-          {dataRender}
+          {
+            (ds: DataSource) => {
+              dataRender(ds)
+              setDs(ds)
+            return null
+            }
+          }
         </DataSourceComponent>
       </div>
       {videoPortal}

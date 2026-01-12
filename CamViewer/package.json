@@ -1,0 +1,15 @@
+{
+  "name": "camviewer",
+  "version": "1.0.0",
+  "description": "A camera viewer, to view .m3u8 streams via a url in a feature layer.",
+  "license": "ISC",
+  "author": "Lucius Creamer",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "hls.js": "^1.6.15"
+  }
+}
