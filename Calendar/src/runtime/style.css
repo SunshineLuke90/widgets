@@ -1,0 +1,90 @@
+:root{
+    --fc-small-font-size: .85em;
+    --fc-page-bg-color: var(--sys-color-surface-background);
+    --fc-neutral-bg-color: hsla(0, 0%, 82%, .3);
+    --fc-neutral-text-color: var(--sys-color-surface-header-text);
+    --fc-border-color: var(--sys-color-divider-primary);
+    --fc-button-text-color: var(--sys-color-action-text);
+    --fc-button-bg-color: var(--sys-color-action);
+    --fc-button-border-color: var(--sys-color-divider-switch);
+    --fc-button-hover-bg-color: var(--sys-color-action-hover);
+    --fc-button-hover-border-color: var(--sys-color-divider-switch);
+    --fc-button-active-bg-color: var(--sys-color-action-selected);
+    --fc-button-active-border-color: var(--sys-color-divider-switch);
+    --fc-event-bg-color: var(--sys-color-secondary-light);
+    --fc-event-border-color: var(--sys-color-divider-switch);
+    --fc-event-text-color: var(--sys-color-action-selected-text);
+    --fc-event-selected-overlay-color: rgba(0, 0, 0, 0.3);
+    --fc-more-link-bg-color: #d0d0d0;
+    --fc-more-link-text-color: inherit;
+    --fc-event-resizer-thickness: 8px;
+    --fc-event-resizer-dot-total-width: 8px;
+    --fc-event-resizer-dot-border-width: 1px;
+    --fc-non-business-color: hsla(0, 0%, 84%, .3);
+    --fc-bg-event-color: #8fdf82;
+    --fc-bg-event-opacity: 0.3;
+    --fc-highlight-color: var(--sys-color-action-focus);
+    --fc-today-bg-color: rgba(255, 220, 40, .15);
+    --fc-now-indicator-color: red;
+}
+
+
+.fc-button-primary:not(:disabled).fc-button-active{
+  color: var(--sys-color-action-selected-text)
+}
+
+
+.widget-camviewer .view-buttons-container {
+  display: flex;
+}
+
+.fc {
+  box-sizing: content-box;
+  height: 100%;
+  width:100%;
+}
+
+.widget-camviewer .jimu-widget{
+  display: flex;
+  text-align: center;
+  color: var(--dark);
+}
+
+.widget-camviewer-not-configured {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  background-color: var(--light);
+  color: var(--dark);
+}
+
+.widget-camviewer .view-button {
+  text-align: center;
+  cursor: pointer;
+  /* Default state using theme variables */
+  background-color: transparent;
+  color: var(--dark);
+  align-items: center;
+  vertical-align: middle;
+  justify-content: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  size: auto;
+  height: auto;
+  width: auto;
+  button {
+    background-color: var(--light);
+    color: var(--dark);
+  }
+}
+
+
+
+
+
+

@@ -1,0 +1,23 @@
+{
+  "name": "Calendar",
+  "label": "Calendar",
+  "type": "widget",
+  "version": "1.19.0",
+  "exbVersion": "1.19.0",
+  "author": "Lucius Creamer",
+  "description": "This widget uses a calendar from the fullcalendar library, to display ArcGIS Data in interactable calendar format.",
+  "copyright": "",
+  "dependency": [
+    "jimu-arcgis"
+  ],
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "publishMessages": ["DATA_RECORDS_SELECTION_CHANGE"],
+  "properties": {},
+  "translatedLocales": [
+    "en"
+  ],
+  "defaultSize": {
+    "width": 800,
+    "height": 500
+  }
+}
