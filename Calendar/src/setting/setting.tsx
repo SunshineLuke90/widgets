@@ -6,9 +6,6 @@ import defaultI18nMessages from './translations/default'
 import type { IMConfig, colorset } from '../config'
 import { DataSourceSelector, FieldSelector } from 'jimu-ui/advanced/data-source-selector'
 
-// Need to install hls.js using node.js for the camera viewer of this widget to function
-// Run npm install hls.js in the client directory of your experience builder install
-
 export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
   const { id, config, useMapWidgetIds } = props
 
