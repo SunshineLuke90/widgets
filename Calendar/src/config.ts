@@ -1,5 +1,4 @@
 import type { ImmutableObject } from 'seamless-immutable'
-import type { IconResult } from 'jimu-core';
 
 export interface colorset {
   id: string;
