@@ -14,10 +14,8 @@ export default function Widget(props: AllWidgetProps<Config>) {
   const [jimuMapView, setJimuMapView] = React.useState<JimuMapView>(null)
   const [activeViewId, setActiveViewId] = React.useState<string>(null)
 
-
   // This is the way that the widget prevents itself from running itself, and from crashing. It checks to see if any maps have been selected, and if any views have been configured.
   const isConfigured = useMapWidgetIds?.length > 0 && config.views?.length > 0
-
 
   // The contained elements are performed every time a view button is clicked.
   const handleViewChange = useCallback((view: ABLSView) => {

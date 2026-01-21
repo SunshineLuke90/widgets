@@ -5,13 +5,11 @@ import { DataSourceSelector, FieldSelector } from 'jimu-ui/advanced/data-source-
 import type { IMConfig } from '../config'
 import { JimuMapViewComponent, type JimuMapView } from 'jimu-arcgis'
 import defaultMessages from './translations/default'
-import { getLayersFromJimuMapView } from './utils'
 import './style.css'
 
 export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
-    const { id, config, onSettingChange, useMapWidgetIds } = props
+    const { id, config, useMapWidgetIds } = props
     const [jimuMapView, setJimuMapView] = React.useState<JimuMapView>(null)
-    const [layers, setLayers] = React.useState<__esri.Layer[]>(null)
 
     const onMapSelected = (useMapWidgetIds: string[]) => {
         props.onSettingChange({
@@ -24,7 +22,6 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
         if (jmv) {
             setJimuMapView(jmv)
             // Flatten the layers from the map for easier use
-            setLayers(getLayersFromJimuMapView(jmv))
         }
     }
 
@@ -73,7 +70,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
                                 useDropdown={true}
                                 isMultiple={false}
                                 isDataSourceDropDownHidden={true}
-                                onChange={(fields) => onFieldChange('toggleBaseUrlField', fields)}
+                                onChange={(fields) => { onFieldChange('toggleBaseUrlField', fields) }}
                                 selectedFields={config?.toggleBaseUrlField ? Immutable([config.toggleBaseUrlField]) : props.useDataSources?.[0]?.fields}
                             />
                         </SettingRow>
@@ -86,7 +83,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
                                 useDropdown={true}
                                 isMultiple={false}
                                 isDataSourceDropDownHidden={true}
-                                onChange={(fields) => onFieldChange('toggleItemUrlArrayField', fields)}
+                                onChange={(fields) => { onFieldChange('toggleItemUrlArrayField', fields) }}
                                 selectedFields={config?.toggleItemUrlArrayField ? Immutable([config.toggleItemUrlArrayField]) : props.useDataSources?.[0]?.fields}
                             />
                         </SettingRow>
@@ -99,7 +96,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
                                 useDropdown={true}
                                 isMultiple={false}
                                 isDataSourceDropDownHidden={true}
-                                onChange={(fields) => onFieldChange('constantUrlArrayField', fields)}
+                                onChange={(fields) => { onFieldChange('constantUrlArrayField', fields) }}
                                 selectedFields={config?.constantUrlArrayField ? Immutable([config.constantUrlArrayField]) : props.useDataSources?.[0]?.fields}
                             />
                         </SettingRow>
@@ -112,7 +109,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
                                 useDropdown={true}
                                 isMultiple={false}
                                 isDataSourceDropDownHidden={true}
-                                onChange={(fields) => onFieldChange('nameField', fields)}
+                                onChange={(fields) => { onFieldChange('nameField', fields) }}
                                 selectedFields={config?.nameField ? Immutable([config.nameField]) : props.useDataSources?.[0]?.fields}
                             />
                         </SettingRow>
@@ -125,7 +122,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
                                 useDropdown={true}
                                 isMultiple={false}
                                 isDataSourceDropDownHidden={true}
-                                onChange={(fields) => onFieldChange('minHeightField', fields)}
+                                onChange={(fields) => { onFieldChange('minHeightField', fields) }}
                                 selectedFields={config?.minHeightField ? Immutable([config.minHeightField]) : props.useDataSources?.[0]?.fields}
                             />
                         </SettingRow>
@@ -138,7 +135,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
                                 useDropdown={true}
                                 isMultiple={false}
                                 isDataSourceDropDownHidden={true}
-                                onChange={(fields) => onFieldChange('maxHeightField', fields)}
+                                onChange={(fields) => { onFieldChange('maxHeightField', fields) }}
                                 selectedFields={config?.maxHeightField ? Immutable([config.maxHeightField]) : props.useDataSources?.[0]?.fields}
                             />
                         </SettingRow>

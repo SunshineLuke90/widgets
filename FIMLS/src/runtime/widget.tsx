@@ -1,28 +1,23 @@
 import { React, jsx } from 'jimu-core'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { type AllWidgetProps, DataSource, DataSourceComponent, FeatureLayerQueryParams, IMDataSourceInfo, DataSourceStatus, DataRecord } from 'jimu-core'
+import { useState } from 'react'
+import { type AllWidgetProps, type DataSource, DataSourceComponent, type FeatureLayerQueryParams, type IMDataSourceInfo, type DataRecord } from 'jimu-core'
 import { JimuMapViewComponent, type JimuMapView } from 'jimu-arcgis'
 import type { IMConfig } from '../config'
-import { Icon } from 'jimu-ui'
 import defaultMessages from './translations/default'
 import './style.css'
-import { CalciteSlider } from '@esri/calcite-components-react';
-import TimeExtent from '@arcgis/core/time/TimeExtent'
+import { CalciteSlider } from '@esri/calcite-components-react'
 import FeatureLayer from 'esri/layers/FeatureLayer'
 import { createPortal } from 'react-dom'
 
 
 export default function Widget(props: AllWidgetProps<IMConfig>) {
-  const { config, useDataSources, useMapWidgetIds } = props
+  const { config, useMapWidgetIds } = props
   const [jimuMapView, setJimuMapView] = React.useState<JimuMapView>(null)
-  const [activeViewId, setActiveViewId] = React.useState<string>(null)
-
   const [layerVis, setLayerVis] = useState(false)
-  const [activeLayer, setActiveLayer] = useState("")
   const [numLayer, setNumLayer] = useState(0)
   const [activeName, setActiveName] = useState("")
-  var toggleArr = []
-  var toggleLayers = []
+  let toggleArr = []
+  let toggleLayers = []
   const [activeLayerIds, setActiveLayerIds] = useState([])
 
   let timer
@@ -31,8 +26,6 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 
   const handleViewChange = (fullList: string[], activeLayer: string) => {
     if (!jimuMapView || !jimuMapView.view) return
-
-    setActiveLayer(activeLayer)
 
     // Define function to return a layer from a given layerid. This gets used further down.
     const findLayerById = (layerId: string) => {
@@ -54,7 +47,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
   const handleFIMChange = (selectedRecords: DataRecord[]) => {
     clearTimeout(timer)
     timer = setTimeout(() => {
-      if (activeName != "" && activeName === selectedRecords[0].getFieldValue(config.nameField)) {
+      if (activeName !== "" && activeName === selectedRecords[0].getFieldValue(config.nameField)) {
         console.debug("Same feature selected. Do nothing.")
         return null
       }
@@ -64,16 +57,18 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
       setNumLayer(toggleArr.length)
       const layers = []
       const layerIds = []
-      for (var x in toggleArr) {
+
+      toggleArr.forEach((item, idx) => {
         layers.push(
           new FeatureLayer({
-            url: selectedRecords[0].getFieldValue(config.toggleBaseUrlField) + "/" + toggleArr[x],
-            id: "sixseven" + x,
+            url: selectedRecords[0].getFieldValue(config.toggleBaseUrlField) + "/" + item,
+            id: "sixseven" + idx,
             visible: false
           })
         )
-        layerIds.push("sixseven" + x)
-      }
+        layerIds.push("sixseven" + idx)
+      })
+
       setActiveLayerIds(layerIds)
       toggleLayers = layers
       jimuMapView.view.map.addMany(toggleLayers)
@@ -91,7 +86,6 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
       const layer = findLayerById(layerId)
       jimuMapView.view.map.remove(layer)
     })
-    setActiveLayer("")
     setNumLayer(0)
     setActiveName("")
     setActiveLayerIds([])
@@ -149,13 +143,12 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
           cursor: 'pointer',
           zIndex: 2
         }}
-        onClick={() => handleFIMClose()}
+        onClick={() => { handleFIMClose() }}
         title="Close"
       >×</div>
       <CalciteSlider
         max={numLayer - 1}
         snap
-        
         ticks={1}
         calcite-hydrated
         style={{ width: '90%', marginLeft: 'auto', marginRight: 'auto', marginTop: 30 }}
