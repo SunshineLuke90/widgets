@@ -3,10 +3,11 @@ import { React, jsx } from 'jimu-core'
 import type { AllWidgetProps } from 'jimu-core'
 import { JimuMapViewComponent, type JimuMapView } from 'jimu-arcgis'
 import type { Config, ABLSView } from '../config'
-import { Button, Icon } from 'jimu-ui'
+import { Icon } from 'jimu-ui'
 import defaultMessages from './translations/default'
 import './style.css'
 import TimeExtent from '@arcgis/core/time/TimeExtent'
+import { useCallback } from 'react'
 
 export default function Widget(props: AllWidgetProps<Config>) {
   const { config, useMapWidgetIds } = props
@@ -19,7 +20,7 @@ export default function Widget(props: AllWidgetProps<Config>) {
 
 
   // The contained elements are performed every time a view button is clicked.
-  const handleViewChange = (view: ABLSView) => {
+  const handleViewChange = useCallback((view: ABLSView) => {
     if (!jimuMapView || !jimuMapView.view) return
 
     setActiveViewId(view.id)
@@ -60,7 +61,7 @@ export default function Widget(props: AllWidgetProps<Config>) {
         startDate.setHours(0, 0, 0, 0) // set start time to very beginning of day
         //Calculate the end date
         endDate.setDate(endDate.getDate() + endOffset)
-        endDate.setHours(23, 59, 59, 999) // set end time to very end of day 
+        endDate.setHours(23, 59, 59, 999) // set end time to very end of day
       }
       else {
         startDate.setHours(view.tod, 0, 0, 0)
@@ -78,7 +79,7 @@ export default function Widget(props: AllWidgetProps<Config>) {
       // Otherwise, clear the map's time extent
       jimuMapView.view.timeExtent = null
     }
-  }
+  }, [jimuMapView])
 
   React.useEffect(() => {
     // Check if the map is loaded, if views are configured, and if no view is active yet.
@@ -86,7 +87,7 @@ export default function Widget(props: AllWidgetProps<Config>) {
       // Trigger the handler for the first view in the configuration.
       handleViewChange(config.views[0])
     }
-  }, [jimuMapView, activeViewId, config.views]) // Dependencies for the view change to occur.
+  }, [handleViewChange, jimuMapView, activeViewId, config.views]) // Dependencies for the view change to occur.
 
 
   // A default display to show when the settings panel has not been completely configured. This is required so that the widget logic doesn't crash while the widget is being set up.
@@ -117,9 +118,9 @@ export default function Widget(props: AllWidgetProps<Config>) {
             className={`view-button ${activeViewId === view.id ? 'active' : ''}`}
             title={view.name}
             round={true}
-            onClick={() => handleViewChange(view)}
-            appearance={`${activeViewId === view.id ? 'solid' : 'transparent'}`}
-            kind={`${activeViewId === view.id ? 'brand' : 'neutral'}`}
+            onClick={() => { handleViewChange(view) }}
+            appearance={activeViewId === view.id ? 'solid' : 'transparent'}
+            kind={activeViewId === view.id ? 'brand' : 'neutral'}
           >
             {view.icon && <Icon icon={view.icon.svg} size="16" className="mr-2" />}
             {view.name}

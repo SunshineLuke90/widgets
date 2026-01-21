@@ -6,9 +6,6 @@ import defaultI18nMessages from './translations/default'
 import type { IMConfig, colorset } from '../config'
 import { DataSourceSelector, FieldSelector } from 'jimu-ui/advanced/data-source-selector'
 
-// Need to install hls.js using node.js for the camera viewer of this widget to function
-// Run npm install hls.js in the client directory of your experience builder install
-
 export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
   const { id, config, useMapWidgetIds } = props
 
@@ -109,7 +106,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
             useDropdown={true}
             isMultiple={false}
             isDataSourceDropDownHidden={true}
-            onChange={(fields) => onFieldChange('labelField', fields)}
+            onChange={(fields) => { onFieldChange('labelField', fields) }}
             selectedFields={config?.labelField ? Immutable([config.labelField]) : props.useDataSources?.[0]?.fields}
           />
         </SettingRow>
@@ -124,7 +121,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
             useDropdown={true}
             isMultiple={false}
             isDataSourceDropDownHidden={true}
-            onChange={(fields) => onFieldChange('startDateField', fields)}
+            onChange={(fields) => { onFieldChange('startDateField', fields) }}
             selectedFields={config?.startDateField ? Immutable([config.startDateField]) : props.useDataSources?.[0]?.fields}
           />
         </SettingRow>
@@ -139,7 +136,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
             useDropdown={true}
             isMultiple={false}
             isDataSourceDropDownHidden={true}
-            onChange={(fields) => onFieldChange('endDateField', fields)}
+            onChange={(fields) => { onFieldChange('endDateField', fields) }}
             selectedFields={config?.endDateField ? Immutable([config.endDateField]) : props.useDataSources?.[0]?.fields}
           />
         </SettingRow>
@@ -154,7 +151,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
             useDropdown={true}
             isMultiple={false}
             isDataSourceDropDownHidden={true}
-            onChange={(fields) => onFieldChange('allDayField', fields)}
+            onChange={(fields) => { onFieldChange('allDayField', fields) }}
             selectedFields={config?.allDayField ? Immutable([config.allDayField]) : props.useDataSources?.[0]?.fields}
           />
         </SettingRow>
@@ -169,7 +166,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
             useDropdown={true}
             isMultiple={false}
             isDataSourceDropDownHidden={true}
-            onChange={(fields) => onFieldChange('descriptionField', fields)}
+            onChange={(fields) => { onFieldChange('descriptionField', fields) }}
             selectedFields={config?.descriptionField ? Immutable([config.descriptionField]) : props.useDataSources?.[0]?.fields}
           />
         </SettingRow>
@@ -203,7 +200,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
             useDropdown={true}
             isMultiple={false}
             isDataSourceDropDownHidden={true}
-            onChange={(fields) => onFieldChange('colorsetField', fields)}
+            onChange={(fields) => { onFieldChange('colorsetField', fields) }}
             selectedFields={config?.colorsetField ? Immutable([config.colorsetField]) : props.useDataSources?.[0]?.fields}
           />
         </SettingRow>
@@ -215,15 +212,15 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
         >
           {config.colorsets?.map((value, index) => (
             <div key={value.id} className="value-config-container">
-              <SettingRow 
+              <SettingRow
                 label={`${props.intl.formatMessage({ id: 'Color'})} ${index + 1}`}
                 flow="no-wrap"
                 level={3}
               >
-                <Button size="sm" type="tertiary" onClick={() => { removeValue(value.id); }}>Remove</Button>
+                <Button size="sm" type="tertiary" onClick={() => { removeValue(value.id) }}>Remove</Button>
               </SettingRow>
-              <SettingRow 
-                flow="wrap" 
+              <SettingRow
+                flow="wrap"
                 label={props.intl.formatMessage({ id: 'Value to Color'})}
                 level={1}
               >
@@ -231,14 +228,14 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
                   size="sm"
                   value={value.fieldValue}
                   onChange={(e) => {
-                    updateValue(value.id, { fieldValue: e.currentTarget.value });
+                    updateValue(value.id, { fieldValue: e.currentTarget.value })
                   }}
                 />
                 <input
                   type="color"
                   value={value.color || '#3788d8'}
                   onChange={(e) => {
-                    updateValue(value.id, { color: e.currentTarget.value });
+                    updateValue(value.id, { color: e.currentTarget.value })
                   }}
                 />
               </SettingRow>

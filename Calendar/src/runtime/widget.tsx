@@ -1,6 +1,5 @@
-import { type AllWidgetProps, DataSource, DataSourceComponent, FeatureLayerQueryParams, DataSourceStatus, MessageManager, DataRecordsSelectionChangeMessage } from 'jimu-core'
+import { type AllWidgetProps, type DataSource, DataSourceComponent, type FeatureLayerQueryParams, DataSourceStatus, MessageManager, DataRecordsSelectionChangeMessage } from 'jimu-core'
 import type { IMConfig } from '../config'
-import defaultMessages from './translations/default'
 import './style.css'
 import { useState } from 'react'
 
@@ -9,7 +8,6 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { cssVar } from 'polished'
-import { color } from 'jimu-theme/lib/manager/mapping'
 
 export default function Widget(props: AllWidgetProps<IMConfig>) {
   const { config } = props
@@ -26,32 +24,32 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 
       const loadedEvents = records.map(record => {
         const title = record.getFieldValue(config.labelField) as string
-        const rawStart = record.getFieldValue(config.startDateField) as any
-        const rawEnd = record.getFieldValue(config.endDateField) as any
+        const rawStart = record.getFieldValue(config.startDateField)
+        const rawEnd = record.getFieldValue(config.endDateField)
         const rawAllDay = record.getFieldValue(config.allDayField) as string
         const description = record.getFieldValue(config.descriptionField) as string
         const colorFieldValue = record.getFieldValue(config.colorsetField) as string
-        
-        var start, end, color;
+
+        let start: string, end: string, color: string | number
 
         const toISO = (v: any) => {
           if (v == null) return undefined
           const d = (v instanceof Date) ? v : new Date(v)
           return isNaN(d.getTime()) ? undefined : d.toISOString()
         }
-        const toISODateOnly = (v: any) => {          
+        const toISODateOnly = (v: any) => {
           if (v == null) return undefined
           const d = (v instanceof Date) ? v : new Date(v)
           d.setHours(d.getHours()-d.getTimezoneOffset()/60) // Adjust to local date
           return isNaN(d.getTime()) ? undefined : d.toISOString().split('T')[0]
         }
 
-        if (rawAllDay === 'y'){
+        if (rawAllDay === 'y') {
           start = toISODateOnly(rawStart)
         }
         else {
           start = toISO(rawStart)
-          end = toISO(rawEnd) 
+          end = toISO(rawEnd)
         }
 
         if (config.colorsets && colorFieldValue) {
@@ -84,20 +82,20 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 
   const getRecordById = (objectId: string) => {
     if (ds) {
-      return ds.getRecordById(objectId);
+      return ds.getRecordById(objectId)
     }
-    return null;
+    return null
   }
 
   const selectFeature = (objectId: string) => {
     if (ds && ds.selectRecordsByIds) {
-      ds.selectRecordsByIds([objectId]); // This updates the selection state
+      ds.selectRecordsByIds([objectId]) // This updates the selection state
     }
-  };
+  }
 
   const handleEventClick = (clickInfo) => {
-    selectFeature(clickInfo.event.id);
-    const record = getRecordById(clickInfo.event.id);
+    selectFeature(clickInfo.event.id)
+    const record = getRecordById(clickInfo.event.id)
     const message = new DataRecordsSelectionChangeMessage(props.widgetId, [record], [props.useDataSources[0].dataSourceId])
     MessageManager.getInstance().publishMessage(message)
   }
@@ -111,22 +109,22 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
         eventClick={handleEventClick}
         eventDidMount={(info) => {
           // Tooltip showing full date/time info
-          const description = info.event.extendedProps.description;
-          const start = info.event.start;
-          const end = info.event.end;
-          let tooltipText = description + '\nStart: ' + start.toLocaleString();
+          const description = info.event.extendedProps.description
+          const start = info.event.start
+          const end = info.event.end
+          let tooltipText = description + '\nStart: ' + start.toLocaleString()
           if (end) {
-            tooltipText += '\nEnd: ' + end.toLocaleString();
+            tooltipText += '\nEnd: ' + end.toLocaleString()
           }
-          info.el.setAttribute('title', tooltipText);
+          info.el.setAttribute('title', tooltipText)
         }}
         customButtons={{
           clearSelection:{
             text: 'Clear Selection',
             click: () => {
               if (ds && ds.clearSelection) {
-                ds.clearSelection();
-                console.debug('Cleared selection in datasource');
+                ds.clearSelection()
+                console.debug('Cleared selection in datasource')
                 const message = new DataRecordsSelectionChangeMessage(props.widgetId, [], [props.useDataSources[0].dataSourceId])
                 MessageManager.getInstance().publishMessage(message)
               }

@@ -7,12 +7,14 @@ export interface ABLSView {
   icon: IconResult;
   layerIds: string[]; //Array of layer IDs that should be visible
   timeEnabled?: boolean;
+  timeRange?: boolean;
   startOffset?: number;
-  endOffset?: number
+  endOffset?: number;
+  tod?: number;
 }
 
 // Defines the overall widget configuration
-export interface Config{
+export interface Config {
   views: ABLSView[];
 }
 

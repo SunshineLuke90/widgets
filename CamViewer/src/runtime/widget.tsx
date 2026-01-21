@@ -1,34 +1,21 @@
-import { React, type AllWidgetProps, jsx, DataSource, DataSourceComponent, FeatureLayerQueryParams, IMDataSourceInfo, DataSourceStatus } from 'jimu-core'
+import { React, type AllWidgetProps, type DataSource, DataSourceComponent, type FeatureLayerQueryParams } from 'jimu-core'
 import type { IMConfig } from '../config'
-import { DataSourceManager } from 'jimu-core'
 import defaultMessages from './translations/default'
-import { JimuMapViewComponent, JimuMapView, JimuLayerView, JimuLayerViews, JimuLayerViewComponent } from 'jimu-arcgis'
+import { JimuMapViewComponent, type JimuMapView, type JimuLayerView } from 'jimu-arcgis'
 import { Button, Icon } from 'jimu-ui'
 import './style.css'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { createPortal } from 'react-dom'
-import classNames from 'classnames'
 
 // You need to install hls.js into your client directory
 // Run npm install hls.js in your client directory to install.
 import Hls from 'hls.js'
 
 export default function Widget(props: AllWidgetProps<IMConfig>) {
-  const { config, useDataSources, useMapWidgetIds } = props
+  const { useDataSources, useMapWidgetIds } = props
   const [jimuMapView, setJimuMapView] = React.useState<JimuMapView>(null)
 
   const isConfigured = useDataSources && useDataSources.length > 0 && useDataSources[0].dataSourceId && useDataSources[0].fields && useDataSources[0].fields.length > 0
-
-  // If not configured, show a message
-  if (!isConfigured) {
-    return (
-      <div className="widget-camviewer jimu-widget">
-        <div className="widget-camviewer-not-configured">
-          {defaultMessages.notConfigured}
-        </div>
-      </div>
-    )
-  }
 
   // Dedicated state for currentURL and layerView
   const [currentURL, setCurrentURL] = React.useState<string | undefined>(undefined)
@@ -64,8 +51,8 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
       setVideoPos({ x: e.clientX - dragOffset.x, y: e.clientY - dragOffset.y })
     } else if (resizing) {
       const dx = e.clientX - resizeStart.x
-      let newWidth = Math.max(120, resizeStart.width + dx)
-      let newHeight = Math.round(newWidth / aspectRatio)
+      const newWidth = Math.max(120, resizeStart.width + dx)
+      const newHeight = Math.round(newWidth / aspectRatio)
       setVideoSize({ width: newWidth, height: newHeight })
     }
   }
@@ -127,8 +114,8 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
           zIndex: 2
         }}
         onClick={() => {
-          ds.clearSelection();
-          setShowVideo(false);
+          ds.clearSelection()
+          setShowVideo(false)
         }}
         title="Close"
       >×</div>
@@ -226,6 +213,16 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
       console.log("HLS instance destroyed")
     }
   }, [currentURL])
+
+  if (!isConfigured) {
+    return (
+      <div className="widget-camviewer jimu-widget">
+        <div className="widget-camviewer-not-configured">
+          {defaultMessages.notConfigured}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <>

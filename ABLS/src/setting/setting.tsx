@@ -1,4 +1,4 @@
-import { React, jsx, utils } from 'jimu-core'
+import { React, utils } from 'jimu-core'
 import type { AllWidgetSettingProps } from 'jimu-for-builder'
 import { MapWidgetSelector, SettingSection, SettingRow } from 'jimu-ui/advanced/setting-components'
 import { IconPicker } from 'jimu-ui/advanced/resource-selector'
@@ -96,21 +96,21 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
                     {config.views?.map((view, index) => (
                         <div key={view.id} className="view-config-container">
                             <SettingRow label={`${props.intl.formatMessage({ id: 'view', defaultMessage: defaultMessages.view })} ${index + 1}`}>
-                                <Button size="sm" type="tertiary" onClick={() => { removeView(view.id); }}>Remove</Button>
+                                <Button size="sm" type="tertiary" onClick={() => { removeView(view.id) }}>Remove</Button>
                             </SettingRow>
                             <SettingRow flow="wrap" label={props.intl.formatMessage({ id: 'viewName', defaultMessage: defaultMessages.viewName })}>
                                 <TextInput
                                     size="sm"
                                     value={view.name}
                                     onChange={(e) => {
-                                        updateView(view.id, { name: e.currentTarget.value });
+                                        updateView(view.id, { name: e.currentTarget.value })
                                     }}
                                 />
                             </SettingRow>
                             <SettingRow label={props.intl.formatMessage({ id: 'icon', defaultMessage: defaultMessages.icon })}>
                                 <IconPicker
                                     icon={view.icon}
-                                    onChange={(icon) => { updateView(view.id, { icon: icon }); }}
+                                    onChange={(icon) => { updateView(view.id, { icon: icon as any}) }}
                                 />
                             </SettingRow>
                             <SettingRow flow="wrap" label={props.intl.formatMessage({ id: 'visibleLayers', defaultMessage: defaultMessages.visibleLayers })} />
@@ -119,7 +119,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
                                     <SettingRow key={layer.id}>
                                         <Checkbox
                                             checked={view.layerIds?.includes(layer.id)}
-                                            onChange={(e, checked) => { onLayerCheckChange(view, layer.id, checked); }}
+                                            onChange={(_e, checked) => { onLayerCheckChange(view, layer.id, checked) }}
                                         />
                                         <label className="ml-2">{layer.title}</label>
                                     </SettingRow>
@@ -128,7 +128,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
                             <SettingRow label="Enable Time Filter" className="mt-3 border-top pt-3">
                                 <Switch
                                     checked={view.timeEnabled ?? false}
-                                    onChange={(evt) => { updateView(view.id, { timeEnabled: evt.target.checked }); }}
+                                    onChange={(evt) => { updateView(view.id, { timeEnabled: evt.target.checked }) }}
                                 />
                             </SettingRow>
                             {view.timeEnabled && (
@@ -138,7 +138,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
                                             className="w-100"
                                             placeholder="e.g., 0 for today, 1 for tomorrow"
                                             value={view.startOffset}
-                                            onAcceptValue={(value) => { updateView(view.id, { startOffset: Number(value) }); }}
+                                            onAcceptValue={(value) => { updateView(view.id, { startOffset: Number(value) }) }}
                                         />
                                     </SettingRow>
                                     <SettingRow flow="wrap" label="End Day Offset">
@@ -146,7 +146,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
                                             className="w-100"
                                             placeholder="e.g., 0 for today, 1 for tomorrow"
                                             value={view.endOffset}
-                                            onAcceptValue={(value) => { updateView(view.id, { endOffset: Number(value) }); }}
+                                            onAcceptValue={(value) => { updateView(view.id, { endOffset: Number(value) }) }}
                                         />
                                     </SettingRow>
                                 </div>
