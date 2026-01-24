@@ -1,4 +1,4 @@
-import { React, type UseDataSource, type ImmutableArray } from "jimu-core"
+import { React, type UseDataSource, type ImmutableArray, IMDataSourceJson, DataSourceTypes } from "jimu-core"
 import _Widget from "../src/runtime/widget"
 import { mockFeatureLayer, widgetRender, wrapWidget } from "jimu-for-test"
 import { screen } from "@testing-library/react"
@@ -20,6 +20,22 @@ jest.mock("jimu-core", () => {
 		}
 	}
 })
+
+const setupMockDataSource = (dsId: string) => {
+	const fakeDs = mockFeatureLayer(featureLayer)
+
+	// 2. Define the data source configuration
+  const dsJson: IMDataSourceJson = {
+    id: dsId, // This is where you set the desired ID for testing
+    type: DataSourceTypes.FeatureLayer,
+    label: "Test Layer",
+    originDataSources: [],
+		data: fakeDs,
+    // ... other schema details
+  };
+
+
+
 
 const render = widgetRender()
 describe("test Calendar Widget", () => {

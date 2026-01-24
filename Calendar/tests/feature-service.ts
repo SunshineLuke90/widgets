@@ -126,7 +126,7 @@ export const featureLayer: MockFeatureLayerData = {
     }
   },
   queries: [{
-    url: `${FEATURE_LAYER_URL}/query?f=json&where=1=1&outFields=*&returnGeometry=true`,
+    url: `${FEATURE_LAYER_URL}/query?f=json&where=1=1&outFields=*`,
     result: {
       fields: [{
         name: 'objectid',

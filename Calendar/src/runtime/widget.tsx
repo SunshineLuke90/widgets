@@ -114,11 +114,10 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 	const handleEventClick = (clickInfo) => {
 		selectFeature(clickInfo.event.id)
 		const record = getRecordById(clickInfo.event.id)
-		const dsId = props.useDataSources?.[0]?.dataSourceId
 		const message = new DataRecordsSelectionChangeMessage(
 			props.widgetId,
 			[record],
-			dsId ? [dsId] : []
+			[props.useDataSources[0].dataSourceId]
 		)
 		MessageManager.getInstance().publishMessage(message)
 	}
@@ -179,11 +178,12 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 				}}
 			/>
 			<DataSourceComponent
-				useDataSource={props.useDataSources?.[0]}
+				useDataSource={props.useDataSources[0]}
 				query={
 					{
 						where: "1=1",
-						outFields: ["*"]
+						outFields: ["*"],
+						returnGeometry: true
 					} as FeatureLayerQueryParams
 				}
 				widgetId={props.widgetId}
