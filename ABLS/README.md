@@ -4,6 +4,9 @@ This custom widget provides a simple tool to be able to create custom views of d
 
 "Views" can be created on a given map, effectively creating separate sets of layers that will be visible when an input button is clicked. This will not break any existing "map layers" widgets, or any filtering / timeline widgets that are already in place to filter data, it simply provides a more intuitive experience for users to toggle between sets of layers within a map based experience.
 
+A prime example of where this widget is used can be found in the [SEMA Daily Brief](https://gis.mo.gov/semabrief) application. The ABLS widget appears in the bottom left corner of the map, and is made to blend in as if it were a views navigation widget.
+![An example of the ABLS Widget](./ABLSExample.png)
+
 ## Using the widget
 
 Implementation is simple. Just drag the widget into your application, connect it to a map if it doesn't automatically connect, then create a view and select all of the layers you want visible (Including basemap layers). The layer order will be maintained, it's just the visibility that will be changed. The first view that you choose will be what the map will appear with the first time the ABLS widget is loaded.

@@ -2,6 +2,11 @@
 
 This is a simple widget to view .m3u8 streams using a url field in a feature layer. The widget appears as a button, which when clicked will turn on the "camera" layer, and when a camera is clicked a popup video stream will appear to start streaming the live camera feed.
 
+## Interactive Example
+
+This widget can be used and interacted with on my example application, found [here](https://exb.luciuscreamer.com/camera). In case you miss it, the camera widget is the little button at the bottom of the screen. Click it to turn on the camera layer.
+![A screenshot of the camera application](./cameraExample.png)
+
 ## Setting up the widget
 
 This widget can be set up by adding the widget to your application, then selecting the map and data source the camera layer is stored in. You will then select the field that the .m3u8 url is stored in, as well as an icon for the main widget button. It is recommended that you set a background color in the style settings, and also set the height and width to "auto".
