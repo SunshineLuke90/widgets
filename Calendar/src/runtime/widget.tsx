@@ -7,7 +7,7 @@ import {
 	MessageManager,
 	DataRecordsSelectionChangeMessage
 } from "jimu-core"
-import type { IMConfig } from "../config"
+import type { data, IMConfig } from "../config"
 import "./style.css"
 import { useState } from "react"
 
@@ -23,12 +23,14 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 	const [events, setEvents] = useState<any[]>([])
 
 	const isConfigured =
-		props.useDataSources &&
-		props.useDataSources.length === 1 &&
-		config.startDateField &&
-		config.labelField
+		config.dataSets &&
+		config.dataSets.length > 0 &&
+		config.dataSets[0].useDataSources &&
+		config.dataSets[0].useDataSources.length === 1 &&
+		config.dataSets[0].startDateField &&
+		config.dataSets[0].endDateField
 
-	const fillCalendarEvents = (ds: DataSource) => {
+	const fillCalendarEvents = (ds: DataSource, dsConfig: data) => {
 		if (!ds) return
 		try {
 			const records = ds.getRecords() || []
@@ -36,15 +38,15 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 			if (records.length === events.length) return
 
 			const loadedEvents = records.map((record) => {
-				const title = record.getFieldValue(config.labelField) as string
-				const rawStart = record.getFieldValue(config.startDateField)
-				const rawEnd = record.getFieldValue(config.endDateField)
-				const rawAllDay = record.getFieldValue(config.allDayField) as string
+				const title = record.getFieldValue(dsConfig.labelField) as string
+				const rawStart = record.getFieldValue(dsConfig.startDateField)
+				const rawEnd = record.getFieldValue(dsConfig.endDateField)
+				const rawAllDay = record.getFieldValue(dsConfig.allDayField) as string
 				const description = record.getFieldValue(
-					config.descriptionField
+					dsConfig.descriptionField
 				) as string
 				const colorFieldValue = record.getFieldValue(
-					config.colorsetField
+					dsConfig.colorsetField
 				) as string
 
 				let start: string, end: string, color: string | number
@@ -68,19 +70,20 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 					end = toISO(rawEnd)
 				}
 
-				if (config.colorsets && colorFieldValue) {
-					const matchedColorSet = config.colorsets.find(
+				if (dsConfig.colorsets && colorFieldValue) {
+					const matchedColorSet = dsConfig.colorsets.find(
 						(cs) => cs.fieldValue === colorFieldValue
 					)
 					if (matchedColorSet) {
 						color = matchedColorSet.color
 					} else {
 						color =
-							config.defaultEventColor || cssVar("--ref-palette-secondary-500")
+							dsConfig.defaultEventColor ||
+							cssVar("--ref-palette-secondary-500")
 					}
 				} else {
 					color =
-						config.defaultEventColor || cssVar("--ref-palette-secondary-500")
+						dsConfig.defaultEventColor || cssVar("--ref-palette-secondary-500")
 				}
 
 				return {
@@ -177,26 +180,32 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 					right: "dayGridMonth,timeGridWeek,timeGridDay"
 				}}
 			/>
-			<DataSourceComponent
-				useDataSource={props.useDataSources[0]}
-				query={
-					{
-						where: "1=1",
-						outFields: ["*"],
-						returnGeometry: true
-					} as FeatureLayerQueryParams
-				}
-				widgetId={props.widgetId}
-			>
-				{(ds: DataSource) => {
-					if (ds && ds.getStatus() === DataSourceStatus.Loaded) {
-						// Data source is loaded — populate calendar events
-						setDs(ds)
-						fillCalendarEvents(ds)
-					}
-					return null
-				}}
-			</DataSourceComponent>
+			{config.dataSets && config.dataSets.length > 0 && (
+				<>
+					{config.dataSets.map((dsConfig, index) => (
+						<DataSourceComponent
+							useDataSource={dsConfig.useDataSources[0]}
+							query={
+								{
+									where: "1=1",
+									outFields: ["*"],
+									returnGeometry: true
+								} as FeatureLayerQueryParams
+							}
+							widgetId={props.widgetId}
+						>
+							{(ds: DataSource) => {
+								if (ds && ds.getStatus() === DataSourceStatus.Loaded) {
+									// Data source is loaded — populate calendar events
+									setDs(ds)
+									fillCalendarEvents(ds, dsConfig.asMutable({ deep: true }))
+								}
+								return null
+							}}
+						</DataSourceComponent>
+					))}
+				</>
+			)}
 		</>
 	)
 }

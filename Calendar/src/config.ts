@@ -1,4 +1,5 @@
 import type { ImmutableObject } from 'seamless-immutable'
+import type { UseDataSource } from 'jimu-core'
 
 export interface colorset {
   id: string;
@@ -6,7 +7,7 @@ export interface colorset {
   color: string;
 }
 
-export interface Config {
+export interface data {
   id: string // Unique ID for React keys
 
   // Individual field keys selected in the settings. Store as a single field name (jimuName).
@@ -20,6 +21,12 @@ export interface Config {
   // Color settings
   defaultEventColor?: string
   colorsets?: colorset[]
+  // optional datasource selection saved per dataset
+  useDataSources?: UseDataSource[]
+}
+
+export interface Config {
+  dataSets: data[]
 }
 
 export type IMConfig = ImmutableObject<Config>
