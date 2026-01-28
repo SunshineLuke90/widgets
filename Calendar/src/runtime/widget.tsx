@@ -19,7 +19,8 @@ import { cssVar } from "polished"
 
 export default function Widget(props: AllWidgetProps<IMConfig>) {
 	const { config } = props
-	const [ds, setDs] = useState<DataSource>(null)
+	//const [ds, setDs] = useState<DataSource>(null)
+	const [datasources, setDatasources] = useState<DataSource[]>([])
 	const [events, setEvents] = useState<any[]>([])
 
 	const isConfigured =
@@ -88,6 +89,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 
 				return {
 					id: record.getId(),
+					dataSource: ds,
 					title: title ?? "",
 					start: start,
 					end: end ?? undefined,
@@ -101,22 +103,22 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 		}
 	}
 
-	const getRecordById = (objectId: string) => {
+	const getRecordById = (ds: DataSource, objectId: string) => {
 		if (ds) {
 			return ds.getRecordById(objectId)
 		}
 		return null
 	}
 
-	const selectFeature = (objectId: string) => {
+	const selectFeature = (ds: DataSource, objectId: string) => {
 		if (ds && ds.selectRecordsByIds) {
 			ds.selectRecordsByIds([objectId]) // This updates the selection state
 		}
 	}
 
 	const handleEventClick = (clickInfo) => {
-		selectFeature(clickInfo.event.id)
-		const record = getRecordById(clickInfo.event.id)
+		selectFeature(clickInfo.event.dataSource, clickInfo.event.id)
+		const record = getRecordById(clickInfo.event.dataSource, clickInfo.event.id)
 		const message = new DataRecordsSelectionChangeMessage(
 			props.widgetId,
 			[record],
@@ -125,12 +127,38 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 		MessageManager.getInstance().publishMessage(message)
 	}
 
+	const handleClearSelection = () => {
+		/// Loop through all datasets, if there is a selection, clear it and post a message.
+		datasources.forEach((ds) => {
+			if (ds.getSelectedRecords().length > 0) {
+				ds.clearSelection()
+				const message = new DataRecordsSelectionChangeMessage(
+					props.widgetId,
+					[],
+					[props.useDataSources[0].dataSourceId]
+				)
+				MessageManager.getInstance().publishMessage(message)
+			}
+		})
+	}
+
 	if (!isConfigured) {
 		return (
 			<div className="widget-calendar-not-configured">
 				Please configure the Calendar widget in the settings panel.
 			</div>
 		)
+	}
+	//return <div>Calendar widget has been configured.</div>
+
+	const addDatasource = (ds: DataSource) => {
+		setDatasources((prevDatasources) => {
+			// Avoid adding duplicates
+			if (!prevDatasources.includes(ds)) {
+				return [...prevDatasources, ds]
+			}
+			return prevDatasources
+		})
 	}
 
 	return (
@@ -155,7 +183,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 					clearSelection: {
 						text: "Clear Selection",
 						click: () => {
-							if (ds && ds.clearSelection) {
+							/*
 								ds.clearSelection()
 								console.debug("Cleared selection in datasource")
 								const message = new DataRecordsSelectionChangeMessage(
@@ -164,7 +192,8 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 									[props.useDataSources[0].dataSourceId]
 								)
 								MessageManager.getInstance().publishMessage(message)
-							}
+								*/
+							handleClearSelection()
 						}
 					}
 				}}
@@ -184,6 +213,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 				<>
 					{config.dataSets.map((dsConfig, index) => (
 						<DataSourceComponent
+							key={index}
 							useDataSource={dsConfig.useDataSources[0]}
 							query={
 								{
@@ -197,7 +227,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 							{(ds: DataSource) => {
 								if (ds && ds.getStatus() === DataSourceStatus.Loaded) {
 									// Data source is loaded — populate calendar events
-									setDs(ds)
+									addDatasource(ds)
 									fillCalendarEvents(ds, dsConfig.asMutable({ deep: true }))
 								}
 								return null
