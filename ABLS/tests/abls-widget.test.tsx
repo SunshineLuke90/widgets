@@ -10,6 +10,8 @@ jest.mock("jimu-arcgis", () => {
 	const React = require("react")
 	return {
 		JimuMapViewComponent: ({ onActiveViewChange }: any) => {
+			const callbackRef = React.useRef(onActiveViewChange)
+			callbackRef.current = onActiveViewChange
 			React.useEffect(() => {
 				const fakeJmv = {
 					view: {
@@ -23,7 +25,7 @@ jest.mock("jimu-arcgis", () => {
 						timeExtent: null
 					}
 				}
-				onActiveViewChange && onActiveViewChange(fakeJmv)
+				callbackRef.current?.(fakeJmv)
 			}, [])
 			return React.createElement("div", null, "mock-map")
 		}
@@ -57,7 +59,7 @@ describe("test ABLS Widget", () => {
 		})
 		render(<Widget widgetId="Widget_1" />)
 		const view2 = screen.getByText("View 2")
-		expect(view2).toBeTruthy()
+		expect(view2).toBeVisible()
 		// click the second view and assert it becomes active
 		await userEvent.click(view2)
 		expect(screen.getByText("View 2").className).toContain("active")
@@ -72,6 +74,6 @@ describe("test ABLS Widget", () => {
 		const { queryByText } = render(<Widget widgetId="Widget_1" />)
 		expect(
 			queryByText("Please configure this widget in the settings panel.")
-		).toBeTruthy()
+		).toBeVisible()
 	})
 })
