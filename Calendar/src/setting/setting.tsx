@@ -1,321 +1,417 @@
 import {
+	React,
 	Immutable,
 	type UseDataSource,
 	DataSourceTypes,
-	type IMFieldSchema,
-	utils
+	utils,
+	type ImmutableObject,
+	css
 } from "jimu-core"
 import type { AllWidgetSettingProps } from "jimu-for-builder"
-import {
-	MapWidgetSelector,
-	SettingRow,
-	SettingSection
-} from "jimu-ui/advanced/setting-components"
-import { Button, TextInput } from "jimu-ui"
-import defaultI18nMessages from "./translations/default"
-import type { IMConfig, colorset } from "../config"
+import { SettingRow, SettingSection } from "jimu-ui/advanced/setting-components"
+import { Button, TextInput, Tabs, Tab, CollapsablePanel } from "jimu-ui"
+import type { IMConfig, colorset, data } from "../config"
 import {
 	DataSourceSelector,
 	FieldSelector
 } from "jimu-ui/advanced/data-source-selector"
 
 export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
-	const { id, config, useMapWidgetIds } = props
+	const { id, config } = props
+	const [activeTab, setActiveTab] = React.useState<string | undefined>(
+		config?.dataSets?.[0]?.id
+	)
 
-	const onMapSelected = (useMapWidgetIds: string[]) => {
-		props.onSettingChange({
-			id: props.id,
-			useMapWidgetIds: useMapWidgetIds
-		})
-	}
+	// helper to get a mutable copy of datasets
+	const getDataSets = () =>
+		config?.dataSets ? config.dataSets.asMutable({ deep: true }) : []
 
-	// Save field selection to widget config under separate keys so each FieldSelector is independent
-	const onFieldChange = (key: string, fields: IMFieldSchema[]) => {
-		const fieldName = fields?.[0]?.jimuName ?? null
-		const newConfig = (config || Immutable({})).set(key, fieldName)
+	const updateDataset = (datasetId: string, newData: Partial<any>) => {
+		const arr = getDataSets()
+		const idx = arr.findIndex((d: any) => d.id === datasetId)
+		if (idx === -1) return
+		arr[idx] = { ...arr[idx], ...newData }
+		const newConfig = (config || Immutable({})).set("dataSets", arr)
 		props.onSettingChange({ id, config: newConfig })
 	}
 
-	const onDataSourceChange = (useDataSources: UseDataSource[]) => {
-		props.onSettingChange({
-			id: props.id,
-			useDataSources: useDataSources
-		})
-	}
-
-	const onConfigChange = (value: colorset[]) => {
-		const newConfig = (config || Immutable({})).set("colorsets", value)
+	const addDataset = () => {
+		const newDataset = {
+			id: `ds_${utils.getUUID()}`,
+			labelField: undefined,
+			startDateField: undefined,
+			endDateField: undefined,
+			allDayField: undefined,
+			descriptionField: undefined,
+			colorsetField: undefined,
+			defaultEventColor: "#3788d8",
+			colorsets: [] as colorset[],
+			useDataSources: [] as UseDataSource[]
+		}
+		const arr = getDataSets()
+		arr.push(newDataset)
+		const newConfig = (config || Immutable({})).set("dataSets", arr)
 		props.onSettingChange({ id, config: newConfig })
 	}
 
-	const addValue = () => {
+	const removeDataset = (datasetId: string) => {
+		const arr = getDataSets().filter((d: any) => d.id !== datasetId)
+		const newConfig = (config || Immutable({})).set("dataSets", arr)
+		props.onSettingChange({ id, config: newConfig })
+	}
+
+	const addValue = (datasetId: string) => {
 		const newValue: colorset = {
 			id: `view_${utils.getUUID()}`,
 			fieldValue: ``,
 			color: `#000000`
 		}
-		const newcolorsets = config.colorsets
-			? [...config.colorsets, newValue]
-			: [newValue]
-		onConfigChange(newcolorsets)
+		const arr = getDataSets()
+		const idx = arr.findIndex((d: any) => d.id === datasetId)
+		if (idx === -1) return
+		const ds = arr[idx]
+		ds.colorsets = ds.colorsets ? [...ds.colorsets, newValue] : [newValue]
+		updateDataset(datasetId, { colorsets: ds.colorsets })
 	}
 
-	const removeValue = (viewId: string) => {
-		const newcolorsets = config.colorsets.filter((v) => v.id !== viewId)
-		onConfigChange(newcolorsets.asMutable({ deep: true }))
+	const removeValue = (datasetId: string, viewId: string) => {
+		const arr = getDataSets()
+		const idx = arr.findIndex((d: any) => d.id === datasetId)
+		if (idx === -1) return
+		const ds = arr[idx]
+		const newcolorsets = (ds.colorsets || []).filter(
+			(v: any) => v.id !== viewId
+		)
+		updateDataset(datasetId, { colorsets: newcolorsets })
 	}
 
-	const updateValue = (viewId: string, newViewData: Partial<colorset>) => {
-		const newcolorsets = config.colorsets.map((v) => {
-			if (v.id === viewId) {
-				return { ...v, ...newViewData }
-			}
-			return v
-		})
-		onConfigChange(newcolorsets.asMutable({ deep: true }))
+	const updateValue = (
+		datasetId: string,
+		viewId: string,
+		newViewData: Partial<colorset>
+	) => {
+		const arr = getDataSets()
+		const idx = arr.findIndex((d: any) => d.id === datasetId)
+		if (idx === -1) return
+		const ds = arr[idx]
+		const newcolorsets = (ds.colorsets || []).map((v: any) =>
+			v.id === viewId ? { ...v, ...newViewData } : v
+		)
+		updateDataset(datasetId, { colorsets: newcolorsets })
 	}
 
 	return (
 		<div className="view-layers-toggle-setting">
-			<SettingSection
-				title={props.intl.formatMessage({
-					id: "selectedMapLabel",
-					defaultMessage: defaultI18nMessages.selectedMap
-				})}
-			>
+			<SettingSection>
 				<SettingRow
-					label={"Select Map Widget"}
+					flow={"no-wrap"}
 					level={1}
-					flow={"wrap"}
-					tag={"label"}
+					tag={"div"}
+					label={props.intl.formatMessage({
+						id: "dataSources",
+						defaultMessage: "Add Data Sources"
+					})}
 				>
-					<MapWidgetSelector
-						onSelect={onMapSelected}
-						useMapWidgetIds={useMapWidgetIds}
-					/>
-				</SettingRow>
-				<SettingRow
-					label={"Select Data Source"}
-					level={1}
-					flow={"wrap"}
-					tag={"label"}
-				>
-					<DataSourceSelector
-						types={Immutable([DataSourceTypes.FeatureLayer])}
-						mustUseDataSource={true}
-						useDataSources={props.useDataSources}
-						useDataSourcesEnabled={props.useDataSourcesEnabled}
-						onChange={onDataSourceChange}
-						widgetId={props.id}
-					/>
+					<Button type="secondary" onClick={addDataset}>
+						{props.intl.formatMessage({
+							id: "Add Dataset",
+							defaultMessage: "Add Dataset"
+						})}
+					</Button>
 				</SettingRow>
 			</SettingSection>
-			{props.useDataSources?.length === 1 && (
-				<>
-					<SettingSection title={"Field Settings"}>
-						<SettingRow
-							label={"Select Label Field"}
-							level={2}
-							flow={"wrap"}
-							tag={"label"}
-						>
-							<FieldSelector
-								useDataSources={props.useDataSources}
-								useDropdown={true}
-								isMultiple={false}
-								isDataSourceDropDownHidden={true}
-								onChange={(fields) => {
-									onFieldChange("labelField", fields)
-								}}
-								selectedFields={
-									config?.labelField
-										? Immutable([config.labelField])
-										: props.useDataSources?.[0]?.fields
-								}
-							/>
-						</SettingRow>
-						<SettingRow
-							label={"Start Date Field"}
-							level={1}
-							flow={"wrap"}
-							tag={"label"}
-						>
-							<FieldSelector
-								useDataSources={props.useDataSources}
-								useDropdown={true}
-								isMultiple={false}
-								isDataSourceDropDownHidden={true}
-								onChange={(fields) => {
-									onFieldChange("startDateField", fields)
-								}}
-								selectedFields={
-									config?.startDateField
-										? Immutable([config.startDateField])
-										: props.useDataSources?.[0]?.fields
-								}
-							/>
-						</SettingRow>
-						<SettingRow
-							label={"End Date Field"}
-							level={2}
-							flow={"wrap"}
-							tag={"label"}
-						>
-							<FieldSelector
-								useDataSources={props.useDataSources}
-								useDropdown={true}
-								isMultiple={false}
-								isDataSourceDropDownHidden={true}
-								onChange={(fields) => {
-									onFieldChange("endDateField", fields)
-								}}
-								selectedFields={
-									config?.endDateField
-										? Immutable([config.endDateField])
-										: props.useDataSources?.[0]?.fields
-								}
-							/>
-						</SettingRow>
-						<SettingRow
-							label={"All Day Field"}
-							level={2}
-							flow={"wrap"}
-							tag={"label"}
-						>
-							<FieldSelector
-								useDataSources={props.useDataSources}
-								useDropdown={true}
-								isMultiple={false}
-								isDataSourceDropDownHidden={true}
-								onChange={(fields) => {
-									onFieldChange("allDayField", fields)
-								}}
-								selectedFields={
-									config?.allDayField
-										? Immutable([config.allDayField])
-										: props.useDataSources?.[0]?.fields
-								}
-							/>
-						</SettingRow>
-						<SettingRow
-							label={"Description Field"}
-							level={2}
-							flow={"wrap"}
-							tag={"label"}
-						>
-							<FieldSelector
-								useDataSources={props.useDataSources}
-								useDropdown={true}
-								isMultiple={false}
-								isDataSourceDropDownHidden={true}
-								onChange={(fields) => {
-									onFieldChange("descriptionField", fields)
-								}}
-								selectedFields={
-									config?.descriptionField
-										? Immutable([config.descriptionField])
-										: props.useDataSources?.[0]?.fields
-								}
-							/>
-						</SettingRow>
-					</SettingSection>
-					<SettingSection title={"Event Color Settings"}>
-						<SettingRow
-							label={"Default Event Color"}
-							level={1}
-							flow={"wrap"}
-							tag={"label"}
-						>
-							<input
-								type="color"
-								value={config?.defaultEventColor || "#3788d8"}
-								onChange={(e) => {
-									const newConfig = (config || Immutable({})).set(
-										"defaultEventColor",
-										e.target.value
-									)
-									props.onSettingChange({ id, config: newConfig })
-								}}
-							/>
-						</SettingRow>
-						<SettingRow
-							label={"Color Field"}
-							level={2}
-							flow={"wrap"}
-							tag={"label"}
-						>
-							<FieldSelector
-								useDataSources={props.useDataSources}
-								useDropdown={true}
-								isMultiple={false}
-								isDataSourceDropDownHidden={true}
-								onChange={(fields) => {
-									onFieldChange("colorsetField", fields)
-								}}
-								selectedFields={
-									config?.colorsetField
-										? Immutable([config.colorsetField])
-										: props.useDataSources?.[0]?.fields
-								}
-							/>
-						</SettingRow>
-						<SettingRow
-							label={"Map field values to colors"}
-							level={2}
-							flow={"wrap"}
-							tag={"div"}
-						>
-							{config.colorsets?.map((value, index) => (
-								<div key={value.id} className="value-config-container">
-									<SettingRow
-										label={`${props.intl.formatMessage({ id: "Color" })} ${
-											index + 1
-										}`}
-										flow="no-wrap"
-										level={3}
+
+			{config?.dataSets && config.dataSets.length > 0 && (
+				<SettingSection title={props.intl.formatMessage({ id: "Datasets" })}>
+					<Tabs
+						value={activeTab}
+						onChange={(id) => {
+							setActiveTab(id)
+						}}
+						type="tabs"
+						keepMount
+						onClose={(id) => {
+							removeDataset(id)
+						}}
+						children={
+							config.dataSets.map(
+								(ds: ImmutableObject<data>, dsIndex: number) => (
+									<Tab
+										id={ds.id}
+										key={ds.id}
+										title={`Dataset ${dsIndex + 1}`}
+										closeable
 									>
-										<Button
-											size="sm"
-											type="tertiary"
-											onClick={() => {
-												removeValue(value.id)
-											}}
-										>
-											Remove
-										</Button>
-									</SettingRow>
-									<SettingRow
-										flow="wrap"
-										label={props.intl.formatMessage({ id: "Value to Color" })}
-										level={1}
-									>
-										<TextInput
-											size="sm"
-											value={value.fieldValue}
-											onChange={(e) => {
-												updateValue(value.id, {
-													fieldValue: e.currentTarget.value
-												})
-											}}
-										/>
-										<input
-											type="color"
-											value={value.color || "#3788d8"}
-											onChange={(e) => {
-												updateValue(value.id, {
-													color: e.currentTarget.value
-												})
-											}}
-										/>
-									</SettingRow>
-								</div>
-							))}
-							<Button type="primary" className="w-100 mt-2" onClick={addValue}>
-								{props.intl.formatMessage({ id: "Add Color" })}
-							</Button>
-						</SettingRow>
-					</SettingSection>
-				</>
+										<SettingRow label={"Data Source"} level={1} flow={"wrap"}>
+											<DataSourceSelector
+												types={Immutable([DataSourceTypes.FeatureLayer])}
+												mustUseDataSource={true}
+												isMultiple={false}
+												useDataSources={ds.useDataSources}
+												useDataSourcesEnabled={props.useDataSourcesEnabled}
+												onChange={(uds: UseDataSource[]) => {
+													updateDataset(ds.id, { useDataSources: uds })
+												}}
+												widgetId={props.id}
+											/>
+										</SettingRow>
+										{ds.useDataSources?.length === 1 && (
+											<>
+												<SettingRow
+													label={"Select Label Field"}
+													level={2}
+													flow={"wrap"}
+													tag={"label"}
+												>
+													<FieldSelector
+														useDataSources={ds.useDataSources}
+														useDropdown={true}
+														isMultiple={false}
+														isDataSourceDropDownHidden={true}
+														onChange={(fields) => {
+															updateDataset(ds.id, {
+																labelField: fields?.[0]?.jimuName ?? null
+															})
+														}}
+														selectedFields={
+															ds?.labelField
+																? Immutable([ds.labelField])
+																: ds?.useDataSources?.[0]?.fields
+														}
+													/>
+												</SettingRow>
+
+												<SettingRow
+													label={"Start Date Field"}
+													level={1}
+													flow={"wrap"}
+													tag={"label"}
+												>
+													<FieldSelector
+														useDataSources={ds.useDataSources}
+														useDropdown={true}
+														isMultiple={false}
+														isDataSourceDropDownHidden={true}
+														onChange={(fields) => {
+															updateDataset(ds.id, {
+																startDateField: fields?.[0]?.jimuName ?? null
+															})
+														}}
+														selectedFields={
+															ds?.startDateField
+																? Immutable([ds.startDateField])
+																: ds?.useDataSources?.[0]?.fields
+														}
+													/>
+												</SettingRow>
+
+												<SettingRow
+													label={"End Date Field"}
+													level={2}
+													flow={"wrap"}
+													tag={"label"}
+												>
+													<FieldSelector
+														useDataSources={ds.useDataSources}
+														useDropdown={true}
+														isMultiple={false}
+														isDataSourceDropDownHidden={true}
+														onChange={(fields) => {
+															updateDataset(ds.id, {
+																endDateField: fields?.[0]?.jimuName ?? null
+															})
+														}}
+														selectedFields={
+															ds?.endDateField
+																? Immutable([ds.endDateField])
+																: ds?.useDataSources?.[0]?.fields
+														}
+													/>
+												</SettingRow>
+
+												<SettingRow
+													label={"All Day Field"}
+													level={2}
+													flow={"wrap"}
+													tag={"label"}
+												>
+													<FieldSelector
+														useDataSources={ds.useDataSources}
+														useDropdown={true}
+														isMultiple={false}
+														isDataSourceDropDownHidden={true}
+														onChange={(fields) => {
+															updateDataset(ds.id, {
+																allDayField: fields?.[0]?.jimuName ?? null
+															})
+														}}
+														selectedFields={
+															ds?.allDayField
+																? Immutable([ds.allDayField])
+																: ds?.useDataSources?.[0]?.fields
+														}
+													/>
+												</SettingRow>
+
+												<SettingRow
+													label={"Description Field"}
+													level={2}
+													flow={"wrap"}
+													tag={"label"}
+												>
+													<FieldSelector
+														useDataSources={ds.useDataSources}
+														useDropdown={true}
+														isMultiple={false}
+														isDataSourceDropDownHidden={true}
+														onChange={(fields) => {
+															updateDataset(ds.id, {
+																descriptionField: fields?.[0]?.jimuName ?? null
+															})
+														}}
+														selectedFields={
+															ds?.descriptionField
+																? Immutable([ds.descriptionField])
+																: ds?.useDataSources?.[0]?.fields
+														}
+													/>
+												</SettingRow>
+												{ds.labelField &&
+													ds.startDateField &&
+													ds.endDateField && (
+														<>
+															<CollapsablePanel
+																label={"Color Settings"}
+																defaultIsOpen={true}
+															>
+																<SettingRow
+																	label={"Default Event Color"}
+																	level={1}
+																	flow={"no-wrap"}
+																	tag={"label"}
+																>
+																	<input
+																		type="color"
+																		value={ds?.defaultEventColor || "#3788d8"}
+																		onChange={(e) => {
+																			updateDataset(ds.id, {
+																				defaultEventColor: e.target.value
+																			})
+																		}}
+																	/>
+																</SettingRow>
+																<SettingRow
+																	label={"Color Field"}
+																	level={2}
+																	flow={"wrap"}
+																	tag={"label"}
+																>
+																	<FieldSelector
+																		useDataSources={ds.useDataSources}
+																		useDropdown={true}
+																		isMultiple={false}
+																		isDataSourceDropDownHidden={true}
+																		onChange={(fields) => {
+																			updateDataset(ds.id, {
+																				colorsetField:
+																					fields?.[0]?.jimuName ?? null
+																			})
+																		}}
+																		selectedFields={
+																			ds?.colorsetField
+																				? Immutable([ds.colorsetField])
+																				: ds?.useDataSources?.[0]?.fields
+																		}
+																	/>
+																</SettingRow>
+																{ds.colorsetField && (
+																	<SettingRow
+																		label={"Map field values to colors"}
+																		level={2}
+																		flow={"wrap"}
+																		tag={"div"}
+																	>
+																		{(ds.colorsets || []).map(
+																			(value: any, index: number) => (
+																				<div
+																					key={value.id}
+																					className="value-config-container"
+																					style={{ paddingBottom: "8px" }}
+																				>
+																					<SettingRow
+																						label={`${props.intl.formatMessage({
+																							id: "Color"
+																						})} ${index + 1}`}
+																						flow="no-wrap"
+																						level={2}
+																					>
+																						<Button
+																							size="sm"
+																							type="tertiary"
+																							onClick={() => {
+																								removeValue(ds.id, value.id)
+																							}}
+																						>
+																							Remove
+																						</Button>
+																					</SettingRow>
+																					<SettingRow
+																						flow="wrap"
+																						label={props.intl.formatMessage({
+																							id: "Value to Color"
+																						})}
+																						level={3}
+																						css={css`
+																							margin-top: 4px !important;
+																						`}
+																					>
+																						<TextInput
+																							size="sm"
+																							value={value.fieldValue}
+																							onChange={(e) => {
+																								updateValue(ds.id, value.id, {
+																									fieldValue:
+																										e.currentTarget.value
+																								})
+																							}}
+																						/>
+																						<input
+																							type="color"
+																							value={value.color || "#3788d8"}
+																							onChange={(e) => {
+																								updateValue(ds.id, value.id, {
+																									color: e.currentTarget.value
+																								})
+																							}}
+																						/>
+																					</SettingRow>
+																				</div>
+																			)
+																		)}
+																		<Button
+																			type="primary"
+																			className="w-100 mt-2"
+																			onClick={() => {
+																				addValue(ds.id)
+																			}}
+																		>
+																			{props.intl.formatMessage({
+																				id: "Add Color"
+																			})}
+																		</Button>
+																	</SettingRow>
+																)}
+															</CollapsablePanel>
+														</>
+													)}
+											</>
+										)}
+									</Tab>
+								)
+							) as any
+						}
+					/>
+				</SettingSection>
 			)}
 		</div>
 	)

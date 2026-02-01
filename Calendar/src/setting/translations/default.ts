@@ -1,4 +1,4 @@
 export default {
-  selectedMap: 'Choose Data Source',
+  dataSources: 'Add Data Sources',
   layers: 'Layers'
 }
