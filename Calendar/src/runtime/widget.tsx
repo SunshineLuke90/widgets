@@ -1,4 +1,5 @@
 import {
+	React,
 	type AllWidgetProps,
 	type DataSource,
 	DataSourceComponent,
@@ -9,7 +10,6 @@ import {
 } from "jimu-core"
 import type { data, IMConfig } from "../config"
 import "./style.css"
-import { useState } from "react"
 
 import FullCalendar from "@fullcalendar/react"
 import dayGridPlugin from "@fullcalendar/daygrid"
@@ -19,9 +19,15 @@ import { cssVar } from "polished"
 
 export default function Widget(props: AllWidgetProps<IMConfig>) {
 	const { config } = props
-	//const [ds, setDs] = useState<DataSource>(null)
-	const [datasources, setDatasources] = useState<DataSource[]>([])
-	const [events, setEvents] = useState<any[]>([])
+	//const [ds, setDs] = React.useState<DataSource>(null)
+	const [datasources, setDatasources] = React.useState<DataSource[]>([])
+	// Store events keyed by datasource ID to support multiple datasources
+	const [eventsByDsId, setEventsByDsId] = React.useState<{
+		[dsId: string]: any[]
+	}>({})
+
+	// Compute flat events array from all datasources
+	const events = Object.values(eventsByDsId).flat()
 
 	const isConfigured =
 		config.dataSets &&
@@ -34,9 +40,12 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 	const fillCalendarEvents = (ds: DataSource, dsConfig: data) => {
 		if (!ds) return
 		try {
+			const dsId = ds.id
 			const records = ds.getRecords() || []
+			const currentEventsForDs = eventsByDsId[dsId] || []
+
 			// Only update if record count changed to avoid unnecessary state updates
-			if (records.length === events.length) return
+			if (records.length === currentEventsForDs.length) return
 
 			const loadedEvents = records.map((record) => {
 				const title = record.getFieldValue(dsConfig.labelField) as string
@@ -88,7 +97,8 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 				}
 
 				return {
-					id: record.getId(),
+					id: `${dsId}_${record.getId()}`, // Prefix with dsId to ensure unique IDs across datasources
+					originalId: record.getId(),
 					dataSource: ds,
 					title: title ?? "",
 					start: start,
@@ -97,7 +107,12 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 					description: description ?? ""
 				}
 			})
-			setEvents(loadedEvents)
+
+			// Update only this datasource's events, preserving others
+			setEventsByDsId((prev) => ({
+				...prev,
+				[dsId]: loadedEvents
+			}))
 		} catch (e) {
 			console.error("Failed to load events from datasource", e)
 		}
@@ -117,12 +132,14 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 	}
 
 	const handleEventClick = (clickInfo) => {
-		selectFeature(clickInfo.event.dataSource, clickInfo.event.id)
-		const record = getRecordById(clickInfo.event.dataSource, clickInfo.event.id)
+		const eventDs = clickInfo.event.extendedProps.dataSource
+		const originalId = clickInfo.event.extendedProps.originalId
+		selectFeature(eventDs, originalId)
+		const record = getRecordById(eventDs, originalId)
 		const message = new DataRecordsSelectionChangeMessage(
 			props.widgetId,
 			[record],
-			[props.useDataSources[0].dataSourceId]
+			[eventDs.id]
 		)
 		MessageManager.getInstance().publishMessage(message)
 	}

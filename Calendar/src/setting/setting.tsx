@@ -4,7 +4,8 @@ import {
 	type UseDataSource,
 	DataSourceTypes,
 	utils,
-	type ImmutableObject
+	type ImmutableObject,
+	css
 } from "jimu-core"
 import type { AllWidgetSettingProps } from "jimu-for-builder"
 import { SettingRow, SettingSection } from "jimu-ui/advanced/setting-components"
@@ -145,7 +146,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 											<DataSourceSelector
 												types={Immutable([DataSourceTypes.FeatureLayer])}
 												mustUseDataSource={true}
-												isMultiple={true}
+												isMultiple={false}
 												useDataSources={ds.useDataSources}
 												useDataSourcesEnabled={props.useDataSourcesEnabled}
 												onChange={(uds: UseDataSource[]) => {
@@ -335,13 +336,14 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 																				<div
 																					key={value.id}
 																					className="value-config-container"
+																					style={{ paddingBottom: "8px" }}
 																				>
 																					<SettingRow
 																						label={`${props.intl.formatMessage({
 																							id: "Color"
 																						})} ${index + 1}`}
 																						flow="no-wrap"
-																						level={3}
+																						level={2}
 																					>
 																						<Button
 																							size="sm"
@@ -358,7 +360,10 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 																						label={props.intl.formatMessage({
 																							id: "Value to Color"
 																						})}
-																						level={1}
+																						level={3}
+																						css={css`
+																							margin-top: 4px !important;
+																						`}
 																					>
 																						<TextInput
 																							size="sm"
