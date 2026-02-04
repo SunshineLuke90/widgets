@@ -19,7 +19,6 @@ import { cssVar } from "polished"
 
 export default function Widget(props: AllWidgetProps<IMConfig>) {
 	const { config } = props
-	//const [ds, setDs] = React.useState<DataSource>(null)
 	const [datasources, setDatasources] = React.useState<DataSource[]>([])
 	// Store events keyed by datasource ID to support multiple datasources
 	const [eventsByDsId, setEventsByDsId] = React.useState<{
@@ -118,24 +117,11 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 		}
 	}
 
-	const getRecordById = (ds: DataSource, objectId: string) => {
-		if (ds) {
-			return ds.getRecordById(objectId)
-		}
-		return null
-	}
-
-	const selectFeature = (ds: DataSource, objectId: string) => {
-		if (ds && ds.selectRecordsByIds) {
-			ds.selectRecordsByIds([objectId]) // This updates the selection state
-		}
-	}
-
 	const handleEventClick = (clickInfo) => {
-		const eventDs = clickInfo.event.extendedProps.dataSource
-		const originalId = clickInfo.event.extendedProps.originalId
-		selectFeature(eventDs, originalId)
-		const record = getRecordById(eventDs, originalId)
+		const eventDs = clickInfo.event.extendedProps.dataSource as DataSource
+		const originalId = clickInfo.event.extendedProps.originalId as string
+		eventDs.selectRecordsByIds([originalId])
+		const record = eventDs.getRecordById(originalId)
 		const message = new DataRecordsSelectionChangeMessage(
 			props.widgetId,
 			[record],
@@ -166,17 +152,6 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 			</div>
 		)
 	}
-	//return <div>Calendar widget has been configured.</div>
-
-	const addDatasource = (ds: DataSource) => {
-		setDatasources((prevDatasources) => {
-			// Avoid adding duplicates
-			if (!prevDatasources.includes(ds)) {
-				return [...prevDatasources, ds]
-			}
-			return prevDatasources
-		})
-	}
 
 	return (
 		<>
@@ -200,16 +175,6 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 					clearSelection: {
 						text: "Clear Selection",
 						click: () => {
-							/*
-								ds.clearSelection()
-								console.debug("Cleared selection in datasource")
-								const message = new DataRecordsSelectionChangeMessage(
-									props.widgetId,
-									[],
-									[props.useDataSources[0].dataSourceId]
-								)
-								MessageManager.getInstance().publishMessage(message)
-								*/
 							handleClearSelection()
 						}
 					}
@@ -243,8 +208,14 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 						>
 							{(ds: DataSource) => {
 								if (ds && ds.getStatus() === DataSourceStatus.Loaded) {
+									setDatasources((prevDatasources) => {
+										// Avoids adding duplicates
+										if (!prevDatasources.includes(ds)) {
+											return [...prevDatasources, ds]
+										}
+										return prevDatasources
+									})
 									// Data source is loaded — populate calendar events
-									addDatasource(ds)
 									fillCalendarEvents(ds, dsConfig.asMutable({ deep: true }))
 								}
 								return null
