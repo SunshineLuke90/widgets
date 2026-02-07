@@ -305,14 +305,12 @@ function cleanup(
 // COMPONENT
 // =============================================================================
 
-export default function Radar(
-	{ mapElementId = "radar-map" },
-	props: AllWidgetProps<IMConfig>
-) {
+export default function Radar(props: AllWidgetProps<IMConfig>) {
 	// -------------------------------------------------------------------------
 	// State and Refs
 	// -------------------------------------------------------------------------
-	//const { config } = props
+	const { config } = props
+	const mapElementId = "radar-map"
 	const wmsRef = React.useRef(null)
 	const viewWatchHandleRef = React.useRef(null)
 	const refreshTimerIdRef = React.useRef(null)
@@ -365,8 +363,22 @@ export default function Radar(
 					opacity: 0.75,
 					visible: true
 				})
-				//jimuMapView.getJimuLayerViewByAPILayer(props.config.placementLayer)
-				view.map.add(wmsRef.current)
+
+				// --- Add WMS layer to map, trying to respect placementLayer if specified ---
+				// --- This tries to insert the WMS layer just below the specified layer ID, or on top of all layers if not found ---
+				const allLayers = jimuMapView.view.map.layers.toArray()
+				console.log(
+					"All map layers:",
+					allLayers.map((l) => l.id)
+				)
+				const posIndex = allLayers.findIndex(
+					(l) => l.id === config.placementLayer
+				)
+				if (posIndex >= 0) {
+					jimuMapView.view.map.add(wmsRef.current, posIndex)
+				} else {
+					jimuMapView.view.map.add(wmsRef.current)
+				}
 				setStatusText("Status: WMS layer added")
 
 				// --- Early return if no time dimension ---
@@ -482,7 +494,8 @@ export default function Radar(
 		setIdx,
 		framesRef,
 		idxRef,
-		playSpeedRef
+		playSpeedRef,
+		config.placementLayer
 	])
 
 	// -------------------------------------------------------------------------

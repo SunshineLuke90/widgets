@@ -7,7 +7,6 @@ import {
 import { React } from "jimu-core"
 import type { IMConfig } from "../config"
 import { Option, Select } from "jimu-ui"
-import { getLayersFromJimuMapView } from "./utils"
 import { JimuMapViewComponent, type JimuMapView } from "jimu-arcgis"
 
 export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
@@ -25,14 +24,15 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 		if (jmv) {
 			setJimuMapView(jmv)
 			// Flatten the layers from the map for easier use
-			const unfilteredLayers = getLayersFromJimuMapView(jmv).reverse()
+			const unfilteredLayers = jmv?.view?.map?.layers
+				? jmv.view.map.layers.toArray().reverse()
+				: []
 			// Filter out layers that have identical IDs (keeping the first occurrence)
 			const uniqueLayers = unfilteredLayers.filter(
 				(layer, index, self) =>
 					index === self.findIndex((l) => l.id === layer.id)
 			)
 			setLayers(uniqueLayers)
-			//setLayers(getLayersFromJimuMapView(jmv).reverse())
 		}
 	}
 
