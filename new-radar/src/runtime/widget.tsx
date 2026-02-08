@@ -3,7 +3,12 @@ import "@esri/calcite-components/dist/components/calcite-button"
 import "@esri/calcite-components/dist/components/calcite-action-bar"
 import "@esri/calcite-components/dist/components/calcite-slider"
 import "@esri/calcite-components/dist/components/calcite-tooltip"
-import { CalciteSlider, CalciteButton } from "@esri/calcite-components-react"
+import {
+	CalciteSlider,
+	CalciteButton,
+	CalciteSelect,
+	CalciteOption
+} from "@esri/calcite-components-react"
 import "@arcgis/map-components/components/arcgis-map"
 import "@arcgis/map-components/components/arcgis-legend"
 import WMSLayer from "@arcgis/core/layers/WMSLayer.js"
@@ -15,8 +20,6 @@ import {
 	fetchWmsCapabilities
 } from "./wms-utils"
 import {
-	WMS_BASE,
-	LAYER_NAME,
 	REFRESH_INTERVAL_MS,
 	MAX_FRAMES,
 	waitForViewReady,
@@ -61,6 +64,40 @@ export default function Radar(props: AllWidgetProps<IMConfig>) {
 	// State and Refs
 	// -------------------------------------------------------------------------
 	const { config } = props
+
+	const getDefaultsForType = React.useCallback(
+		(type: string): { wmsBase: string | null; layerName: string | null } => {
+			switch (type) {
+				case "Precipitation":
+					return {
+						wmsBase:
+							"https://nowcoast.noaa.gov/geoserver/observations/weather_radar/ows",
+						layerName: "base_reflectivity_mosaic"
+					}
+				case "Imagery":
+					return {
+						wmsBase: "https://fire.data.nesdis.noaa.gov/api/ogc/imagery/wms",
+						layerName: "GOESEastCONUSGeoColor"
+					}
+				default:
+					return {
+						wmsBase: null,
+						layerName: null
+					}
+			}
+		},
+		[]
+	)
+	const defaults = getDefaultsForType(config.radarType)
+	const [wmsBase, setWmsBase] = React.useState(defaults.wmsBase)
+	const [layerName, setLayerName] = React.useState(defaults.layerName)
+
+	React.useEffect(() => {
+		const newDefaults = getDefaultsForType(config.radarType)
+		setWmsBase(newDefaults.wmsBase)
+		setLayerName(newDefaults.layerName)
+	}, [config.radarType, getDefaultsForType])
+
 	const mapElementId = "radar-map"
 	const wmsRef = React.useRef(null)
 	const viewWatchHandleRef = React.useRef(null)
@@ -98,19 +135,20 @@ export default function Radar(props: AllWidgetProps<IMConfig>) {
 	// Initialization Effect
 	// -------------------------------------------------------------------------
 	React.useEffect(() => {
+		if (!wmsBase || !layerName) return
+
 		let view: __esri.MapView
 		;(async function init() {
 			view = (await jimuMapView.whenJimuMapViewLoaded()).view as __esri.MapView
 			setStatusText("Status: loading...")
-
 			try {
 				// --- Fetch WMS capabilities and create layer ---
-				const { times } = await fetchWmsCapabilities(WMS_BASE, LAYER_NAME)
+				const { times } = await fetchWmsCapabilities(wmsBase, layerName)
 
 				wmsRef.current = new WMSLayer({
-					url: WMS_BASE,
-					title: "nowCOAST Radar (WMS)",
-					sublayers: [{ name: LAYER_NAME }],
+					url: wmsBase,
+					title: `${config.radarType} (WMS)`,
+					sublayers: [{ name: layerName }],
 					opacity: 0.75,
 					visible: true
 				})
@@ -187,7 +225,13 @@ export default function Radar(props: AllWidgetProps<IMConfig>) {
 						prevExtentKeyRef.current = key
 						prefetchInProgressRef.current = true
 						try {
-							await prefetchFrames(framesRef.current, view, setStatusText)
+							await prefetchFrames(
+								framesRef.current,
+								view,
+								wmsBase,
+								layerName,
+								setStatusText
+							)
 						} finally {
 							prefetchInProgressRef.current = false
 						}
@@ -205,7 +249,13 @@ export default function Radar(props: AllWidgetProps<IMConfig>) {
 				// --- Initial prefetch after view is ready ---
 				await waitForViewReady(view)
 				await registerServiceWorker()
-				await prefetchFrames(framesRef.current, view, setStatusText)
+				await prefetchFrames(
+					framesRef.current,
+					view,
+					wmsBase,
+					layerName,
+					setStatusText
+				)
 
 				// --- Set up periodic refresh ---
 				refreshTimerIdRef.current = setInterval(
@@ -215,6 +265,8 @@ export default function Radar(props: AllWidgetProps<IMConfig>) {
 							idxRef,
 							sliderRef,
 							view,
+							wmsBase,
+							layerName,
 							setFrames,
 							setIdx,
 							setStatusText,
@@ -223,7 +275,7 @@ export default function Radar(props: AllWidgetProps<IMConfig>) {
 					REFRESH_INTERVAL_MS
 				)
 			} catch (err) {
-				console.error("Error creating WMS layer from nowCOAST:", err)
+				console.error(`Error creating WMS layer from ${config.radarType}:`, err)
 				setStatusText("Status: WMS layer error or not accessible")
 				addFallbackLayer(view, setStatusText)
 			}
@@ -246,7 +298,10 @@ export default function Radar(props: AllWidgetProps<IMConfig>) {
 		framesRef,
 		idxRef,
 		playSpeedRef,
-		config.placementLayer
+		config.placementLayer,
+		config.radarType,
+		wmsBase,
+		layerName
 	])
 
 	// -------------------------------------------------------------------------
@@ -323,7 +378,32 @@ export default function Radar(props: AllWidgetProps<IMConfig>) {
 					/>
 				</div>
 			</div>
-			<div className="radar-status">{statusText}</div>
+			<div className="radar-status">
+				{config.radarType === "Imagery" && (
+					<CalciteSelect
+						label="Radar Type"
+						value={layerName}
+						onCalciteSelectChange={(e) => {
+							jimuMapView.view.map.remove(wmsRef.current)
+							setLayerName(e.target.value)
+						}}
+					>
+						<CalciteOption value="GOESEastCONUSGeoColor">
+							GOES-East GeoColor
+						</CalciteOption>
+						<CalciteOption value="GOESEastCONUSFireTemp">
+							GOES-East Fire Temperature
+						</CalciteOption>
+						<CalciteOption value="GOESEastCONUSMicrophysics">
+							GOES-East Microphysics
+						</CalciteOption>
+						<CalciteOption value="GOESEastCONUSDayFire">
+							GOES-East Day Fire
+						</CalciteOption>
+					</CalciteSelect>
+				)}
+				{statusText}
+			</div>
 		</div>
 	)
 }

@@ -8,21 +8,105 @@
 
 import esriRequest from "@arcgis/core/request"
 
-// WMS XML namespace
+// WMS XML namespace (used by some servers; others omit the namespace)
 export const WMS_NS = "http://www.opengis.net/wms"
+
+/**
+ * Helper: get elements by tag name, trying namespaced first, then non-namespaced.
+ * Many WMS servers (e.g. GeoServer) include the OGC namespace, while others
+ * (e.g. the NESDIS fire portal) emit plain XML without a namespace.
+ */
+function getElementsByTag(parent: Element | Document, tag: string): Element[] {
+	// Try namespaced first
+	let els = parent.getElementsByTagNameNS(WMS_NS, tag)
+	if (els.length > 0) return Array.from(els)
+	// Fall back to non-namespaced
+	els = parent.getElementsByTagName(tag)
+	return Array.from(els)
+}
 
 /**
  * Find a layer element in WMS capabilities XML by name
  */
 export function findLayerByName(xml: Document, layerName: string): Element | null {
-	const layers = xml.getElementsByTagNameNS(WMS_NS, "Layer")
-	for (let i = 0; i < layers.length; i++) {
-		const nameNode = layers[i].getElementsByTagNameNS(WMS_NS, "Name")[0]
-		if (nameNode?.textContent === layerName) {
-			return layers[i]
+	const layers = getElementsByTag(xml, "Layer")
+	for (const layer of layers) {
+		// Look for a direct child <Name> element
+		const nameNodes = getElementsByTag(layer, "Name")
+		for (const nameNode of nameNodes) {
+			if (nameNode.textContent === layerName && nameNode.parentElement === layer) {
+				return layer
+			}
 		}
 	}
 	return null
+}
+
+/**
+ * Parse an ISO 8601 duration string (e.g. "PT5M", "PT1H", "PT30S") to milliseconds.
+ */
+export function parseIsoDuration(iso: string): number {
+	const match = iso.match(
+		/^P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?$/
+	)
+	if (!match) return 0
+	const days = parseInt(match[1] || "0", 10)
+	const hours = parseInt(match[2] || "0", 10)
+	const minutes = parseInt(match[3] || "0", 10)
+	const seconds = parseFloat(match[4] || "0")
+	return ((days * 24 + hours) * 60 + minutes) * 60 * 1000 + seconds * 1000
+}
+
+/**
+ * Format a Date as YYYY-MM-DDTHH:MM:SSZ (no fractional seconds).
+ * Many WMS servers (including the NESDIS fire portal) reject millisecond
+ * precision that JavaScript's Date.toISOString() produces (.000Z).
+ */
+function formatWmsTime(date: Date): string {
+	const pad = (n: number) => String(n).padStart(2, "0")
+	return (
+		date.getUTCFullYear() +
+		"-" +
+		pad(date.getUTCMonth() + 1) +
+		"-" +
+		pad(date.getUTCDate()) +
+		"T" +
+		pad(date.getUTCHours()) +
+		":" +
+		pad(date.getUTCMinutes()) +
+		":" +
+		pad(date.getUTCSeconds()) +
+		"Z"
+	)
+}
+
+/**
+ * Expand an ISO 8601 time interval (start/end/period) into discrete timestamps.
+ * Only generates the last `maxFrames` timestamps to avoid creating huge arrays.
+ */
+export function expandTimeInterval(
+	intervalStr: string,
+	maxFrames: number
+): string[] {
+	const parts = intervalStr.trim().split("/")
+	if (parts.length !== 3) return []
+
+	const start = new Date(parts[0]).getTime()
+	const end = new Date(parts[1]).getTime()
+	const stepMs = parseIsoDuration(parts[2])
+
+	if (isNaN(start) || isNaN(end) || stepMs <= 0) return []
+
+	// Calculate total number of steps
+	const totalSteps = Math.floor((end - start) / stepMs)
+
+	// Only generate the last `maxFrames` timestamps
+	const firstStep = Math.max(0, totalSteps - maxFrames + 1)
+	const times: string[] = []
+	for (let i = firstStep; i <= totalSteps; i++) {
+		times.push(formatWmsTime(new Date(start + i * stepMs)))
+	}
+	return times
 }
 
 /**
@@ -30,6 +114,13 @@ export function findLayerByName(xml: Document, layerName: string): Element | nul
  */
 export function parseTimesFromText(text: string): string[] {
 	const trimmed = text.trim()
+
+	// Check if it's an ISO 8601 time interval (start/end/period)
+	if (trimmed.includes("/") && !trimmed.includes(",")) {
+		return expandTimeInterval(trimmed, 30)
+	}
+
+	// Otherwise treat as comma-separated list
 	if (trimmed.includes(",")) {
 		return trimmed.split(",").map((s) => s.trim())
 	}
@@ -44,20 +135,20 @@ export function extractTimesFromLayer(layer: Element | null): string[] {
 	if (!layer) return []
 
 	// Try <Dimension name="time">
-	const dims = layer.getElementsByTagNameNS(WMS_NS, "Dimension")
-	for (let i = 0; i < dims.length; i++) {
-		const name = dims[i].getAttribute("name")
+	const dims = getElementsByTag(layer, "Dimension")
+	for (const dim of dims) {
+		const name = dim.getAttribute("name")
 		if (name?.toLowerCase() === "time") {
-			return parseTimesFromText(dims[i].textContent || "")
+			return parseTimesFromText(dim.textContent || "")
 		}
 	}
 
 	// Fallback: Try <Extent name="time">
-	const exts = layer.getElementsByTagNameNS(WMS_NS, "Extent")
-	for (let i = 0; i < exts.length; i++) {
-		const name = exts[i].getAttribute("name")
+	const exts = getElementsByTag(layer, "Extent")
+	for (const ext of exts) {
+		const name = ext.getAttribute("name")
 		if (name?.toLowerCase() === "time") {
-			return parseTimesFromText(exts[i].textContent || "")
+			return parseTimesFromText(ext.textContent || "")
 		}
 	}
 

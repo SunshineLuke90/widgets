@@ -6,7 +6,7 @@
  * used outside of React components.
  */
 
-import MapImageLayer from "@arcgis/core/layers/MapImageLayer.js"
+import WMSLayer from "@arcgis/core/layers/WMSLayer.js"
 import { fetchWmsCapabilities, buildGetMapUrl } from "./wms-utils"
 import type React from "react"
 
@@ -14,9 +14,9 @@ import type React from "react"
 // CONSTANTS
 // =============================================================================
 
-export const WMS_BASE =
-	"https://nowcoast.noaa.gov/geoserver/observations/weather_radar/ows"
-export const LAYER_NAME = "base_reflectivity_mosaic"
+//export const WMS_BASE =
+//	"https://fire.data.nesdis.noaa.gov/api/ogc/imagery/wms"
+//export const LAYER_NAME = "GOESEastCONUSGeoColor"
 export const FALLBACK_URL =
 	"https://nowcoast.noaa.gov/arcgis/rest/services/nowcoast/radar_meteo_imagery_nexrad_time/MapServer"
 export const REFRESH_INTERVAL_MS = 4 * 60 * 1000 // 4 minutes
@@ -68,6 +68,8 @@ export async function registerServiceWorker(): Promise<void> {
 export async function prefetchFrames(
 	frameList: string[],
 	view: __esri.MapView,
+	wmsBase: string,
+	layerName: string,
 	setStatusText: (text: string) => void
 ): Promise<void> {
 	if (!frameList || frameList.length === 0) return
@@ -76,8 +78,8 @@ export async function prefetchFrames(
 		const fetchPromises = frameList
 			.map((time) =>
 				buildGetMapUrl(
-					WMS_BASE,
-					LAYER_NAME,
+					wmsBase,
+					layerName,
 					view.extent,
 					view.width,
 					view.height,
@@ -105,6 +107,8 @@ export async function refreshTimes(params: {
 	idxRef: React.RefObject<number>
 	sliderRef: React.RefObject<any>
 	view: __esri.MapView
+	wmsBase: string
+	layerName: string
 	setFrames: (frames: string[]) => void
 	setIdx: (idx: number) => void
 	setStatusText: (text: string) => void
@@ -122,7 +126,7 @@ export async function refreshTimes(params: {
 	} = params
 
 	try {
-		const { times } = await fetchWmsCapabilities(WMS_BASE, LAYER_NAME)
+		const { times } = await fetchWmsCapabilities(params.wmsBase, params.layerName)
 
 		if (!times || times.length === 0) {
 			console.debug("refreshTimes: no times found")
@@ -150,7 +154,7 @@ export async function refreshTimes(params: {
 			setStatusText(
 				`Status: ${framesRef.current.length} time frames available (updated)`
 			)
-			await prefetchFrames(newlyAdded, view, setStatusText)
+			await prefetchFrames(newlyAdded, view, params.wmsBase, params.layerName, setStatusText)
 		} else {
 			console.debug("refreshTimes: no new frames")
 		}
@@ -227,23 +231,25 @@ export function createAnimationControls(
 }
 
 /**
- * Add fallback MapImageLayer when WMS fails
+ * Add fallback WMSLayer when primary WMS fails
  */
 export function addFallbackLayer(
 	view: __esri.MapView,
 	setStatusText: (text: string) => void
 ): void {
 	try {
-		const nowLayer = new MapImageLayer({
+		const fallbackLayer = new WMSLayer({
 			url: FALLBACK_URL,
-			id: "nowcoast-radar",
+			id: "nowcoast-radar-fallback",
+			title: "NowCOAST Radar (fallback)",
+			sublayers: [{ name: "base_reflectivity_mosaic" }],
 			opacity: 0.75,
 			visible: true
 		})
-		view?.map?.add(nowLayer)
-		setStatusText("Status: nowCOAST MapImageLayer added as fallback")
+		view?.map?.add(fallbackLayer)
+		setStatusText("Status: WMS fallback layer added")
 	} catch (e) {
-		console.error("Fallback MapImageLayer failed:", e)
+		console.error("Fallback WMSLayer failed:", e)
 	}
 }
 
