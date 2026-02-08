@@ -71,8 +71,8 @@ export default function Radar(props: AllWidgetProps<IMConfig>) {
 				case "Precipitation":
 					return {
 						wmsBase:
-							"https://nowcoast.noaa.gov/geoserver/observations/weather_radar/ows",
-						layerName: "base_reflectivity_mosaic"
+							"https://opengeo.ncep.noaa.gov/geoserver/conus/conus_bref_qcd/ows",
+						layerName: "conus_bref_qcd"
 					}
 				case "Imagery":
 					return {
@@ -394,6 +394,7 @@ export default function Radar(props: AllWidgetProps<IMConfig>) {
 						value={layerName}
 						onCalciteSelectChange={(e) => {
 							jimuMapView.view.map.remove(wmsRef.current)
+							setPlaying(false)
 							setLayerName(e.target.value)
 						}}
 					>

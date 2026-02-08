@@ -28,7 +28,7 @@ self.addEventListener('fetch', (event) => {
     const url = event.request.url
     // Only handle GET requests and WMS GetMap calls
     if (event.request.method !== 'GET') return
-    if (url.indexOf('/api/ogc/imagery/wms') === -1 && url.indexOf('/geoserver/observations/weather_radar/ows') === -1) return
+    if (url.indexOf('/api/ogc/imagery/wms') === -1 && url.indexOf('/geoserver/observations/weather_radar/ows') === -1 && url.indexOf('geoserver/conus/conus_bref_qcd/ows') === -1) return
     // simple heuristic to match GetMap calls
     if (url.toLowerCase().indexOf('request=getmap') === -1) return
 
