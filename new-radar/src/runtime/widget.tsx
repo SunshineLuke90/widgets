@@ -13,7 +13,7 @@ import "@arcgis/map-components/components/arcgis-map"
 import "@arcgis/map-components/components/arcgis-legend"
 import WMSLayer from "@arcgis/core/layers/WMSLayer.js"
 import "./style.css"
-import { MapViewManager } from "jimu-arcgis"
+import { JimuMapViewComponent, type JimuMapView } from "jimu-arcgis"
 import {
 	formatTimestamp,
 	getExtentKey,
@@ -63,7 +63,7 @@ export default function Radar(props: AllWidgetProps<IMConfig>) {
 	// -------------------------------------------------------------------------
 	// State and Refs
 	// -------------------------------------------------------------------------
-	const { config } = props
+	const { config, useMapWidgetIds } = props
 
 	const getDefaultsForType = React.useCallback(
 		(type: string): { wmsBase: string | null; layerName: string | null } => {
@@ -122,10 +122,11 @@ export default function Radar(props: AllWidgetProps<IMConfig>) {
 	const stopAnimationRef = React.useRef<() => void>(null)
 	const restartAnimationRef = React.useRef<() => void>(null)
 
-	const mvManager = MapViewManager.getInstance()
-	const jimuMapView = mvManager.getJimuMapViewById(
-		mvManager.getAllJimuMapViewIds()[0]
-	)
+	//const mvManager = MapViewManager.getInstance()
+	const [jimuMapView, setJimuMapView] = React.useState<JimuMapView>(null)
+	//const jimuMapView = mvManager.getJimuMapViewById(
+	//	mvManager.getAllJimuMapViewIds()[0]
+	//)
 
 	const toggleTimeType = React.useCallback(() => {
 		setTimeType((prev) => !prev)
@@ -309,6 +310,14 @@ export default function Radar(props: AllWidgetProps<IMConfig>) {
 	// -------------------------------------------------------------------------
 	return (
 		<div className="radar-panel">
+			{useMapWidgetIds?.length > 0 && (
+				<JimuMapViewComponent
+					useMapWidgetId={useMapWidgetIds?.[0]}
+					onActiveViewChange={(jmv) => {
+						setJimuMapView(jmv)
+					}}
+				/>
+			)}
 			<div className="timeline-container">
 				<calcite-button
 					id="timestamp"
