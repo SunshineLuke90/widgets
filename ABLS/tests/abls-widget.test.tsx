@@ -5,6 +5,16 @@ import { screen } from "@testing-library/react"
 import "@testing-library/jest-dom"
 import userEvent from "@testing-library/user-event"
 
+// Mock CalciteButton so we don't need real custom-element registration in jsdom
+jest.mock("@esri/calcite-components-react", () => {
+	const React = require("react")
+	return {
+		CalciteButton: React.forwardRef(({ children, ...props }: any, ref: any) =>
+			React.createElement("button", { ...props, ref }, children)
+		)
+	}
+})
+
 // Mock the JimuMapViewComponent so the widget receives a jimuMapView during tests
 jest.mock("jimu-arcgis", () => {
 	const React = require("react")

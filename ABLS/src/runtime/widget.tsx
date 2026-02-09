@@ -8,7 +8,7 @@ import defaultMessages from "./translations/default"
 import "./style.css"
 import TimeExtent from "@arcgis/core/time/TimeExtent"
 import { useCallback } from "react"
-import { CalciteButton } from "calcite-components"
+import { CalciteButton } from "@esri/calcite-components-react"
 
 export default function Widget(props: AllWidgetProps<Config>) {
 	const { config, useMapWidgetIds } = props
@@ -127,7 +127,6 @@ export default function Widget(props: AllWidgetProps<Config>) {
 								activeViewId === view.id ? "active" : ""
 							}`}
 							title={view.name}
-							round={true}
 							onClick={() => {
 								handleViewChange(view)
 							}}
