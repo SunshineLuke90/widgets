@@ -1,16 +1,11 @@
 import { React, type AllWidgetProps } from "jimu-core"
-import "@esri/calcite-components/dist/components/calcite-button"
-import "@esri/calcite-components/dist/components/calcite-action-bar"
-import "@esri/calcite-components/dist/components/calcite-slider"
-import "@esri/calcite-components/dist/components/calcite-tooltip"
 import {
 	CalciteSlider,
 	CalciteButton,
 	CalciteSelect,
-	CalciteOption
+	CalciteOption,
+	CalciteTooltip
 } from "@esri/calcite-components-react"
-import "@arcgis/map-components/components/arcgis-map"
-import "@arcgis/map-components/components/arcgis-legend"
 import WMSLayer from "@arcgis/core/layers/WMSLayer.js"
 import "./style.css"
 import { JimuMapViewComponent, type JimuMapView } from "jimu-arcgis"
@@ -59,11 +54,14 @@ function useRefState<T>(
 // COMPONENT
 // =============================================================================
 
-export default function Radar(props: AllWidgetProps<IMConfig>) {
+export default function Widget(props: AllWidgetProps<IMConfig>) {
 	// -------------------------------------------------------------------------
 	// State and Refs
 	// -------------------------------------------------------------------------
 	const { config, useMapWidgetIds } = props
+
+	const isConfigured =
+		config.radarType && config.radarType !== "" && useMapWidgetIds?.length > 0
 
 	const getDefaultsForType = React.useCallback(
 		(type: string): { wmsBase: string | null; layerName: string | null } => {
@@ -136,7 +134,7 @@ export default function Radar(props: AllWidgetProps<IMConfig>) {
 	// Initialization Effect
 	// -------------------------------------------------------------------------
 	React.useEffect(() => {
-		if (!wmsBase || !layerName) return
+		if (!wmsBase || !layerName || !jimuMapView) return
 
 		let view: __esri.MapView
 		;(async function init() {
@@ -306,6 +304,19 @@ export default function Radar(props: AllWidgetProps<IMConfig>) {
 	])
 
 	// -------------------------------------------------------------------------
+	// Early return if not configured
+	// -------------------------------------------------------------------------
+
+	if (!isConfigured) {
+		return (
+			<div className="radar-panel radar-placeholder">
+				Please configure the widget by selecting a radar type and map in the
+				settings.
+			</div>
+		)
+	}
+
+	// -------------------------------------------------------------------------
 	// JSX
 	// -------------------------------------------------------------------------
 	return (
@@ -319,7 +330,7 @@ export default function Radar(props: AllWidgetProps<IMConfig>) {
 				/>
 			)}
 			<div className="timeline-container">
-				<calcite-button
+				<CalciteButton
 					id="timestamp"
 					className="timestamp"
 					kind="neutral"
@@ -328,10 +339,10 @@ export default function Radar(props: AllWidgetProps<IMConfig>) {
 					onClick={toggleTimeType}
 				>
 					{formatTimestamp(tsText, timeType)}
-				</calcite-button>
-				<calcite-tooltip referenceElement="timestamp" placement="top">
+				</CalciteButton>
+				<CalciteTooltip referenceElement="timestamp" placement="top">
 					<span>Toggle Time Format</span>
-				</calcite-tooltip>
+				</CalciteTooltip>
 				<CalciteSlider
 					className="timeline-slider"
 					ref={sliderRef}
