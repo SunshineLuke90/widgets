@@ -1,8 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <g id="Style" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="*UI-icons" transform="translate(-100.000000, -515.000000)" fill="#FFF" fill-rule="nonzero">
-            <path d="M102,516 C101.447715,516 101,516.447715 101,517 L101,529 C101,529.552285 101.447715,530 102,530 L114,530 C114.552285,530 115,529.552285 115,529 L115,517 C115,516.447715 114.552285,516 114,516 L102,516 Z M102,515 L114,515 C115.104569,515 116,515.895431 116,517 L116,529 C116,530.104569 115.104569,531 114,531 L102,531 C100.895431,531 100,530.104569 100,529 L100,517 C100,515.895431 100.895431,515 102,515 Z M105.5,526 L107.5,526 C109.156854,526 110.5,524.656854 110.5,523 C110.5,521.343146 109.156854,520 107.5,520 L105.5,520 L105.5,526 Z M107.5,527 L104.5,527 L104.5,519 L107.5,519 C109.709139,519 111.5,520.790861 111.5,523 C111.5,525.209139 109.709139,527 107.5,527 Z" id="widget-demo"></path>
-        </g>
-    </g>
-</svg>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
+<svg fill="#ffffff" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="800px" height="800px" viewBox="0 0 856.506 856.506" xml:space="preserve" stroke="#ffffff">
+<g id="SVGRepo_bgCarrier" stroke-width="0"/>
+<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
+<g id="SVGRepo_iconCarrier"> <g> <path d="M20,728.816h816.506c11.046,0,20-8.954,20-20V228.013c0-11.046-8.954-20-20-20h-530.81v-60.323c0-11.046-8.954-20-20-20 H114.253c-11.046,0-20,8.954-20,20v60.323H20c-11.046,0-20,8.954-20,20v480.804C0,719.862,8.954,728.816,20,728.816z M427.027,300.181c93.607,0,169.491,75.884,169.491,169.492s-75.884,169.492-169.491,169.492 c-93.608,0-169.492-75.884-169.492-169.492S333.419,300.181,427.027,300.181z"/> </g> </g>
+</svg>
