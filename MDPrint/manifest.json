@@ -1,0 +1,23 @@
+{
+  "name": "MDPrint",
+  "label": "MDPrint",
+  "type": "widget",
+  "version": "1.19.0",
+  "exbVersion": "1.19.0",
+  "author": "Lucius Creamer",
+  "description": "This widget allows users to print feature reports from the ArcGIS Experience Builder, client-side.",
+  "copyright": "",
+  "dependency": [
+    "jimu-arcgis"
+  ],
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "publishMessages": [],
+  "properties": {},
+  "translatedLocales": [
+    "en"
+  ],
+  "defaultSize": {
+    "width": 800,
+    "height": 500
+  }
+}

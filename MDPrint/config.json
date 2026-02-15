@@ -1,0 +1,4 @@
+{
+    "markdown":"# Markdown Title\n\nThis is an example of markdown content in the MDPrint widget. You can use **bold**, *italic*, and other markdown syntax to format your content.\n\n- Item 1\n- Item 2\n- Item 3\n\n[ArcGIS Experience Builder](https://experience.arcgis.com/)",
+    "css":".markdown-content {\n  font-family: 'Noto Sans', Arial, Helvetica, sans-serif;\n  color: #333;\n}\n\n.markdown-content h1 {\n  color: #0078d4;\n}\n\n.markdown-content a {\n  color: #0078d4;\n  text-decoration: none;\n}\n\n.markdown-content a:hover {\n  text-decoration: underline;\n}"
+}

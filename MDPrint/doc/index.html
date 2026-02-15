@@ -1,0 +1,33 @@
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--Import Calcite Stylesheet via CDN. This is easier than having to create react stuff for each static page-->
+    <script type="module" src="https://js.arcgis.com/calcite-components/3.2.1/calcite.esm.js"></script>
+    <link rel="stylesheet" href="doc/calcite.css">
+
+    <!--Import Noto Sans so that the website draws properly-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wdth,wght@0,62.5..100,100..900;1,62.5..100,100..900&display=swap"
+        rel="stylesheet">
+
+    <!--Reference component stylesheet-->
+    <link rel="stylesheet" href="doc/styles.css">
+
+    <!--Webpage Title-->
+    <title>Markdown Print Help</title>
+</head>
+<body>
+    <div class="header noto-sans-heavy">
+        <h1>
+            Print Widget
+        </h1>
+    </div>
+    <p>
+        This widget is designed to print simple feature reports using <a href="https://www.markdownguide.org/basic-syntax/">markdown</a> configuration. The markdown configured in the settings can include fields from the datasource, wrapped in ${}. You can also perform some simple formatting on date or number fields, using the following syntax:<br>
+        Date: ${dateField | "M/D/YY h:mm A"} => 2/15/26 4:23 PM<br>
+        Number: ${numField | "#,###.00"} => 23,456.78<br><br>
+        The formatting string uses Arcade syntax, similar to the syntax in the <a href="https://developers.arcgis.com/arcade/function-reference/text_functions/#text">Text() Arcade function</a>
+    </p>
+</body>

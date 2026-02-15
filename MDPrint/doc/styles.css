@@ -1,0 +1,95 @@
+:root {
+  font-family: "Noto Sans", sans-serif;
+
+  --calcite-sans-family: 'Noto Sans', Arial, Helvetica, sans-serif;
+}
+
+body,
+.calcite-mode-dark,
+.calcite-mode-light {
+  font-family: 'Noto Sans', Arial, Helvetica, sans-serif !important;
+}
+
+.action-bar {
+  --calcite-action-bar-items-space: 15px;
+  --calcite-action-bar-size: 100%
+}
+
+.menu-button {
+  height: 30px;
+  width: 30px;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-bottom: 15px;
+}
+
+calcite-button {
+  --calcite-button-corner-radius: 5em;
+  --calcite-button-text-color: '#ffffff';
+  --calcite-button-icon-color: '#ffffff'
+}
+
+html {
+  font-size: 120%
+    /* Page scaling was too small */
+}
+
+body {
+  background-color: #212121;
+  color: #ffffff;
+}
+
+main {
+  width: calc(500px + 20%);
+  max-width: 90%;
+  margin: auto;
+  padding: 20px;
+}
+
+footer {
+  text-align: right;
+  font-size: smaller;
+  padding: 15px;
+}
+
+.sub-header {
+  color: #ffffff;
+  background-color: #212121;
+  padding: 10px;
+  text-align: center;
+}
+
+.header {
+  color: #ffffff;
+  background-color: #212121;
+  text-align: center;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  font-variation-settings: "wdth" 75;
+}
+
+.header h1 {
+  font-size: 50px;
+}
+
+.header h2 {
+  font-size: 30px;
+}
+
+.header h3 {
+  font-size: 20px;
+}
+
+a:link {
+  color: var(--calcite-color-text-link) /* Unvisited link color */
+}
+
+a:visited {
+  color: #DC90EE; /* Visited link color */
+}
+
+a:focus-visible {
+    outline: 2px solid var(--calcite-color-brand);
+    border-radius: 4px;
+}
