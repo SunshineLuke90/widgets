@@ -75,6 +75,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 						setActiveTab(id)
 					}}
 					type="tabs"
+					scrollable={true}
 					keepMount
 					onClose={(id) => {
 						removePrintTemplate(id)

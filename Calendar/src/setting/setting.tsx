@@ -130,6 +130,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 						}}
 						type="tabs"
 						keepMount
+						scrollable={true}
 						onClose={(id) => {
 							removeDataset(id)
 						}}
