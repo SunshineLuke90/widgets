@@ -125,6 +125,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 											>
 												<TextArea
 													value={template.markdown}
+													height={window.innerHeight * 0.4}
 													onChange={(e) => {
 														updateTemplate(template.id, {
 															markdown: e.currentTarget.value
@@ -136,6 +137,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 											<SettingRow label="Custom CSS" level={2} flow="wrap">
 												<TextArea
 													value={template.css}
+													height={window.innerHeight * 0.4}
 													onChange={(e) => {
 														updateTemplate(template.id, {
 															css: e.currentTarget.value

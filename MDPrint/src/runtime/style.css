@@ -1,9 +1,8 @@
-/* Layout for widget: make the paper a column flex container so we can pin the button */
 .widget-mdprint {
     display: flex;
     flex-direction: column;
     height: 100%;
-    min-height: 0; /* allow children to shrink for scrolling */
+    min-height: 0;
 }
 
 /* Scrollable area that fills remaining space above the button */
@@ -15,7 +14,7 @@
     padding-left: 16px;
 }
 
-/* Make the calcite button full width and stick to the bottom of the widget */
+/* Make the calcite print button full width and stick to the bottom of the widget */
 .widget-mdprint calcite-button {
     width: 100%;
     flex: 0 0 auto;
@@ -37,7 +36,6 @@
     border-bottom: 1px solid rgba(0,0,0,0.12);
 }
 
-/* Thin divider under the header title */
 .widget-mdprint h4 {
     font-size: 16px;
     font-weight: 500;
@@ -48,12 +46,37 @@
     padding-right: 12px;
 }
 
-/* Thin divider immediately above the scrollable wrapper */
 .widget-mdprint .mdprint-scroll {
-    /* border-top: 1px solid rgba(0,0,0,0.08); */
     padding-top: 8px;
+}
+
+.mdprint-field-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 400;
+    margin: 8px 0 0 0;
+}
+
+.mdprint-field-header .label {
+    margin: 0;
+    font-weight: 400;
+}
+
+.mdprint-field-header calcite-button,
+.mdprint-field-header .expand-button {
+    flex: 0 0 auto;
+    margin-left: 8px;
 }
 
 .widget-mdprint .text-truncate {
     font-weight: 400
+}
+
+.widget-mdprint textarea {
+    border-radius: 4px;
+}
+
+.modal-content textarea {
+    border-radius: 4px;
 }

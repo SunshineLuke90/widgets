@@ -9,7 +9,16 @@ import {
 	Immutable
 } from "jimu-core"
 import type { IMConfig, PrintTemplate } from "../config"
-import { CollapsablePanel, Paper, TextArea } from "jimu-ui"
+import {
+	Button,
+	CollapsablePanel,
+	Icon,
+	Modal,
+	ModalBody,
+	ModalHeader,
+	Paper,
+	TextArea
+} from "jimu-ui"
 import {
 	CalciteAlert,
 	CalciteButton,
@@ -44,6 +53,24 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 	// Alert state
 	const [alertOpen, setAlertOpen] = React.useState(false)
 	const [alertMessage, setAlertMessage] = React.useState("")
+
+	// Modal state for markdown editor
+	const [mdModalOpen, setMdModalOpen] = React.useState(false)
+	const openMDModal = () => {
+		setMdModalOpen(true)
+	}
+	const closeMDModal = () => {
+		setMdModalOpen(false)
+	}
+
+	// Modal state for css editor
+	const [cssModalOpen, setCssModalOpen] = React.useState(false)
+	const openCSSModal = () => {
+		setCssModalOpen(true)
+	}
+	const closeCSSModal = () => {
+		setCssModalOpen(false)
+	}
 
 	const showAlert = (message: string) => {
 		setAlertMessage(message)
@@ -149,7 +176,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 				<h4>Markdown Printer</h4>
 			</header>
 			<div className="mdprint-scroll">
-				Template
+				<span style={{ fontSize: "14px" }}>Template</span>
 				<CalciteSelect
 					label="Select Print Template"
 					scale="s"
@@ -191,11 +218,50 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 									defaultIsOpen={false}
 									level={3}
 								>
-									<div style={{ fontWeight: 400, margin: "8px 0 0 0" }}>
-										Markdown Content
+									<div className="mdprint-field-header">
+										<div className="label">Markdown Content</div>
+										<Button
+											icon={true}
+											className="expand-button"
+											size="sm"
+											variant="text"
+											onClick={openMDModal}
+										>
+											<Icon
+												size="m"
+												icon='<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16"><path d="M15 15h-4v-1h2.282l-3.633-3.584.767-.767L14 13.282V11h1zM5 1v1H2.718l3.633 3.584-.767.767L2 2.718V5H1V1z"></path></svg>'
+											></Icon>
+										</Button>
+										<Modal
+											centered
+											keyboard
+											scrollable
+											toggle={closeMDModal}
+											isOpen={mdModalOpen}
+											onRequestClose={closeMDModal}
+										>
+											<ModalHeader toggle={closeMDModal}>
+												Markdown Content
+											</ModalHeader>
+											<ModalBody>
+												<TextArea
+													height={window.innerHeight * 0.8}
+													value={currentMarkdown}
+													onChange={(e) => {
+														const val = e.currentTarget.value
+														setMarkdownOverrides((prev) => ({
+															...prev,
+															[template.id]: val
+														}))
+													}}
+													placeholder="Enter markdown content here"
+												/>
+											</ModalBody>
+										</Modal>
 									</div>
 									<TextArea
 										value={currentMarkdown}
+										height={100}
 										onChange={(e) => {
 											const val = e.currentTarget.value
 											setMarkdownOverrides((prev) => ({
@@ -205,11 +271,50 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 										}}
 										placeholder="Enter markdown content here"
 									/>
-									<div style={{ fontWeight: 400, margin: "8px 0 0 0" }}>
-										Custom CSS
+									<div className="mdprint-field-header">
+										<div className="label">Custom CSS</div>
+										<Button
+											icon={true}
+											className="expand-button"
+											size="sm"
+											variant="text"
+											onClick={openCSSModal}
+										>
+											<Icon
+												size="m"
+												icon='<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16"><path d="M15 15h-4v-1h2.282l-3.633-3.584.767-.767L14 13.282V11h1zM5 1v1H2.718l3.633 3.584-.767.767L2 2.718V5H1V1z"></path></svg>'
+											></Icon>
+										</Button>
+										<Modal
+											centered
+											keyboard
+											scrollable
+											toggle={closeCSSModal}
+											isOpen={cssModalOpen}
+											onRequestClose={closeCSSModal}
+										>
+											<ModalHeader toggle={closeCSSModal}>
+												CSS Content
+											</ModalHeader>
+											<ModalBody>
+												<TextArea
+													height={window.innerHeight * 0.8}
+													value={currentCss}
+													onChange={(e) => {
+														const val = e.currentTarget.value
+														setCssOverrides((prev) => ({
+															...prev,
+															[template.id]: val
+														}))
+													}}
+													placeholder="Enter CSS content here"
+												/>
+											</ModalBody>
+										</Modal>
 									</div>
 									<TextArea
 										value={currentCss}
+										height={100}
 										onChange={(e) => {
 											const val = e.currentTarget.value
 											setCssOverrides((prev) => ({
@@ -226,7 +331,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 			</div>
 
 			<CalciteButton
-				appearance="outline"
+				appearance="solid"
 				disabled={!selectedTemplateId || selectedCount === 0}
 				style={{ marginTop: "8px" }}
 				className="print-button"
@@ -239,7 +344,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 					}
 				}}
 			>
-				Print
+				Print {selectedCount > 0 ? `(${selectedCount} selected)` : ""}
 			</CalciteButton>
 			{/* Render a DataSourceComponent for each unique datasource */}
 			{uniqueUseDataSources.map((uds) => (
