@@ -1,0 +1,59 @@
+/* Layout for widget: make the paper a column flex container so we can pin the button */
+.widget-mdprint {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0; /* allow children to shrink for scrolling */
+}
+
+/* Scrollable area that fills remaining space above the button */
+.widget-mdprint .mdprint-scroll {
+    overflow: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding-right: 16px;
+    padding-left: 16px;
+}
+
+/* Make the calcite button full width and stick to the bottom of the widget */
+.widget-mdprint calcite-button {
+    width: 100%;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    padding-right: 16px;
+    padding-left: 16px;
+    padding-bottom: 16px;
+}
+
+/* Add a little bottom padding so content isn't flush against the button */
+.widget-mdprint .mdprint-scroll > *:last-child {
+    padding-bottom: 12px;
+}
+
+.widget-mdprint header {
+    border-bottom: 1px solid rgba(0,0,0,0.12);
+}
+
+/* Thin divider under the header title */
+.widget-mdprint h4 {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0;
+    padding-bottom: 10px;
+    padding-top: 10px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+/* Thin divider immediately above the scrollable wrapper */
+.widget-mdprint .mdprint-scroll {
+    /* border-top: 1px solid rgba(0,0,0,0.08); */
+    padding-top: 8px;
+}
+
+.widget-mdprint .text-truncate {
+    font-weight: 400
+}

@@ -1,3 +1,7 @@
+import DOMPurify from 'dompurify'
+import { marked } from 'marked'
+import printJS from 'print-js'
+
 /**
   A simple date formatting function that supports the same token formatting as ArcGIS Arcade, for example:
 
@@ -80,4 +84,53 @@ export const applyFormat = (value: any, format: string) => {
   }
 
   return value ?? "" // Fallback for strings or unknown types
+}
+
+/**
+ * Handles the print workflow: replaces field variables in markdown, converts to HTML,
+ * sanitizes, and opens a print dialog.
+ *
+ * @param records - The data records (selected features) to print, one page per record.
+ * @param markdown - The markdown template string with ${fieldName} or ${fieldName|format} placeholders.
+ * @param css - The custom CSS to apply to the print output.
+ * @returns "Success" if the print dialog was opened, or an error message string.
+ */
+export const handlePrint = (
+  records: any[],
+  markdown: string,
+  css: string
+): string => {
+
+  if (!records || records.length === 0) {
+    return "No features selected. Please select at least one feature before printing."
+  }
+  if (!markdown) {
+    return "No markdown content configured for this template."
+  }
+
+  try {
+    const pages: string[] = []
+    for (const feature of records) {
+      const result = markdown.replace(/\${(.*?)}/g, (_match, contents) => {
+        const [fieldName, ...formatParts] = contents.split("|")
+        const field = fieldName.trim()
+        const format = formatParts.length
+          ? formatParts.join("|").trim().replace(/['"]/g, "")
+          : null
+        const out = applyFormat(feature.getData()[field], format) ?? ""
+        return out
+      })
+      const htmlOut = `<div class="markdown-content">${DOMPurify.sanitize(marked.parse(result, { async: false }))}</div>`
+      const formattedHtml = htmlOut.replace(/\n/g, "<br>")
+      pages.push(formattedHtml)
+    }
+    const combinedHtml = pages.join(
+      '<div style="page-break-after: always;"></div>'
+    )
+    const cleanCss = "@page { margin: 20px; } " + css.replace(/\n/g, "")
+    printJS({ printable: combinedHtml, type: "raw-html", style: cleanCss })
+    return "Success"
+  } catch (error) {
+    return `Print failed: ${error instanceof Error ? error.message : String(error)}`
+  }
 }
