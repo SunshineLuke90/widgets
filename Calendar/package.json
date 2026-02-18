@@ -1,18 +1,16 @@
 {
-  "name": "calendar",
+  "name": "exb-calendar",
   "version": "1.0.0",
   "description": "A Calendar widget for Experience Builder Developer Edition",
-  "license": "ISC",
+  "license": "MIT",
   "author": "Lucius Creamer",
-  "type": "commonjs",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "dependencies": {
     "@fullcalendar/daygrid": "^6.1.20",
     "@fullcalendar/interaction": "^6.1.20",
     "@fullcalendar/react": "^6.1.20",
     "@fullcalendar/timegrid": "^6.1.20"
+  },
+  "peerDependencies":{
+    "polished": "4.3.1"
   }
 }

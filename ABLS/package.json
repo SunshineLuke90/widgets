@@ -1,0 +1,19 @@
+{
+  "name": "abls",
+  "version": "1.0.0",
+  "description": "A Better Layer Switcher - A custom Experience Widget, to swith between sets of layers using a views navigation like interface.",
+  "keywords": [
+    "exb-widget",
+    "experience-builder",
+    "exb"
+  ],
+  "license": "MIT",
+  "author": "Lucius Creamer",
+  "main": "src/runtime/widget.tsx",
+  "directories": {
+    "test": "tests"
+  },
+  "peerDependencies": {
+    "@esri/calcite-components": "5.0.1"
+  }
+}
