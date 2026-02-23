@@ -1,6 +1,6 @@
 {
   "name": "exb-calendar",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "A Calendar widget for Experience Builder Developer Edition",
   "license": "MIT",
   "author": "Lucius Creamer",
@@ -12,5 +12,6 @@
   },
   "peerDependencies":{
     "polished": "4.3.1"
-  }
+  },
+  "keywords":["exb-widget", "experience-builder", "exb"]
 }

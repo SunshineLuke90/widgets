@@ -10,7 +10,7 @@
   "dependency": [
     "jimu-arcgis"
   ],
-  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "license": "MIT",
   "publishMessages": ["DATA_RECORDS_SELECTION_CHANGE"],
   "properties": {},
   "translatedLocales": [

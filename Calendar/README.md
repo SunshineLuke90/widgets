@@ -9,7 +9,7 @@ This widget can be used and interacted with on my example application, found [he
 
 ## Setting up the Calendar
 
-The calendar has a few data formatting requirements if you want all features to work flawlessly OOTB. These will be explained below.
+The calendar has a few data formatting requirements if you want all features to work flawlessly OOTB. These will be explained below. These formatting requirements must be fulfilled for all datasources that you want displayed on the calendar, of which you can configure any amount. (Tested working with at least 2)
 
 1. Label Field
    - The label field is what shows up on the event in the calendar (This is a short tagline.)
