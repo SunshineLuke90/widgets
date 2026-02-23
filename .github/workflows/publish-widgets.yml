@@ -1,0 +1,87 @@
+name: Publish Changed Widgets
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      widgets: ${{ steps.set-matrix.outputs.widgets }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: set-matrix
+        run: |
+          echo "Detecting changed directories..."
+
+          # Get changed files in this push
+          CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+
+          # Extract unique top-level directories
+          DIRS=$(echo "$CHANGED" | cut -d/ -f1 | sort -u)
+
+          WIDGETS=()
+
+          for dir in $DIRS; do
+            if [ -d "$dir" ] && [ -f "$dir/package.json" ]; then
+              WIDGETS+=("\"$dir\"")
+            fi
+          done
+
+          # Convert to JSON array
+          JSON="[$(IFS=,; echo "${WIDGETS[*]}")]"
+
+          echo "Widgets to process: $JSON"
+          echo "widgets=$JSON" >> $GITHUB_OUTPUT
+
+  publish:
+    needs: detect
+    if: needs.detect.outputs.widgets != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        widget: ${{ fromJson(needs.detect.outputs.widgets) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org/
+
+      - name: Check and publish
+        run: |
+          DIR="${{ matrix.widget }}"
+
+          echo "Processing $DIR"
+
+          PACKAGE_NAME=$(node -p "require('./$DIR/package.json').name")
+          LOCAL_VERSION=$(node -p "require('./$DIR/package.json').version")
+
+          echo "Package: $PACKAGE_NAME"
+          echo "Local version: $LOCAL_VERSION"
+
+          PUBLISHED_VERSION=$(npm view "$PACKAGE_NAME" version 2>/dev/null || echo "none")
+
+          echo "Published version: $PUBLISHED_VERSION"
+
+          if [ "$PUBLISHED_VERSION" = "none" ]; then
+            echo "Package not found on npm. Publishing..."
+            cd "$DIR"
+            npm publish --access public
+          else
+            if [ "$(printf '%s\n' "$PUBLISHED_VERSION" "$LOCAL_VERSION" | sort -V | tail -n1)" = "$LOCAL_VERSION" ] && [ "$LOCAL_VERSION" != "$PUBLISHED_VERSION" ]; then
+              echo "Local version is newer. Publishing..."
+              cd "$DIR"
+              npm publish --access public
+            else
+              echo "No publish needed."
+            fi
+          fi
