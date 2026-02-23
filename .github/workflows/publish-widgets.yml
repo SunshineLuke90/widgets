@@ -3,7 +3,7 @@ name: Publish Changed Widgets
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   detect:
