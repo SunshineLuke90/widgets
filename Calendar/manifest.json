@@ -6,7 +6,6 @@
   "exbVersion": "1.19.0",
   "author": "Lucius Creamer",
   "description": "This widget uses a calendar from the fullcalendar library, to display ArcGIS Data in interactable calendar format.",
-  "copyright": "",
   "dependency": [
     "jimu-arcgis"
   ],
