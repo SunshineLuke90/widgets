@@ -13,5 +13,8 @@
   "peerDependencies":{
     "polished": "4.3.1"
   },
-  "keywords":["exb-widget", "experience-builder", "exb"]
+  "keywords":["exb-widget", "experience-builder", "exb"],
+  "repository":{
+    "url":"https://github.com/SunshineLuke90/widgets"
+  }
 }
