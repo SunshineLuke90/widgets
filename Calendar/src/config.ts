@@ -9,6 +9,7 @@ export interface colorset {
 
 export interface data {
   id: string // Unique ID for React keys
+  useDataSources?: UseDataSource[]
 
   // Individual field keys selected in the settings. Store as a single field name (jimuName).
   labelField?: string
@@ -21,8 +22,6 @@ export interface data {
   // Color settings
   defaultEventColor?: string
   colorsets?: colorset[]
-  // optional datasource selection saved per dataset
-  useDataSources?: UseDataSource[]
 }
 
 export interface Config {
