@@ -1,16 +1,16 @@
-import type { UseDataSource } from 'jimu-core'
-import type { ImmutableObject } from 'seamless-immutable'
+import type { UseDataSource } from "jimu-core"
+import type { ImmutableObject } from "seamless-immutable"
 
 export interface PrintTemplate {
-  id: string;
-  label: string;
-  markdown: string;
-  css: string;
-  useDataSources?: UseDataSource[]
+	id: string
+	label: string
+	markdown: string
+	css: string
+	useDataSources?: UseDataSource[]
 }
 
 export interface Config {
-  PrintTemplates: PrintTemplate[];
+	PrintTemplates: PrintTemplate[]
 }
 
 export type IMConfig = ImmutableObject<Config>
