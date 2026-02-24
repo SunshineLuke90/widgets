@@ -2,13 +2,11 @@
   "name": "new-radar",
   "label": "New Radar",
   "type": "widget",
-  "version": "1.18.0",
-  "exbVersion": "1.18.0",
+  "version": "1.19.0",
+  "exbVersion": "1.19.0",
   "author": "Lucius Creamer",
   "description": "This is a simple widget to add a looping radar and controls to an existing map widget.",
-  "copyright": "",
-  "license": "http://www.apache.org/licenses/LICENSE-2.0",
-  "properties": {},
+  "license": "MIT",
   "translatedLocales": [
     "en"
   ],

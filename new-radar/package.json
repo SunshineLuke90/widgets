@@ -1,0 +1,17 @@
+{
+  "name": "exb-new-radar",
+  "version": "1.0.0",
+  "description": "This is a simple widget to add a looping radar and controls to an existing map widget.",
+  "author": "Lucius Creamer",
+  "license": "MIT",
+  "keywords": [
+    "exb-widget",
+    "experience-builder",
+    "exb"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SunshineLuke90/widgets.git",
+    "directory": "new-radar"
+  }
+}

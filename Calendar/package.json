@@ -10,11 +10,17 @@
     "@fullcalendar/react": "^6.1.20",
     "@fullcalendar/timegrid": "^6.1.20"
   },
-  "peerDependencies":{
+  "peerDependencies": {
     "polished": "4.3.1"
   },
-  "keywords":["exb-widget", "experience-builder", "exb"],
-  "repository":{
-    "url":"https://github.com/SunshineLuke90/widgets"
+  "keywords": [
+    "exb-widget",
+    "experience-builder",
+    "exb"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SunshineLuke90/widgets.git",
+    "directory": "Calendar"
   }
 }
