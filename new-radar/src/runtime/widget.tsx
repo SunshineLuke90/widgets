@@ -69,8 +69,11 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 				case "Precipitation":
 					return {
 						wmsBase:
-							"https://opengeo.ncep.noaa.gov/geoserver/conus/conus_bref_qcd/ows",
-						layerName: "conus_bref_qcd"
+							"https://nowcoast.noaa.gov/geoserver/observations/weather_radar/ows",
+						layerName: "base_reflectivity_mosaic"
+						// Alternative layer:
+						// wmsBase: "https://opengeo.ncep.noaa.gov/geoserver/conus/conus_bref_qcd/ows",
+						// layerName: "conus_bref_qcd"
 					}
 				case "Imagery":
 					return {
