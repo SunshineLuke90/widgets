@@ -1,6 +1,6 @@
 {
   "name": "abls",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Better Layer Switcher - A custom Experience Widget, to swith between sets of layers using a views navigation like interface.",
   "keywords": [
     "exb-widget",
@@ -15,5 +15,15 @@
   },
   "peerDependencies": {
     "@esri/calcite-components": "5.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^4.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SunshineLuke90/widgets.git",
+    "directory": "ABLS"
   }
 }
