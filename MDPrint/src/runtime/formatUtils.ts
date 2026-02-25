@@ -1,8 +1,7 @@
 import DOMPurify from "dompurify"
 import { marked } from "marked"
 import printJS from "print-js"
-//import FeatureLayer from "esri/layers/FeatureLayer"
-//import Query from "esri/rest/support/Query"
+import FeatureLayer from "esri/layers/FeatureLayer"
 
 /**
   A simple date formatting function that supports the same token formatting as ArcGIS Arcade, for example:
@@ -88,7 +87,7 @@ export const applyFormat = (value: any, format: string) => {
 	return value ?? "" // Fallback for strings or unknown types
 }
 
-// Helper: replace placeholders in a template string with values from a provided attributes object
+// Replaces placeholders in a template string with values from a provided attributes object
 const replacePlaceholders = (
 	templateStr: string,
 	attrsProvider: (field: string, format?: string) => any
@@ -103,7 +102,7 @@ const replacePlaceholders = (
 		return val ?? ""
 	})
 
-// Helper: run a feature service query and render innerTemplate for each returned feature
+// Runs a feature service query and renders innerTemplate for each returned feature
 const processQueryBlock = async (
 	originalFeature: any,
 	layerUrlRaw: string,
@@ -116,36 +115,30 @@ const processQueryBlock = async (
 		return applyFormat(val, fmt)
 	})
 
-	// 2) Build query URL (append /query if needed)
+	// 2) Build query
 	const layerUrl = layerUrlRaw.trim()
-	const queryEndpoint =
-		/lowercase/i.test("") && layerUrl.toLowerCase().includes("/query")
-			? layerUrl
-			: layerUrl.replace(/\/+$/, "") + "/query"
+	const featureLayer = new FeatureLayer({ url: layerUrl })
+	const query = featureLayer.createQuery()
+	query.where = whereClause
+	query.outFields = ["*"]
 
-	// 3) Execute query (outFields=*). Keep simple; callers can provide precise where to limit results.
-	const params = new URLSearchParams({
-		where: whereClause,
-		outFields: "*",
-		f: "json"
-	})
-	const resp = await fetch(queryEndpoint + "?" + params.toString())
-	if (!resp.ok) {
-		throw new Error(`Query failed (${resp.status}) for ${layerUrl}`)
-	}
-	const json = await resp.json()
-	const feats = json.features || []
-
-	// 4) For each returned feature, render innerTemplate using its attributes
-	const renderedParts = feats.map((f: any) => {
-		const attrs = f.attributes || {}
-		return replacePlaceholders(innerTemplate, (field, fmt) =>
-			applyFormat(attrs[field], fmt)
+	// 3) For each returned feature, render innerTemplate using its attributes
+	try {
+		const results = await featureLayer.queryFeatures(query)
+		const feats = results.features || []
+		return feats
+			.map((f) => {
+				const attrs = f.attributes || {}
+				return replacePlaceholders(innerTemplate, (field, fmt) =>
+					applyFormat(attrs[field], fmt)
+				)
+			})
+			.join("")
+	} catch (error) {
+		throw new Error(
+			`Query failed for ${layerUrl}: ${error instanceof Error ? error.message : String(error)}`
 		)
-	})
-
-	// Join rendered parts (no page-break inside the block; outer logic can control that)
-	return renderedParts.join("")
+	}
 }
 
 /**
