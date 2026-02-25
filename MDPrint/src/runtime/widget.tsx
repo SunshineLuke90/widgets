@@ -117,7 +117,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 		return selectedByDsId[dsId] || []
 	}
 
-	const doPrint = (template: ImmutableObject<PrintTemplate>) => {
+	const doPrint = async (template: ImmutableObject<PrintTemplate>) => {
 		const dsId = getDsIdForTemplate(template)
 		if (!dsId || !datasources[dsId]) {
 			showAlert("No data source available for this template.")
@@ -135,7 +135,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 				? cssOverrides[template.id]
 				: template.css
 
-		const result = handlePrint(records, markdown, css)
+		const result = await handlePrint(records, markdown, css)
 		if (result !== "Success") {
 			showAlert(result)
 		}

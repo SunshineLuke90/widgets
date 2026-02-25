@@ -1,6 +1,6 @@
 {
 	"name": "exb-mdprint",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "A widget for printing a feature report client-side.",
 	"license": "MIT",
 	"author": "Lucius Creamer",

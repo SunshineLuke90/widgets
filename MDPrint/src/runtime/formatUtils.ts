@@ -1,6 +1,8 @@
 import DOMPurify from "dompurify"
 import { marked } from "marked"
 import printJS from "print-js"
+//import FeatureLayer from "esri/layers/FeatureLayer"
+//import Query from "esri/rest/support/Query"
 
 /**
   A simple date formatting function that supports the same token formatting as ArcGIS Arcade, for example:
@@ -86,6 +88,66 @@ export const applyFormat = (value: any, format: string) => {
 	return value ?? "" // Fallback for strings or unknown types
 }
 
+// Helper: replace placeholders in a template string with values from a provided attributes object
+const replacePlaceholders = (
+	templateStr: string,
+	attrsProvider: (field: string, format?: string) => any
+) =>
+	templateStr.replace(/\${(.*?)}/g, (_m, contents) => {
+		const [fieldName, ...formatParts] = contents.split("|")
+		const field = fieldName.trim()
+		const format = formatParts.length
+			? formatParts.join("|").trim().replace(/['"]/g, "")
+			: null
+		const val = attrsProvider(field, format)
+		return val ?? ""
+	})
+
+// Helper: run a feature service query and render innerTemplate for each returned feature
+const processQueryBlock = async (
+	originalFeature: any,
+	layerUrlRaw: string,
+	whereRaw: string,
+	innerTemplate: string
+) => {
+	// 1) Replace any ${...} inside where with the original feature values
+	const whereClause = replacePlaceholders(whereRaw, (field, fmt) => {
+		const val = originalFeature.getData()[field]
+		return applyFormat(val, fmt)
+	})
+
+	// 2) Build query URL (append /query if needed)
+	const layerUrl = layerUrlRaw.trim()
+	const queryEndpoint =
+		/lowercase/i.test("") && layerUrl.toLowerCase().includes("/query")
+			? layerUrl
+			: layerUrl.replace(/\/+$/, "") + "/query"
+
+	// 3) Execute query (outFields=*). Keep simple; callers can provide precise where to limit results.
+	const params = new URLSearchParams({
+		where: whereClause,
+		outFields: "*",
+		f: "json"
+	})
+	const resp = await fetch(queryEndpoint + "?" + params.toString())
+	if (!resp.ok) {
+		throw new Error(`Query failed (${resp.status}) for ${layerUrl}`)
+	}
+	const json = await resp.json()
+	const feats = json.features || []
+
+	// 4) For each returned feature, render innerTemplate using its attributes
+	const renderedParts = feats.map((f: any) => {
+		const attrs = f.attributes || {}
+		return replacePlaceholders(innerTemplate, (field, fmt) =>
+			applyFormat(attrs[field], fmt)
+		)
+	})
+
+	// Join rendered parts (no page-break inside the block; outer logic can control that)
+	return renderedParts.join("")
+}
+
 /**
  * Handles the print workflow: replaces field variables in markdown, converts to HTML,
  * sanitizes, and opens a print dialog.
@@ -95,11 +157,11 @@ export const applyFormat = (value: any, format: string) => {
  * @param css - The custom CSS to apply to the print output.
  * @returns "Success" if the print dialog was opened, or an error message string.
  */
-export const handlePrint = (
+export const handlePrint = async (
 	records: any[],
 	markdown: string,
 	css: string
-): string => {
+): Promise<string> => {
 	if (!records || records.length === 0) {
 		return "No features selected. Please select at least one feature before printing."
 	}
@@ -109,20 +171,64 @@ export const handlePrint = (
 
 	try {
 		const pages: string[] = []
+
+		// For each original record (one printed page per original feature)
 		for (const feature of records) {
-			const result = markdown.replace(/\${(.*?)}/g, (_match, contents) => {
-				const [fieldName, ...formatParts] = contents.split("|")
-				const field = fieldName.trim()
-				const format = formatParts.length
-					? formatParts.join("|").trim().replace(/['"]/g, "")
-					: null
-				const out = applyFormat(feature.getData()[field], format) ?? ""
-				return out
+			let template = markdown
+
+			// Process all Query blocks iteratively (supports multiple blocks)
+			// Start-tag syntax: ${Query|<layerUrl>|<whereClause>}
+			// End-tag syntax: ${/Query}
+			// The where clause may contain nested ${field} placeholders, so we need
+			// a regex that allows } inside ${...} within the where group.
+			const queryStartRegex =
+				/\${\s*Query\s*\|((?:(?!\$\{).)*?)\|((?:(?:\$\{[^}]*\})|[^}])*?)\s*}/i
+			let match = queryStartRegex.exec(template)
+			while (match) {
+				const fullStart = match[0]
+				const layerUrlRaw = match[1]
+				const whereRaw = match[2]
+
+				// find corresponding end tag after the start
+				const startIndex = match.index + fullStart.length
+				const endTag = "${/Query}"
+				const endIndex = template.indexOf(endTag, startIndex)
+				if (endIndex === -1) throw new Error("Unclosed Query block in template")
+
+				const innerTemplate = template.substring(startIndex, endIndex)
+
+				// Execute query and render inner template for returned features
+				const rendered = await processQueryBlock(
+					feature,
+					layerUrlRaw,
+					whereRaw,
+					innerTemplate
+				)
+
+				// Replace the entire block (start...inner...end) with rendered content
+				const blockStartIdx = match.index
+				const blockEndIdx = endIndex + endTag.length
+				template =
+					template.substring(0, blockStartIdx) +
+					rendered +
+					template.substring(blockEndIdx)
+
+				// Look for next Query block
+				match = queryStartRegex.exec(template)
+			}
+
+			// After query blocks are expanded, replace remaining placeholders from the original feature
+			const result = replacePlaceholders(template, (field, fmt) => {
+				const val = feature.getData()[field]
+				return applyFormat(val, fmt)
 			})
-			const htmlOut = `<div class="markdown-content">${DOMPurify.sanitize(marked.parse(result, { async: false }))}</div>`
-			const formattedHtml = htmlOut.replace(/\n/g, "<br>")
-			pages.push(formattedHtml)
+
+			const htmlOut = `<div class="markdown-content">${DOMPurify.sanitize(
+				marked.parse(result, { async: false, breaks: true, gfm: true })
+			)}</div>`
+			pages.push(htmlOut)
 		}
+
 		const combinedHtml = pages.join(
 			'<div style="page-break-after: always;"></div>'
 		)
