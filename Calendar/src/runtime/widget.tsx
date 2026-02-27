@@ -6,7 +6,10 @@ import {
 	type FeatureLayerQueryParams,
 	DataSourceStatus,
 	MessageManager,
-	DataRecordsSelectionChangeMessage
+	DataRecordsSelectionChangeMessage,
+	DataSourceManager,
+	type FeatureLayerDataSource,
+	type SqlQueryParams
 } from "jimu-core"
 import type { data, IMConfig } from "../config"
 import "./style.css"
@@ -23,6 +26,13 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 	// Store events keyed by datasource ID to support multiple datasources
 	const [eventsByDsId, setEventsByDsId] = React.useState<{
 		[dsId: string]: any[]
+	}>({})
+
+	// reference to the FullCalendar instance so we can query its current view
+	const calendarRef = React.useRef<FullCalendar>(null)
+
+	const [queryByDsId, setQueryByDsId] = React.useState<{
+		[dsId: string]: string
 	}>({})
 
 	// Compute flat events array from all datasources
@@ -156,6 +166,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 	return (
 		<>
 			<FullCalendar
+				ref={calendarRef}
 				plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
 				initialView="dayGridMonth"
 				events={events}
@@ -174,8 +185,43 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 				customButtons={{
 					clearSelection: {
 						text: "Clear Selection",
+						hint: "Click to clear selection in connected datasets",
 						click: () => {
 							handleClearSelection()
+						}
+					},
+					filterToggle: {
+						text: "Filter by Current View",
+						hint: "Click to filter events based on the current calendar view",
+						click: () => {
+							const view = calendarRef.current?.getApi()?.view
+							if (!view) return
+
+							// Use epoch milliseconds — the format ArcGIS feature services expect for date queries
+							const startEpoch = view.activeStart
+								.toLocaleString("en-US", { timeZone: "UTC" })
+								.replace(",", "")
+							const endEpoch = view.activeEnd
+								.toLocaleString("en-US", { timeZone: "UTC" })
+								.replace(",", "")
+
+							config.dataSets?.forEach((dsConfig) => {
+								const dsManager = DataSourceManager.getInstance()
+
+								const useDataSource = dsConfig.useDataSources[0]
+								const ds: FeatureLayerDataSource = dsManager.getDataSource(
+									useDataSource.dataSourceId
+								) as FeatureLayerDataSource
+								const queryParams: SqlQueryParams = {
+									where: `(${dsConfig.startDateField} <= '${endEpoch}' AND ${dsConfig.startDateField} >= '${startEpoch}') OR (${dsConfig.endDateField} >= '${startEpoch}' AND ${dsConfig.endDateField} <= '${endEpoch}') OR (${dsConfig.startDateField} <= '${startEpoch}' AND ${dsConfig.endDateField} >= '${endEpoch}')`
+								}
+								setQueryByDsId((prev) => ({
+									...prev,
+									[useDataSource.dataSourceId]: queryParams.where
+								}))
+								console.log("Applying filter with params", queryParams)
+								ds.updateQueryParams(queryParams, props.widgetId)
+							})
 						}
 					}
 				}}
@@ -186,7 +232,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 					day: "Day"
 				}}
 				headerToolbar={{
-					left: "prev,next today clearSelection",
+					left: "prev,next today clearSelection filterToggle",
 					center: "title",
 					right: "dayGridMonth,timeGridWeek,timeGridDay"
 				}}
@@ -199,7 +245,9 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 							useDataSource={dsConfig.useDataSources[0]}
 							query={
 								{
-									where: "1=1",
+									where:
+										queryByDsId[dsConfig.useDataSources[0].dataSourceId] ||
+										"1=1",
 									outFields: ["*"],
 									returnGeometry: true
 								} as FeatureLayerQueryParams
