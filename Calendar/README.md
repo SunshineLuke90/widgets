@@ -2,6 +2,10 @@
 
 This widget provides a simple interactive calendar to work alongside an ArcGIS Online feature layer. Using the widget is as simple as adding the widget to your application, selecting a data source, and then mapping the fields. This widget is also set up to use message actions, meaning selecting an event on the calendar also selects the feature on any maps, lists, tables, etc. that the data source is also used in. This can also be set to zoom in on a map, apply filtering, and much more. Data filtering also works on the calendar, so if the data source is filtered by another widget, the calendar events will also be filtered.
 
+## Calendar as a Filter
+
+The calendar also has the ability to act as a datasource filter, which is helpful when trying to view large datasets. Next to the "Clear Selection" button is a filter toggle, which will filter all events placed on the calendar by the current calendar view. This filter gets reapplied every time the view changes, whether that's moving forward and backwards in time, or changing between month week and day views.
+
 ## Interactive Example
 
 This widget can be used and interacted with on my example application, found [here](https://exb.luciuscreamer.com/calendar). Worth noting, the calendar widget follows Experience Builder styling, to fit the look of your application. If you don't vibe with the dark theme, the widget works just fine in a light themed application.

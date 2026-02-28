@@ -7,8 +7,6 @@ import {
 	DataSourceStatus,
 	MessageManager,
 	DataRecordsSelectionChangeMessage,
-	DataSourceManager,
-	type FeatureLayerDataSource,
 	type SqlQueryParams
 } from "jimu-core"
 import type { data, IMConfig } from "../config"
@@ -34,6 +32,8 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 	const [queryByDsId, setQueryByDsId] = React.useState<{
 		[dsId: string]: string
 	}>({})
+
+	const [filterState, setFilterState] = React.useState(false)
 
 	// Compute flat events array from all datasources
 	const events = Object.values(eventsByDsId).flat()
@@ -155,6 +155,35 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 		})
 	}
 
+	function filterCalendar(filter: boolean = false) {
+		// Get the current view's date range
+		const view = calendarRef.current?.getApi()?.view
+		// Use epoch milliseconds — the format ArcGIS feature services expect for date queries
+		const startEpoch = view.activeStart
+			.toLocaleString("en-US", { timeZone: "UTC" })
+			.replace(",", "")
+		const endEpoch = view.activeEnd
+			.toLocaleString("en-US", { timeZone: "UTC" })
+			.replace(",", "")
+
+		config.dataSets?.forEach((dsConfig) => {
+			const useDataSource = dsConfig.useDataSources[0]
+			let queryParams: SqlQueryParams = {
+				where: "1=1"
+			}
+			if (filter) {
+				queryParams = {
+					where: `(${dsConfig.startDateField} <= '${endEpoch}' AND ${dsConfig.startDateField} >= '${startEpoch}') OR (${dsConfig.endDateField} >= '${startEpoch}' AND ${dsConfig.endDateField} <= '${endEpoch}') OR (${dsConfig.startDateField} <= '${startEpoch}' AND ${dsConfig.endDateField} >= '${endEpoch}')`
+				}
+			}
+
+			setQueryByDsId((prev) => ({
+				...prev,
+				[useDataSource.dataSourceId]: queryParams.where
+			}))
+		})
+	}
+
 	if (!isConfigured) {
 		return (
 			<div className="widget-calendar-not-configured">
@@ -182,6 +211,11 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 					}
 					info.el.setAttribute("title", tooltipText)
 				}}
+				datesSet={() => {
+					if (filterState) {
+						filterCalendar(true)
+					}
+				}}
 				customButtons={{
 					clearSelection: {
 						text: "Clear Selection",
@@ -191,37 +225,12 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 						}
 					},
 					filterToggle: {
-						text: "Filter by Current View",
+						text: "Filter " + (filterState ? "On" : "Off"),
 						hint: "Click to filter events based on the current calendar view",
 						click: () => {
-							const view = calendarRef.current?.getApi()?.view
-							if (!view) return
-
-							// Use epoch milliseconds — the format ArcGIS feature services expect for date queries
-							const startEpoch = view.activeStart
-								.toLocaleString("en-US", { timeZone: "UTC" })
-								.replace(",", "")
-							const endEpoch = view.activeEnd
-								.toLocaleString("en-US", { timeZone: "UTC" })
-								.replace(",", "")
-
-							config.dataSets?.forEach((dsConfig) => {
-								const dsManager = DataSourceManager.getInstance()
-
-								const useDataSource = dsConfig.useDataSources[0]
-								const ds: FeatureLayerDataSource = dsManager.getDataSource(
-									useDataSource.dataSourceId
-								) as FeatureLayerDataSource
-								const queryParams: SqlQueryParams = {
-									where: `(${dsConfig.startDateField} <= '${endEpoch}' AND ${dsConfig.startDateField} >= '${startEpoch}') OR (${dsConfig.endDateField} >= '${startEpoch}' AND ${dsConfig.endDateField} <= '${endEpoch}') OR (${dsConfig.startDateField} <= '${startEpoch}' AND ${dsConfig.endDateField} >= '${endEpoch}')`
-								}
-								setQueryByDsId((prev) => ({
-									...prev,
-									[useDataSource.dataSourceId]: queryParams.where
-								}))
-								console.log("Applying filter with params", queryParams)
-								ds.updateQueryParams(queryParams, props.widgetId)
-							})
+							const newFilterState = !filterState
+							setFilterState(newFilterState)
+							filterCalendar(newFilterState)
 						}
 					}
 				}}

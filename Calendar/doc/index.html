@@ -1,41 +1,65 @@
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!--Import Calcite Stylesheet via CDN. This is easier than having to create react stuff for each static page-->
-    <script type="module" src="https://js.arcgis.com/calcite-components/3.2.1/calcite.esm.js"></script>
+	<!--Import Calcite Stylesheet via CDN. This is easier than having to create react stuff for each static page-->
+	<script
+		type="module"
+		src="https://js.arcgis.com/calcite-components/3.2.1/calcite.esm.js"
+	></script>
 
-    <!--Import Noto Sans so that the website draws properly-->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wdth,wght@0,62.5..100,100..900;1,62.5..100,100..900&display=swap"
-        rel="stylesheet">
+	<!--Import Noto Sans so that the website draws properly-->
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link
+		href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wdth,wght@0,62.5..100,100..900;1,62.5..100,100..900&display=swap"
+		rel="stylesheet"
+	/>
 
-    <!--Reference component stylesheet-->
-    <link rel="stylesheet" href="doc/styles.css">
+	<!--Reference component stylesheet-->
+	<link rel="stylesheet" href="doc/styles.css" />
 
-    <!--Webpage Title-->
-    <title>Calendar Help</title>
+	<!--Webpage Title-->
+	<title>Calendar Help</title>
 </head>
 <body>
-    <div class="header noto-sans-heavy">
-        <h1>
-            Calendar Widget
-        </h1>
-    </div>
-    <p>
-        This widget is designed to allow the end user to use a calendar interface to display data from multiple Experience Builder data sources.<br>
-        To use this widget, you need to format your data source appropriately. You need the following fields for this widget to work:
-        <li>Label - A text field, the label for the event on the calendar</li>
-        <li>Date Start - An Esri date field, indicating the start of the event</li>
-        <li>Date End - An Esri date field, indicating the end of the event</li>
-        <li>AllDay - A string field, indicating if the event lasts all day (Values must be y or n)</li>
-        <li>Description (optional) - A text field, with a longer description of the event, to be displayed when a user hovers over the event</li>
-        <li>Color (optional) - A text field. This can be anything, as you will set the values for calendar symbology</li>
-        <br>
-        Each data source that you use will need these fields, but the actual feature type can be anything (Table, Point, Line, Polygon ...) Additional datasources can be added using the (Add Dataset) button in the top right of the window.<br>
-        Message actions are also set up to support selecting features by clicking them on the calendar. One common workflow would be to zoom to a specific event point when the event is clicked on the calendar. To do this, go to the "Action" tab and add a trigger for "Record Selection Changes" and set your map widget to "Zoom To".<br>
-        This widget would not be possible without the <a href="https://fullcalendar.io">fullcalendar.io javascript library</a>. Be sure to check them out.
-        This Experience Builder widget was developed by Lucius Creamer.
-        </p>
+	<div class="header noto-sans-heavy">
+		<h1>Calendar Widget</h1>
+	</div>
+	<p>
+		This widget is designed to allow the end user to use a calendar interface to
+		display data from multiple Experience Builder data sources.<br />
+		To use this widget, you need to format your data source appropriately. You
+		need the following fields for this widget to work:
+		<li>Label - A text field, the label for the event on the calendar</li>
+		<li>Date Start - An Esri date field, indicating the start of the event</li>
+		<li>Date End - An Esri date field, indicating the end of the event</li>
+		<li>
+			AllDay - A string field, indicating if the event lasts all day (Values
+			must be y or n)
+		</li>
+		<li>
+			Description (optional) - A text field, with a longer description of the
+			event, to be displayed when a user hovers over the event
+		</li>
+		<li>
+			Color (optional) - A text field. This can be anything, as you will set the
+			values for calendar symbology
+		</li>
+		<br />
+		Each data source that you use will need these fields, but the actual feature
+		type can be anything (Table, Point, Line, Polygon ...) Additional
+		datasources can be added using the (Add Dataset) button in the top right of
+		the window.<br />
+		Message actions are also set up to support selecting features by clicking
+		them on the calendar. One common workflow would be to zoom to a specific
+		event point when the event is clicked on the calendar. To do this, go to the
+		"Action" tab and add a trigger for "Record Selection Changes" and set your
+		map widget to "Zoom To".<br />
+		This widget would not be possible without the
+		<a href="https://fullcalendar.io">fullcalendar.io javascript library</a>. Be
+		sure to check them out. Visit the
+		<a href="https://www.npmjs.com/package/exb-calendar">NPM page</a> for more
+		information. <br /><br />This Experience Builder widget was developed by
+		Lucius Creamer.
+	</p>
 </body>
