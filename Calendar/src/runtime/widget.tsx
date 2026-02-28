@@ -155,7 +155,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 		})
 	}
 
-	function filterCalendar(filter: boolean = false) {
+	const filterCalendar = (filter: boolean = false) => {
 		// Get the current view's date range
 		const view = calendarRef.current?.getApi()?.view
 		// Use epoch milliseconds — the format ArcGIS feature services expect for date queries
