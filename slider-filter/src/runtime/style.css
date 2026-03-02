@@ -1,0 +1,154 @@
+/* ── Slider Filter Widget ── */
+
+/* Slider wrapper — horizontal padding so handles don't clip at edges */
+.slider-filter-widget .slider-track-wrapper {
+  padding: 0 14px;
+}
+
+/* ── Track ── */
+.slider-filter-widget .noUi-target {
+  height: 12px;
+  border: none;
+  border-radius: 6px;
+  background: var(--ref-palette-neutral-300);
+  box-shadow: none;
+  overflow: visible;
+}
+
+/* Static gradient spans the full track (set via JS on .noUi-base) */
+.slider-filter-widget .noUi-base {
+  border-radius: 6px;
+}
+
+/* Connect segments container */
+.slider-filter-widget .noUi-connects {
+  border-radius: 6px;
+  z-index: 0;
+}
+
+/* Middle connect (selected range) — transparent to show gradient beneath */
+.slider-filter-widget .noUi-connect {
+  background: transparent;
+}
+
+/* Out-of-range segments (1st and 3rd connect) — gray overlay */
+.slider-filter-widget .noUi-connect.noUi-connect-gray {
+  background: var(--ref-palette-neutral-300);
+}
+
+/* Handle origins — above ticks, below tooltips */
+.slider-filter-widget .noUi-origin {
+  z-index: 10 !important;
+}
+
+/* ── Handles (thumbs) ── */
+.slider-filter-widget .noUi-handle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  background: var(--ref-palette-neutral-600);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  top: -6px;
+  right: -12px;
+  cursor: grab;
+}
+
+.slider-filter-widget .noUi-handle:active {
+  cursor: grabbing;
+}
+
+/* Remove default handle decoration bars */
+.slider-filter-widget .noUi-handle::before,
+.slider-filter-widget .noUi-handle::after {
+  display: none;
+}
+
+/* ── Tooltip base styling ── */
+.slider-filter-widget .noUi-tooltip {
+  font-size: 12px;
+  padding: 2px 6px;
+  border: none;
+  background: var(--ref-palette-neutral-300);
+  color: var(--jimu-text-light);
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+/* ── Tooltip positioning — both BELOW ── */
+.slider-filter-widget.tooltips-below .noUi-tooltip {
+  top: 100%;
+  bottom: unset;
+  margin-top: 6px;
+  margin-bottom: 0;
+}
+
+/* ── Tooltip positioning — both ABOVE ── */
+.slider-filter-widget.tooltips-above .noUi-tooltip {
+  bottom: 100%;
+  top: unset;
+  margin-bottom: 6px;
+  margin-top: 0;
+}
+
+/* ── Tooltip positioning — mixed: min below, max above ── */
+.slider-filter-widget.tooltips-mixed-min-below .noUi-handle-lower .noUi-tooltip {
+  top: 100%;
+  bottom: unset;
+  margin-top: 6px;
+  margin-bottom: 0;
+}
+.slider-filter-widget.tooltips-mixed-min-below .noUi-handle-upper .noUi-tooltip {
+  bottom: 100%;
+  top: unset;
+  margin-bottom: 6px;
+  margin-top: 0;
+}
+
+/* ── Tooltip positioning — mixed: min above, max below ── */
+.slider-filter-widget.tooltips-mixed-min-above .noUi-handle-lower .noUi-tooltip {
+  bottom: 100%;
+  top: unset;
+  margin-bottom: 6px;
+  margin-top: 0;
+}
+.slider-filter-widget.tooltips-mixed-min-above .noUi-handle-upper .noUi-tooltip {
+  top: 100%;
+  bottom: unset;
+  margin-top: 6px;
+  margin-bottom: 0;
+}
+
+/* ── Pips (ticks) — inside .noUi-base, above connects, below handles ── */
+.slider-filter-widget .noUi-pips {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 12px;
+  padding: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Hide ALL tick labels — markers only */
+.slider-filter-widget .noUi-value {
+  display: none !important;
+}
+
+/* Tick markers — span the full track height */
+.slider-filter-widget .noUi-marker-horizontal.noUi-marker {
+  position: absolute;
+  width: 1px;
+  top: 0;
+}
+
+.slider-filter-widget .noUi-marker-horizontal.noUi-marker-large {
+  height: 12px;
+  background: var(--ref-palette-neutral-600);
+}
+
+.slider-filter-widget .noUi-marker-horizontal.noUi-marker-normal {
+  height: 12px;
+  background: var(--ref-palette-neutral-300);
+}

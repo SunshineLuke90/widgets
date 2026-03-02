@@ -1,0 +1,20 @@
+{
+    "name": "slider-filter",
+    "label": "Slider Filter",
+    "type": "widget",
+    "version": "1.19.0",
+    "exbVersion": "1.19.0",
+    "author": "Lucius Creamer",
+    "description": "This is a slider filter widget, based off of the idea on Jose Barrios' community post (https://tinyurl.com/mrsc7a8r).",
+    "license": "MIT",
+    "translatedLocales": [
+        "en"
+    ],
+    "defaultSize": {
+        "width": 800,
+        "height": 500
+    },
+    "dependency": [
+        "jimu-arcgis"
+    ]
+}

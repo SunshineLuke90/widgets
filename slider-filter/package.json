@@ -1,0 +1,24 @@
+{
+  "name": "exb-slider-filter",
+  "version": "1.0.0",
+  "description": "A simple slider filter widget for Experience Builder, idea from Jose Barrios.",
+  "keywords": [
+    "exb-widget",
+    "experience-builder",
+    "exb"
+  ],
+  "homepage": "https://github.com/SunshineLuke90/widgets#readme",
+  "bugs": {
+    "url": "https://github.com/SunshineLuke90/widgets/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SunshineLuke90/widgets.git",
+    "directory": "slider-filter"
+  },
+  "license": "MIT",
+  "author": "Lucius Creamer",
+  "dependencies": {
+    "nouislider": "^15.8.1"
+  }
+}

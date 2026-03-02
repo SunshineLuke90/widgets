@@ -1,0 +1,10 @@
+{
+    "showTicks": false,
+    "showCurrentValue": false,
+    "minLabel": "Min",
+    "maxLabel": "Max",
+    "startColor": "var(--ref-palette-primary-400)",
+    "endColor": "var(--ref-palette-primary-600)",
+    "minLabelPosition": "TOP",
+    "maxLabelPosition": "BOTTOM"
+}
