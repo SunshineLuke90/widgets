@@ -9,7 +9,14 @@ import {
 } from "jimu-core"
 import type { AllWidgetSettingProps } from "jimu-for-builder"
 import { SettingRow, SettingSection } from "jimu-ui/advanced/setting-components"
-import { Button, TextInput, Tabs, Tab, CollapsablePanel } from "jimu-ui"
+import {
+	Button,
+	TextInput,
+	Tabs,
+	Tab,
+	CollapsablePanel,
+	NumericInput
+} from "jimu-ui"
 import type { IMConfig, colorset, data } from "../config"
 import {
 	DataSourceSelector,
@@ -102,6 +109,25 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 
 	return (
 		<div className="view-layers-toggle-setting">
+			<SettingSection>
+				<SettingRow
+					flow={"wrap"}
+					level={2}
+					label={"Max Events Before Squishing"}
+				>
+					<NumericInput
+						value={config.maxEventCount}
+						onChange={(value) => {
+							props.onSettingChange({
+								id,
+								config: { ...config, maxEventCount: value }
+							})
+						}}
+						title="Max Event Count"
+						placeholder="Max Event Count"
+					/>
+				</SettingRow>
+			</SettingSection>
 			<SettingSection>
 				<SettingRow
 					flow={"no-wrap"}

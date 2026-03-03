@@ -2,6 +2,8 @@
 
 This widget provides a simple interactive calendar to work alongside an ArcGIS Online feature layer. Using the widget is as simple as adding the widget to your application, selecting a data source, and then mapping the fields. This widget is also set up to use message actions, meaning selecting an event on the calendar also selects the feature on any maps, lists, tables, etc. that the data source is also used in. This can also be set to zoom in on a map, apply filtering, and much more. Data filtering also works on the calendar, so if the data source is filtered by another widget, the calendar events will also be filtered.
 
+Calendar events are stacked side by side, and when viewing a large number of events within a specified time, the events will even collapse, allowing you to view many more events than would typically fit on your screen, without having to mess with filtering to get things to display properly.
+
 ## Calendar as a Filter
 
 The calendar also has the ability to act as a datasource filter, which is helpful when trying to view large datasets. Next to the "Clear Selection" button is a filter toggle, which will filter all events placed on the calendar by the current calendar view. This filter gets reapplied every time the view changes, whether that's moving forward and backwards in time, or changing between month week and day views.
@@ -30,3 +32,7 @@ The calendar has a few data formatting requirements if you want all features to 
 5. Description Field
    - The description is shown in the tooltip shown when the user hovers over the event. This can be a longer text field, but should likely not be longer than a sentence or two.
    - Type: text
+
+### Extra tips:
+
+The calendar will use only the data rendered by the datasource. If you are using a calendar feature service with a high number of events, make sure to adjust the "page size" within the data source settings, so that all events are returned and provided to the calendar.

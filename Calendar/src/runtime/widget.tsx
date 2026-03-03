@@ -16,6 +16,7 @@ import FullCalendar from "@fullcalendar/react"
 import dayGridPlugin from "@fullcalendar/daygrid"
 import interactionPlugin from "@fullcalendar/interaction"
 import timeGridPlugin from "@fullcalendar/timegrid"
+import type { ViewApi } from "@fullcalendar/core"
 import { cssVar } from "polished"
 
 export default function Widget(props: AllWidgetProps<IMConfig>) {
@@ -37,6 +38,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 
 	// Compute flat events array from all datasources
 	const events = Object.values(eventsByDsId).flat()
+	const [maxEvents, setMaxEvents] = React.useState(100)
 
 	const isConfigured =
 		config.dataSets &&
@@ -155,10 +157,10 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 		})
 	}
 
-	const filterCalendar = (filter: boolean = false) => {
+	const filterCalendar = (filter: boolean = false, view: ViewApi) => {
 		// Get the current view's date range
-		const view = calendarRef.current?.getApi()?.view
-		// Use epoch milliseconds — the format ArcGIS feature services expect for date queries
+		//const view = calendarRef.current?.getApi()?.view
+		// Use locale — epoch seconds doesn't seem to work.
 		const startEpoch = view.activeStart
 			.toLocaleString("en-US", { timeZone: "UTC" })
 			.replace(",", "")
@@ -199,6 +201,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 				plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
 				initialView="dayGridMonth"
 				events={events}
+				eventMaxStack={maxEvents}
 				eventClick={handleEventClick}
 				eventDidMount={(info) => {
 					// Tooltip showing full date/time info
@@ -211,9 +214,14 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 					}
 					info.el.setAttribute("title", tooltipText)
 				}}
-				datesSet={() => {
+				datesSet={(arg) => {
 					if (filterState) {
-						filterCalendar(true)
+						filterCalendar(true, arg.view)
+					}
+					if (arg.view.type === "timeGridWeek") {
+						setMaxEvents(config.maxEventCount || 100)
+					} else {
+						setMaxEvents(100)
 					}
 				}}
 				customButtons={{
@@ -230,7 +238,10 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 						click: () => {
 							const newFilterState = !filterState
 							setFilterState(newFilterState)
-							filterCalendar(newFilterState)
+							filterCalendar(
+								newFilterState,
+								calendarRef.current?.getApi()?.view
+							)
 						}
 					}
 				}}
