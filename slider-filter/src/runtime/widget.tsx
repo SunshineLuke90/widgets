@@ -26,14 +26,24 @@ function formatDate(val: number | Date): string {
 export default function Widget(props: AllWidgetProps<IMConfig>) {
 	const { config, id: widgetId, useDataSources } = props
 
-	const minValue =
-		config.rangeType === "NUMBER"
+	const isConfigured =
+		!!useDataSources &&
+		useDataSources.length > 0 &&
+		!!useDataSources[0].fields &&
+		useDataSources[0].fields.length > 0 &&
+		config.minValue !== undefined &&
+		config.maxValue !== undefined
+
+	const minValue = isConfigured
+		? config.rangeType === "NUMBER"
 			? (config.minValue as number)
 			: new Date(config.minValue as unknown as string).getTime()
-	const maxValue =
-		config.rangeType === "NUMBER"
+		: 0
+	const maxValue = isConfigured
+		? config.rangeType === "NUMBER"
 			? (config.maxValue as number)
 			: new Date(config.maxValue as unknown as string).getTime()
+		: 100
 
 	const [whereClause, setWhereClause] = useState<string>("1=1")
 
@@ -140,10 +150,10 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 		callbacksRef.current = { applyFilter, buildWhereClause, setWhereClause }
 	}, [applyFilter, buildWhereClause, setWhereClause])
 
-	/** Create the slider once on mount. */
+	/** Create the slider when configured (ref becomes available). */
 	useEffect(() => {
 		const el = sliderContainerRef.current
-		if (!el) return
+		if (!el || !isConfigured) return
 
 		const step = config.rangeType === "NUMBER" ? 1 : 86_400_000
 
@@ -199,7 +209,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 			sliderApiRef.current = null
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []) // Create once on mount
+	}, [isConfigured]) // Create when configuration becomes valid
 
 	/** Update slider when config changes (range, ticks, tooltips). */
 	useEffect(() => {
@@ -303,6 +313,23 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 		config.showCurrentValue && bothSameSide && minTooltipBelow
 			? tooltipBuffer
 			: 0
+
+	if (!isConfigured) {
+		return (
+			<Paper>
+				<div
+					className={`slider-filter-widget slider-filter-${widgetId} jimu-widget`}
+					style={{
+						padding: "12px 16px",
+						fontSize: 14,
+						color: "var(--jimu-text-secondary)"
+					}}
+				>
+					Please configure the widget to display the slider.
+				</div>
+			</Paper>
+		)
+	}
 
 	return (
 		<Paper>

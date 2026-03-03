@@ -3,8 +3,8 @@
     "showCurrentValue": false,
     "minLabel": "Min",
     "maxLabel": "Max",
-    "startColor": "var(--ref-palette-primary-400)",
-    "endColor": "var(--ref-palette-primary-600)",
+    "startColor": "#007ac2",
+    "endColor": "#005a9e",
     "minLabelPosition": "TOP",
     "maxLabelPosition": "BOTTOM"
 }
