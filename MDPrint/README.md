@@ -8,6 +8,11 @@ This widget aims to make the user experience as simple as possible. The builder 
 
 When prints are made, there are no service calls, no downtime, just reliable markdown to html formatting, printing directly in browser. No server is receiving your print job, and the only service that is needed is for the data to load into your application for you to select. This means speed, and reliability, which is paramount for workflows like a check-in process, large document generation for mailing, record generation for government documentation requirements, etc.
 
+### Interactive Example
+
+This widget can also be viewed as an interactive demo at [https://exb.luciuscreamer.com/mdprint](https://exb.luciuscreamer.com/mdprint). The widget uses theme settings for styling, so that the widget will adapt to the style of whatever application it is used in.
+![A screenshot of the mdprint demo application](./example.png)
+
 ## Builder Experience
 
 The builder shouldn't have a difficult time formatting this widget. Since Markdown is used, it simplifies the formatting requirements, meaning that you don't have to fiddle around with a table in word, or ensure that all of your text is properly slammed together. Markdown also supports html tags, so things like images can still be embedded into the generated reports, meaning logos can be used! Since CSS is also used for the formatting, the sky is the limit in terms of the styling that is desired. Using other sites, like [https://markdowntohtml.com/](https://markdowntohtml.com/), you can quickly see results for generating your markdown and css templates. If you're looking for css inspiration (Or just want something to start with), I highly recommend checking out Jason M's GitHub collection of a few css stylesheets that is publicly available, along with a quick [visualizer](https://jasonm23.github.io/markdown-css-themes/) of the themes in action.
