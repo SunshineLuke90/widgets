@@ -4,6 +4,11 @@
   "description": "This is a simple widget to add a looping radar and controls to an existing map widget.",
   "author": "Lucius Creamer",
   "license": "MIT",
+  "main": "src/runtime/widget.tsx",
+  "homepage": "https://github.com/SunshineLuke90/widgets#readme",
+  "bugs": {
+    "url": "https://github.com/SunshineLuke90/widgets/issues"
+  },
   "keywords": [
     "exb-widget",
     "experience-builder",

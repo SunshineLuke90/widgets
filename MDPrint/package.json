@@ -4,6 +4,7 @@
 	"description": "A widget for printing a feature report client-side.",
 	"license": "MIT",
 	"author": "Lucius Creamer",
+	"main": "src/runtime/widget.tsx",
 	"dependencies": {
 		"dompurify": "^3.3.1",
 		"marked": "^17.0.2",

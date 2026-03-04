@@ -1,15 +1,24 @@
 {
-  "name": "camviewer",
+  "name": "exb-camviewer",
   "version": "1.0.0",
   "description": "A camera viewer, to view .m3u8 streams via a url in a feature layer.",
-  "license": "ISC",
+  "license": "MIT",
   "author": "Lucius Creamer",
-  "type": "commonjs",
-  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "hls.js": "^1.6.15"
+  },
+  "main": "src/runtime/widget.tsx",
+  "keywords": [
+    "exb-widget",
+    "experience-builder",
+    "exb"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SunshineLuke90/widgets.git",
+    "directory": "CamViewer"
   }
 }
