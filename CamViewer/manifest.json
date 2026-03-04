@@ -6,7 +6,6 @@
   "exbVersion": "1.18.0",
   "author": "Lucius Creamer",
   "description": "This widget allows users to view and interact with camera feeds in a map context.",
-  "copyright": "",
   "dependency": [
     "jimu-arcgis"
   ],

@@ -4,8 +4,9 @@
   "description": "A camera viewer, to view .m3u8 streams via a url in a feature layer.",
   "license": "MIT",
   "author": "Lucius Creamer",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "homepage": "https://github.com/SunshineLuke90/widgets#readme",
+  "bugs": {
+    "url": "https://github.com/SunshineLuke90/widgets/issues"
   },
   "dependencies": {
     "hls.js": "^1.6.15"
