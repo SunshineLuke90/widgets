@@ -22,8 +22,22 @@
     padding: 10px;
 }
 
+.button-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    position: relative;
+    width: 100%;
+}
+
 .timestamp {
-    height: fit-content
+    height: fit-content;
+    margin: 0 auto;
+}
+
+.toggle-button {
+    position: absolute;
+    right: 0;
 }
 
 .timeline-slider {

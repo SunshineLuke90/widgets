@@ -129,8 +129,20 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 	//	mvManager.getAllJimuMapViewIds()[0]
 	//)
 
+	const [layerVisible, setLayerVisible] = React.useState(true)
+
 	const toggleTimeType = React.useCallback(() => {
 		setTimeType((prev) => !prev)
+	}, [])
+
+	const toggleVisibility = React.useCallback(() => {
+		setLayerVisible((prev) => {
+			const next = !prev
+			if (wmsRef.current) {
+				wmsRef.current.visible = next
+			}
+			return next
+		})
 	}, [])
 
 	// -------------------------------------------------------------------------
@@ -333,19 +345,30 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 				/>
 			)}
 			<div className="timeline-container">
-				<CalciteButton
-					id="timestamp"
-					className="timestamp"
-					kind="neutral"
-					appearance="transparent"
-					round
-					onClick={toggleTimeType}
-				>
-					{formatTimestamp(tsText, timeType)}
-				</CalciteButton>
-				<CalciteTooltip referenceElement="timestamp" placement="top">
-					<span>Toggle Time Format</span>
-				</CalciteTooltip>
+				<div className="button-row">
+					<CalciteButton
+						id="timestamp"
+						className="timestamp"
+						kind="neutral"
+						appearance="transparent"
+						round
+						onClick={toggleTimeType}
+					>
+						{formatTimestamp(tsText, timeType)}
+					</CalciteButton>
+					<CalciteTooltip referenceElement="timestamp" placement="top">
+						<span>Toggle Time Format</span>
+					</CalciteTooltip>
+					<CalciteButton
+						id="toggle-visibility"
+						className="toggle-button"
+						kind="neutral"
+						appearance="transparent"
+						round
+						iconStart={layerVisible ? "view-visible" : "view-hide"}
+						onClick={toggleVisibility}
+					></CalciteButton>
+				</div>
 				<CalciteSlider
 					className="timeline-slider"
 					ref={sliderRef}
