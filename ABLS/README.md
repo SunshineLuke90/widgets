@@ -1,3 +1,9 @@
+[![npm version][npm-img]][npm-url]
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://raw.githubusercontent.com/SunshineLuke90/widgets/master/ABLS/LICENSE.md)
+
+[npm-img]: https://img.shields.io/npm/v/abls.svg?style=flat
+[npm-url]: https://www.npmjs.com/package/abls
+
 # A Better Layer Switcher (ABLS)
 
 This custom widget provides a simple tool to be able to create custom views of data, which can be easily switched between using a "views navigation like" experience, with significantly less load time.
