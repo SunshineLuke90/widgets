@@ -1,3 +1,9 @@
+[![npm version][npm-img]][npm-url]
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://raw.githubusercontent.com/SunshineLuke90/widgets/master/new-radar/LICENSE.md)
+
+[npm-img]: https://img.shields.io/npm/v/exb-new-radar.svg?style=flat
+[npm-url]: https://www.npmjs.com/package/exb-new-radar
+
 # New Radar Widget
 
 This widget is designed as a replacement for the Rainfall-Radar widget provided by Esri Australia, due to the deprecation of the Rainfall Radar api. This widget uses the NowCoast radar wms layer, but in theory, the same widget could be fairly easily applied to any time enabled wms layer.
