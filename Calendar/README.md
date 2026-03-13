@@ -1,3 +1,7 @@
+[![npm version][npm-img]][npm-url]
+
+[npm-img]: https://img.shields.io/npm/v/exb-calendar.svg?style=flat-square
+[npm-url]: https://www.npmjs.com/package/exb-calendar
 # Calendar Widget
 
 This widget provides a simple interactive calendar to work alongside an ArcGIS Online feature layer. Using the widget is as simple as adding the widget to your application, selecting a data source, and then mapping the fields. This widget is also set up to use message actions, meaning selecting an event on the calendar also selects the feature on any maps, lists, tables, etc. that the data source is also used in. This can also be set to zoom in on a map, apply filtering, and much more. Data filtering also works on the calendar, so if the data source is filtered by another widget, the calendar events will also be filtered.
