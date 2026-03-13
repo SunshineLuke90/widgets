@@ -1,3 +1,9 @@
+[![npm version][npm-img]][npm-url]
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://raw.githubusercontent.com/SunshineLuke90/widgets/master/slider-filter/LICENSE.md)
+
+[npm-img]: https://img.shields.io/npm/v/exb-slider-filter.svg?style=flat
+[npm-url]: https://www.npmjs.com/package/exb-slider-filter
+
 # Slider Filter Widget
 
 This widget is a filter widget, based off of the [idea created by Jose Barrios](https://tinyurl.com/mrsc7a8r). This widget uses a filter that dynamically updates with user input.

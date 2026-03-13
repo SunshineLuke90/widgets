@@ -1,3 +1,9 @@
+[![npm version][npm-img]][npm-url]
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://raw.githubusercontent.com/SunshineLuke90/widgets/master/MDPrint/LICENSE.md)
+
+[npm-img]: https://img.shields.io/npm/v/exb-mdprint.svg?style=flat
+[npm-url]: https://www.npmjs.com/package/exb-mdprint
+
 # Markdown Print Widget
 
 This widget uses the simplicity of the Markdown language, combined with a simple parser, to create a wicked fast feature report generation tool. The markdown print widget allows the GIS builder to create a feature report using similar syntax to the Survey123 Feature Report syntax, providing a recognizable user experience when developing your feature reports. Some of the more complex features of Esri's Feature Reports have not been replicated (Like conditional formatting and map embeds). However, what you may lose in the way of "nice to have" features of feature reports, you gain in printing speed, reliability, and end-user modification.
