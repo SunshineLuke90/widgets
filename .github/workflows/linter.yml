@@ -1,0 +1,47 @@
+name: Lint Widgets
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  lint:
+  runs-on: windows-latest
+  steps:
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "22.x"
+
+    - name: Download Experience Builder
+      shell: pwsh
+      run: |
+        $jsonResponse = Invoke-RestMethod -Uri 'https://downloads.arcgis.com/dms/rest/download/secured/arcgis-experience-builder-1.19.zip?f=json&folder=software%2FExperienceBuilder%2F1.19'
+        Invoke-WebRequest -Uri $jsonResponse.url -OutFile exb.zip
+
+    - name: Unzip Experience Builder
+      shell: pwsh
+      run: Expand-Archive -Path exb.zip -DestinationPath exb -Force
+
+    - name: Checkout widgets
+      uses: actions/checkout@v4
+      with:
+        repository: SunshineLuke90/widgets
+        path: exb/client/your-extensions/widgets
+
+    - name: NPM install in client folder
+      run: npm ci
+      working-directory: exb/client
+
+    - name: Build Widgets (Dev)
+      run: npm run build:dev
+      working-directory: exb/client
+
+    - name: Build Widgets (Prod)
+      run: npm run build:prod
+      working-directory: exb/client
+
+    - name: Perform Linter
+      run: npx eslint
+      working-directory: exb/client
