@@ -1,3 +1,8 @@
+[![npm version][npm-img]][npm-url]
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://raw.githubusercontent.com/SunshineLuke90/widgets/master/CamViewer/LICENSE.md)
+
+[npm-img]: https://img.shields.io/npm/v/exb-camviewer.svg?style=flat-square
+[npm-url]: https://www.npmjs.com/package/exb-camviewer
 # CamViewer Widget
 
 This is a simple widget to view .m3u8 streams using a url field in a feature layer. The widget appears as a button, which when clicked will turn on the "camera" layer, and when a camera is clicked a popup video stream will appear to start streaming the live camera feed.
