@@ -14,7 +14,7 @@ export function getLayersFromJimuMapView(
 				collectLayers(layer.sublayers)
 			}
 		})
-	};
+	}
 	if (jimuMapView?.view?.map?.allLayers) {
 		collectLayers(jimuMapView.view.map.allLayers)
 	}
