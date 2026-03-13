@@ -1,4 +1,5 @@
 [![npm version][npm-img]][npm-url]
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://raw.githubusercontent.com/SunshineLuke90/widgets/master/Calendar/LICENSE.md)
 
 [npm-img]: https://img.shields.io/npm/v/exb-calendar.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/exb-calendar
