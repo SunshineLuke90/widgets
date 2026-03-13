@@ -69,15 +69,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: SunshineLuke90/widgets
-          path: exb/arcgis-experience-builder-1.19/client/your-extensions/widgets
+          path: exb/client/your-extensions/widgets
 
       - name: NPM install in client folder
         run: npm ci
-        working-directory: exb/arcgis-experience-builder-1.19/client
+        working-directory: exb/client
 
       - name: Perform Linter
         run: npx eslint
-        working-directory: exb/arcgis-experience-builder-1.19/client
+        working-directory: exb/client
 
   publish:
     needs: [detect, lint]
