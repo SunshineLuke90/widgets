@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   detect:
@@ -20,8 +23,12 @@ jobs:
         run: |
           echo "Detecting changed directories..."
 
-          # Get changed files in this push
-          CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+          # Get changed files (works for both push and pull_request)
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            CHANGED=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
+          else
+            CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+          fi
 
           # Extract unique top-level directories
           DIRS=$(echo "$CHANGED" | cut -d/ -f1 | sort -u)
@@ -40,8 +47,40 @@ jobs:
           echo "Widgets to process: $JSON"
           echo "widgets=$JSON" >> $GITHUB_OUTPUT
 
+  lint:
+    runs-on: windows-latest
+    steps:
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      - name: Download Experience Builder
+        shell: pwsh
+        run: |
+          $jsonResponse = Invoke-RestMethod -Uri 'https://downloads.arcgis.com/dms/rest/download/secured/arcgis-experience-builder-1.19.zip?f=json&folder=software%2FExperienceBuilder%2F1.19'
+          Invoke-WebRequest -Uri $jsonResponse.url -OutFile exb.zip
+
+      - name: Unzip Experience Builder
+        shell: pwsh
+        run: Expand-Archive -Path exb.zip -DestinationPath exb -Force
+
+      - name: Checkout widgets
+        uses: actions/checkout@v4
+        with:
+          repository: SunshineLuke90/widgets
+          path: exb/arcgis-experience-builder-1.19/client/your-extensions/widgets
+
+      - name: NPM install in client folder
+        run: npm ci
+        working-directory: exb/arcgis-experience-builder-1.19/client
+
+      - name: Perform Linter
+        run: npx eslint
+        working-directory: exb/arcgis-experience-builder-1.19/client
+
   publish:
-    needs: detect
+    needs: [detect, lint]
     if: needs.detect.outputs.widgets != '[]'
     runs-on: ubuntu-latest
     permissions:
@@ -57,7 +96,7 @@ jobs:
       - name: Clear auth token for OIDC
         run: echo "NODE_AUTH_TOKEN=" >> $GITHUB_ENV
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v4
         with:
           node-version: lts/*
           registry-url: https://registry.npmjs.org/
