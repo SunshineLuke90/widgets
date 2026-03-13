@@ -1,7 +1,7 @@
 [![npm version][npm-img]][npm-url]
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://raw.githubusercontent.com/SunshineLuke90/widgets/master/MDPrint/LICENSE.md)
 
-[npm-img]: https://img.shields.io/npm/v/exb-mdprint.svg?style=flat-square
+[npm-img]: https://img.shields.io/npm/v/exb-mdprint.svg?style=flat
 [npm-url]: https://www.npmjs.com/package/exb-mdprint
 
 # Markdown Print Widget
