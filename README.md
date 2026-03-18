@@ -1,6 +1,6 @@
 # Welcome!
 
-Welcome to my Esri Experience Builder custom widgets repository. This repository is the root repository for the most up to date custom widgets that I have developved, and that are available for public release. Please feel free to use these widgets in your own projects, and share this repository around the GIS community. These widgets do not come with any guarantees, so take care in working them into your own projects.
+Welcome to my Esri Experience Builder custom widgets repository. This repository is the root repository for the most up to date custom widgets that I have developed, and that are available for public release. Please feel free to use these widgets in your own projects, and share this repository around the GIS community. These widgets do not come with any guarantees, so take care in working them into your own projects.
 
 ## Interactive Homepage:
 
