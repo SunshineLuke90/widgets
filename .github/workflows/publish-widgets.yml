@@ -19,13 +19,7 @@ jobs:
       - id: set-matrix
         run: |
           echo "Detecting changed directories..."
-
-          # Get changed files (works for both push and pull_request)
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            CHANGED=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
-          else
-            CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
-          fi
+          CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
 
           # Extract unique top-level directories
           DIRS=$(echo "$CHANGED" | cut -d/ -f1 | sort -u)

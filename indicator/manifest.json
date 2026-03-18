@@ -1,0 +1,19 @@
+{
+  "name": "indicator",
+  "label": "Indicator",
+  "type": "widget",
+  "version": "1.19.0",
+  "exbVersion": "1.19.0",
+  "author": "Lucius Creamer",
+  "description": "A simple indicator widget for Experience Builder, based on the indicator widget from ArcGIS Dashboards.",
+  "copyright": "Lucius Creamer 2026",
+  "license": "MIT",
+  "properties": {},
+  "translatedLocales": [
+    "en"
+  ],
+  "defaultSize": {
+    "width": 800,
+    "height": 500
+  }
+}
