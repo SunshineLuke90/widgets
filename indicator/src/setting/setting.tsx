@@ -585,10 +585,50 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 								id: "iconSelector",
 								defaultMessage: "Select Icon"
 							})}
-							flow={"wrap"}
+							flow={"no-wrap"}
 						>
 							<IconPicker icon={config?.icon as any} onChange={onIconChange} />
 						</SettingRow>
+						{config.icon && (
+							<SettingRow
+								label={props.intl.formatMessage({
+									id: "iconPosition",
+									defaultMessage: "Icon Position"
+								})}
+								flow={"no-wrap"}
+							>
+								<ButtonGroup>
+									<Button
+										value="left"
+										active={config.iconPosition === "left"}
+										onClick={() => {
+											onSettingChange({
+												id,
+												config: { ...config, iconPosition: "left" }
+											})
+										}}
+										children={props.intl.formatMessage({
+											id: "left",
+											defaultMessage: "Left"
+										})}
+									/>
+									<Button
+										value="right"
+										active={config.iconPosition === "right"}
+										onClick={() => {
+											onSettingChange({
+												id,
+												config: { ...config, iconPosition: "right" }
+											})
+										}}
+										children={props.intl.formatMessage({
+											id: "right",
+											defaultMessage: "Right"
+										})}
+									/>
+								</ButtonGroup>
+							</SettingRow>
+						)}
 					</SettingSection>
 					<SettingSection>
 						<CollapsablePanel

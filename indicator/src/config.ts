@@ -20,6 +20,7 @@ export type FontSize =
 
 export interface Config {
 	icon?: IconResult
+	iconPosition?: "left" | "right"
 	indQuery: IMSqlExpression
 	refQuery: IMSqlExpression
 	indField: string
