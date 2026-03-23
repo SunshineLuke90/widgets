@@ -24,7 +24,8 @@ import {
 	CollapsablePanel,
 	Tabs,
 	Tab,
-	Switch
+	Switch,
+	NumericInput
 } from "jimu-ui"
 import TextStyleSetting from "./text-style-setting"
 import NumberFormatSetting from "./number-format-setting"
@@ -35,34 +36,13 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 	const [refExpressionVisibility, setRefExpressionVisibility] =
 		React.useState(false)
 
-	const onFieldsChange = (fields: IMFieldSchema[]) => {
-		const fieldNames = fields?.map((f) => f.jimuName)
-		const primary = {
-			...props.useDataSources[0].asMutable({ deep: true }),
-			fields: fieldNames
-		}
-		const ref = props.useDataSources?.[1]?.asMutable({ deep: true })
-		onSettingChange({
-			id: id,
-			useDataSources: ref ? [primary, ref] : [primary]
-		})
-	}
-
-	const onRefFieldsChange = (fields: IMFieldSchema[]) => {
-		const fieldNames = fields?.map((f) => f.jimuName)
-		const primary = props.useDataSources[0].asMutable({ deep: true })
-		const ref = {
-			...props.useDataSources[1].asMutable({ deep: true }),
-			fields: fieldNames
-		}
-		onSettingChange({
-			id: id,
-			useDataSources: [primary, ref]
-		})
-	}
-
 	const onDataSourceChange = (useDataSources: UseDataSource[]) => {
-		const primary = useDataSources[0]
+		const schema = DataSourceManager.getInstance()
+			.getDataSource(useDataSources[0]?.dataSourceId)
+			?.getSchema()
+		const primary = schema?.fields
+			? { ...useDataSources[0], fields: [Object.keys(schema.fields)[0]] }
+			: useDataSources[0]
 		// Auto-populate the reference data source from the primary
 		const ref = (props.useDataSources?.[1] ?? primary) as any
 		const refMutable = ref?.asMutable ? ref.asMutable({ deep: true }) : ref
@@ -81,15 +61,198 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 		})
 	}
 
-	const onIconChange = (icon) => {
-		onSettingChange({
-			id: id,
-			config: {
-				...config,
-				icon: icon
-			}
-		})
-	}
+	const noConditionalFormattingPanel = (
+		<>
+			<TextStyleSetting
+				prefix="top"
+				label={props.intl.formatMessage({
+					id: "topText",
+					defaultMessage: "Top Text"
+				})}
+				config={config}
+				intl={props.intl}
+				onChange={(patch) => {
+					onSettingChange({ id, config: { ...config, ...patch } })
+				}}
+			/>
+			<TextStyleSetting
+				prefix="middle"
+				label={props.intl.formatMessage({
+					id: "middleText",
+					defaultMessage: "Middle Text"
+				})}
+				config={config}
+				intl={props.intl}
+				onChange={(patch) => {
+					onSettingChange({ id, config: { ...config, ...patch } })
+				}}
+			/>
+			<TextStyleSetting
+				prefix="bottom"
+				label={props.intl.formatMessage({
+					id: "bottomText",
+					defaultMessage: "Bottom Text"
+				})}
+				config={config}
+				intl={props.intl}
+				onChange={(patch) => {
+					onSettingChange({ id, config: { ...config, ...patch } })
+				}}
+			/>
+			<SettingRow
+				label={props.intl.formatMessage({
+					id: "iconSelector",
+					defaultMessage: "Select Icon"
+				})}
+				flow={"no-wrap"}
+			>
+				<IconPicker
+					icon={config?.icon as any}
+					onChange={(icon) => {
+						onSettingChange({ id, config: { ...config, icon } })
+					}}
+				/>
+			</SettingRow>
+			{config.icon && (
+				<SettingRow
+					label={props.intl.formatMessage({
+						id: "iconPosition",
+						defaultMessage: "Icon Position"
+					})}
+					flow={"no-wrap"}
+				>
+					<ButtonGroup>
+						<Button
+							value="left"
+							active={config.iconPosition === "left"}
+							onClick={() => {
+								onSettingChange({
+									id,
+									config: { ...config, iconPosition: "left" }
+								})
+							}}
+							children={props.intl.formatMessage({
+								id: "left",
+								defaultMessage: "Left"
+							})}
+						/>
+						<Button
+							value="right"
+							active={config.iconPosition === "right"}
+							onClick={() => {
+								onSettingChange({
+									id,
+									config: { ...config, iconPosition: "right" }
+								})
+							}}
+							children={props.intl.formatMessage({
+								id: "right",
+								defaultMessage: "Right"
+							})}
+						/>
+					</ButtonGroup>
+				</SettingRow>
+			)}
+		</>
+	)
+
+	const belowReferenceConditionalFormattingPanel = (
+		<>
+			<TextStyleSetting
+				prefix="top"
+				suffix="Below"
+				label={props.intl.formatMessage({
+					id: "topText",
+					defaultMessage: "Top Text"
+				})}
+				config={config}
+				intl={props.intl}
+				onChange={(patch) => {
+					onSettingChange({ id, config: { ...config, ...patch } })
+				}}
+			/>
+			<TextStyleSetting
+				prefix="middle"
+				suffix="Below"
+				label={props.intl.formatMessage({
+					id: "middleText",
+					defaultMessage: "Middle Text"
+				})}
+				config={config}
+				intl={props.intl}
+				onChange={(patch) => {
+					onSettingChange({ id, config: { ...config, ...patch } })
+				}}
+			/>
+			<TextStyleSetting
+				prefix="bottom"
+				suffix="Below"
+				label={props.intl.formatMessage({
+					id: "bottomText",
+					defaultMessage: "Bottom Text"
+				})}
+				config={config}
+				intl={props.intl}
+				onChange={(patch) => {
+					onSettingChange({ id, config: { ...config, ...patch } })
+				}}
+			/>
+			<SettingRow
+				label={props.intl.formatMessage({
+					id: "iconSelector",
+					defaultMessage: "Select Icon"
+				})}
+				flow={"no-wrap"}
+			>
+				<IconPicker
+					icon={config?.iconBelow as any}
+					onChange={(icon) => {
+						onSettingChange({ id, config: { ...config, iconBelow: icon } })
+					}}
+				/>
+			</SettingRow>
+			{config.iconBelow && (
+				<SettingRow
+					label={props.intl.formatMessage({
+						id: "iconPosition",
+						defaultMessage: "Icon Position"
+					})}
+					flow={"no-wrap"}
+				>
+					<ButtonGroup>
+						<Button
+							value="left"
+							active={config.iconPosition === "left"}
+							onClick={() => {
+								onSettingChange({
+									id,
+									config: { ...config, iconPosition: "left" }
+								})
+							}}
+							children={props.intl.formatMessage({
+								id: "left",
+								defaultMessage: "Left"
+							})}
+						/>
+						<Button
+							value="right"
+							active={config.iconPosition === "right"}
+							onClick={() => {
+								onSettingChange({
+									id,
+									config: { ...config, iconPosition: "right" }
+								})
+							}}
+							children={props.intl.formatMessage({
+								id: "right",
+								defaultMessage: "Right"
+							})}
+						/>
+					</ButtonGroup>
+				</SettingRow>
+			)}
+		</>
+	)
 
 	return (
 		<div className="view-layers-toggle-setting">
@@ -297,17 +460,32 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 											useDropdown={true}
 											isMultiple={false}
 											isDataSourceDropDownHidden={true}
-											onChange={onFieldsChange}
+											onChange={(fields: IMFieldSchema[]) => {
+												const fieldNames = fields?.map((f) => f.jimuName)
+												const primary = {
+													...props.useDataSources[0].asMutable({ deep: true }),
+													fields: fieldNames
+												}
+												const ref = props.useDataSources?.[1]?.asMutable({
+													deep: true
+												})
+												onSettingChange({
+													id: id,
+													useDataSources: ref ? [primary, ref] : [primary]
+												})
+											}}
 											selectedFields={props.useDataSources?.[0]?.fields}
 											types={
-												config.mainStatisticType === "count"
-													? undefined
-													: Immutable([
+												(config.indType === "Statistic" &&
+													config.mainStatisticType !== "count") ||
+												config.indType === "Feature"
+													? Immutable([
 															"NUMBER" as JimuFieldType,
 															"DATE" as JimuFieldType,
 															"DATE_ONLY" as JimuFieldType,
 															"TIME_ONLY" as JimuFieldType
 														])
+													: undefined
 											}
 										/>
 									</SettingRow>
@@ -360,13 +538,15 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 											defaultMessage: "Statistic"
 										})}
 									/>
-									<option
-										value="Feature"
-										children={props.intl.formatMessage({
-											id: "feature",
-											defaultMessage: "Feature"
-										})}
-									/>
+									{config.indType === "Feature" && (
+										<option
+											value="Feature"
+											children={props.intl.formatMessage({
+												id: "feature",
+												defaultMessage: "Feature"
+											})}
+										/>
+									)}
 									<option
 										value="FixedValue"
 										children={props.intl.formatMessage({
@@ -518,7 +698,20 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 											useDropdown={true}
 											isMultiple={false}
 											isDataSourceDropDownHidden={true}
-											onChange={onRefFieldsChange}
+											onChange={(fields: IMFieldSchema[]) => {
+												const fieldNames = fields?.map((f) => f.jimuName)
+												const primary = props.useDataSources[0].asMutable({
+													deep: true
+												})
+												const ref = {
+													...props.useDataSources[1].asMutable({ deep: true }),
+													fields: fieldNames
+												}
+												onSettingChange({
+													id: id,
+													useDataSources: [primary, ref]
+												})
+											}}
 											selectedFields={props.useDataSources?.[1]?.fields}
 											types={
 												config.refStatisticType === "count"
@@ -534,6 +727,79 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 									</SettingRow>
 								</>
 							)}
+							{config.refType === "FixedValue" && (
+								<SettingRow
+									label={props.intl.formatMessage({
+										id: "fixedValue",
+										defaultMessage: "Fixed Value"
+									})}
+									flow={"wrap"}
+								>
+									<NumericInput
+										type="number"
+										value={config.refFixedValue}
+										onChange={(value) => {
+											onSettingChange({
+												id,
+												config: {
+													...config,
+													refFixedValue: value
+												}
+											})
+										}}
+									/>
+								</SettingRow>
+							)}
+							{config.refType === "Feature" && (
+								<SettingRow
+									label={props.intl.formatMessage({
+										id: "selectValueField",
+										defaultMessage: "Value Field"
+									})}
+									flow={"wrap"}
+								>
+									<FieldSelector
+										useDataSources={
+											props.useDataSources?.[0]
+												? Immutable([props.useDataSources[0]])
+												: Immutable([])
+										}
+										useDropdown={true}
+										isMultiple={false}
+										isDataSourceDropDownHidden={true}
+										onChange={(fields: IMFieldSchema[]) => {
+											const fieldName = fields?.[0]?.jimuName
+											const existingFields =
+												props.useDataSources[0].asMutable({ deep: true })
+													.fields ?? []
+											const primary = {
+												...props.useDataSources[0].asMutable({ deep: true }),
+												fields: fieldName
+													? [existingFields[0], fieldName].filter(Boolean)
+													: existingFields.slice(0, 1)
+											}
+											const ref = props.useDataSources?.[1]?.asMutable({
+												deep: true
+											})
+											onSettingChange({
+												id: id,
+												useDataSources: ref ? [primary, ref] : [primary]
+											})
+										}}
+										selectedFields={
+											props.useDataSources?.[0]?.fields?.[1]
+												? Immutable([props.useDataSources[0].fields[1]])
+												: Immutable([])
+										}
+										types={Immutable([
+											"NUMBER" as JimuFieldType,
+											"DATE" as JimuFieldType,
+											"DATE_ONLY" as JimuFieldType,
+											"TIME_ONLY" as JimuFieldType
+										])}
+									/>
+								</SettingRow>
+							)}
 						</CollapsablePanel>
 					</SettingSection>
 				</Tab>
@@ -544,92 +810,76 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 							defaultMessage: "Settings"
 						})}
 					>
-						<TextStyleSetting
-							prefix="top"
-							label={props.intl.formatMessage({
-								id: "topText",
-								defaultMessage: "Top Text"
-							})}
-							config={config}
-							intl={props.intl}
-							onChange={(patch) => {
-								onSettingChange({ id, config: { ...config, ...patch } })
-							}}
-						/>
-						<TextStyleSetting
-							prefix="middle"
-							label={props.intl.formatMessage({
-								id: "middleText",
-								defaultMessage: "Middle Text"
-							})}
-							config={config}
-							intl={props.intl}
-							onChange={(patch) => {
-								onSettingChange({ id, config: { ...config, ...patch } })
-							}}
-						/>
-						<TextStyleSetting
-							prefix="bottom"
-							label={props.intl.formatMessage({
-								id: "bottomText",
-								defaultMessage: "Bottom Text"
-							})}
-							config={config}
-							intl={props.intl}
-							onChange={(patch) => {
-								onSettingChange({ id, config: { ...config, ...patch } })
-							}}
-						/>
 						<SettingRow
 							label={props.intl.formatMessage({
-								id: "iconSelector",
-								defaultMessage: "Select Icon"
+								id: "showLastUpdateTime",
+								defaultMessage: "Show last update time"
 							})}
 							flow={"no-wrap"}
 						>
-							<IconPicker icon={config?.icon as any} onChange={onIconChange} />
+							<Switch
+								checked={config.showLastUpdateTime}
+								onChange={() => {
+									onSettingChange({
+										id,
+										config: {
+											...config,
+											showLastUpdateTime: !config.showLastUpdateTime
+										}
+									})
+								}}
+							/>
 						</SettingRow>
-						{config.icon && (
-							<SettingRow
-								label={props.intl.formatMessage({
-									id: "iconPosition",
-									defaultMessage: "Icon Position"
-								})}
-								flow={"no-wrap"}
-							>
-								<ButtonGroup>
-									<Button
-										value="left"
-										active={config.iconPosition === "left"}
-										onClick={() => {
-											onSettingChange({
-												id,
-												config: { ...config, iconPosition: "left" }
-											})
-										}}
-										children={props.intl.formatMessage({
-											id: "left",
-											defaultMessage: "Left"
-										})}
-									/>
-									<Button
-										value="right"
-										active={config.iconPosition === "right"}
-										onClick={() => {
-											onSettingChange({
-												id,
-												config: { ...config, iconPosition: "right" }
-											})
-										}}
-										children={props.intl.formatMessage({
-											id: "right",
-											defaultMessage: "Right"
-										})}
-									/>
-								</ButtonGroup>
-							</SettingRow>
-						)}
+						<SettingRow
+							label={props.intl.formatMessage({
+								id: "conditionalFormatting",
+								defaultMessage: "Conditional Formatting"
+							})}
+							flow={"no-wrap"}
+						>
+							<Switch
+								checked={config.conditionalFormat}
+								onChange={() => {
+									onSettingChange({
+										id,
+										config: {
+											...config,
+											conditionalFormat: !config.conditionalFormat
+										}
+									})
+								}}
+							/>
+						</SettingRow>
+						{!config.conditionalFormat && noConditionalFormattingPanel}
 					</SettingSection>
+					{config.conditionalFormat && (
+						<>
+							<SettingSection>
+								<CollapsablePanel
+									label={props.intl.formatMessage({
+										id: "conditionalFormatting",
+										defaultMessage: "Style for value >= reference"
+									})}
+									style={{ margin: "4px 4px 0 4px" }}
+									defaultIsOpen={false}
+								>
+									{noConditionalFormattingPanel}
+								</CollapsablePanel>
+							</SettingSection>
+							<SettingSection>
+								<CollapsablePanel
+									label={props.intl.formatMessage({
+										id: "conditionalFormattingBelow",
+										defaultMessage: "Style for value < reference"
+									})}
+									style={{ margin: "4px 4px 0 4px" }}
+									defaultIsOpen={false}
+								>
+									{belowReferenceConditionalFormattingPanel}
+								</CollapsablePanel>
+							</SettingSection>
+						</>
+					)}
 					<SettingSection>
 						<CollapsablePanel
 							label={props.intl.formatMessage({
@@ -639,38 +889,6 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 							style={{ margin: "4px 4px 0 4px" }}
 							defaultIsOpen={false}
 						>
-							<SettingRow
-								label={props.intl.formatMessage({
-									id: "styleText",
-									defaultMessage: "Style"
-								})}
-								flow="wrap"
-							>
-								<ButtonGroup>
-									<Button
-										value="Decimal"
-										active={config.valueStyle === "Decimal"}
-										onClick={() => {
-											onSettingChange({
-												id,
-												config: { ...config, valueStyle: "Decimal" }
-											})
-										}}
-										children="Decimal"
-									/>
-									<Button
-										value="Percentage"
-										active={config.valueStyle === "Percentage"}
-										onClick={() => {
-											onSettingChange({
-												id,
-												config: { ...config, valueStyle: "Percentage" }
-											})
-										}}
-										children="Percentage"
-									/>
-								</ButtonGroup>
-							</SettingRow>
 							<NumberFormatSetting
 								prefix="value"
 								config={config}
@@ -700,44 +918,48 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 							</SettingRow>
 						</CollapsablePanel>
 					</SettingSection>
-					<SettingSection>
-						<CollapsablePanel
-							label={props.intl.formatMessage({
-								id: "percentageFormatting",
-								defaultMessage: "Percentage Formatting"
-							})}
-							style={{ margin: "4px 4px 0 4px" }}
-							defaultIsOpen={false}
-						>
-							<NumberFormatSetting
-								prefix="pct"
-								config={config}
-								intl={props.intl}
-								onChange={(patch) => {
-									onSettingChange({ id, config: { ...config, ...patch } })
-								}}
-							/>
-						</CollapsablePanel>
-					</SettingSection>
-					<SettingSection>
-						<CollapsablePanel
-							label={props.intl.formatMessage({
-								id: "ratioFormatting",
-								defaultMessage: "Ratio Formatting"
-							})}
-							style={{ margin: "4px 4px 0 4px" }}
-							defaultIsOpen={false}
-						>
-							<NumberFormatSetting
-								prefix="ratio"
-								config={config}
-								intl={props.intl}
-								onChange={(patch) => {
-									onSettingChange({ id, config: { ...config, ...patch } })
-								}}
-							/>
-						</CollapsablePanel>
-					</SettingSection>
+					{config.refType !== "none" && (
+						<>
+							<SettingSection>
+								<CollapsablePanel
+									label={props.intl.formatMessage({
+										id: "percentageFormatting",
+										defaultMessage: "Percentage Formatting"
+									})}
+									style={{ margin: "4px 4px 0 4px" }}
+									defaultIsOpen={false}
+								>
+									<NumberFormatSetting
+										prefix="pct"
+										config={config}
+										intl={props.intl}
+										onChange={(patch) => {
+											onSettingChange({ id, config: { ...config, ...patch } })
+										}}
+									/>
+								</CollapsablePanel>
+							</SettingSection>
+							<SettingSection>
+								<CollapsablePanel
+									label={props.intl.formatMessage({
+										id: "ratioFormatting",
+										defaultMessage: "Ratio Formatting"
+									})}
+									style={{ margin: "4px 4px 0 4px" }}
+									defaultIsOpen={false}
+								>
+									<NumberFormatSetting
+										prefix="ratio"
+										config={config}
+										intl={props.intl}
+										onChange={(patch) => {
+											onSettingChange({ id, config: { ...config, ...patch } })
+										}}
+									/>
+								</CollapsablePanel>
+							</SettingSection>
+						</>
+					)}
 				</Tab>
 			</Tabs>
 		</div>

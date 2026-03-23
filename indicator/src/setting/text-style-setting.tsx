@@ -39,9 +39,11 @@ const EXPRESSIONS = [
 ]
 
 type TextStylePrefix = "top" | "middle" | "bottom"
+type TextStyleSuffix = "" | "Below"
 
 interface TextStyleSettingProps {
 	prefix: TextStylePrefix
+	suffix?: TextStyleSuffix
 	label: string
 	config: IMConfig
 	onChange: (patch: Partial<IMConfig>) => void
@@ -50,15 +52,16 @@ interface TextStyleSettingProps {
 
 export default function TextStyleSetting({
 	prefix,
+	suffix = "",
 	label,
 	config,
 	onChange,
 	intl
 }: TextStyleSettingProps) {
 	const keys = {
-		text: `${prefix}Text` as keyof IMConfig,
-		color: `${prefix}TextColor` as keyof IMConfig,
-		maxSize: `${prefix}TextMaxSize` as keyof IMConfig
+		text: `${prefix}Text${suffix}` as keyof IMConfig,
+		color: `${prefix}TextColor${suffix}` as keyof IMConfig,
+		maxSize: `${prefix}TextMaxSize${suffix}` as keyof IMConfig
 	}
 
 	const text = config[keys.text] as string

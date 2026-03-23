@@ -3,26 +3,23 @@ import {
 	type AllWidgetProps,
 	DataSourceComponent,
 	type DataSource,
-	dataSourceUtils,
-	type StatisticDefinition,
-	type QueryScope,
-	type ArcGISQueriableDataSource,
-	type ArcGISQueryParams
+	type ArcGISQueriableDataSource
 } from "jimu-core"
-import { Icon } from "jimu-ui"
+import { Icon, Paper } from "jimu-ui"
 import type { IMConfig } from "../config"
 import {
 	computeAllValues,
 	buildExpressionValues,
 	resolveExpressions,
-	fontSizeToFlexGrow
+	fontSizeToFlexGrow,
+	getActiveStyles,
+	relativeTime
 } from "./utils"
-
-// Load QueryScope at runtime — it's a const enum that needs a real value
-
-const { QueryScope: QScope } = require("jimu-core") as {
-	QueryScope: { [key: string]: string }
-}
+import {
+	getConfigWhere,
+	queryStatValue,
+	queryFeatureFieldValues
+} from "./queries"
 
 // ── Loading spinner ───────────────────────────────────────────────────────────
 
@@ -237,7 +234,11 @@ const AutoFitMiddle = ({
 					color,
 					fontWeight,
 					lineHeight: 1.15,
-					textAlign: icon?.svg ? (iconPosition === "right" ? "right" : "left") : "center",
+					textAlign: icon?.svg
+						? iconPosition === "right"
+							? "right"
+							: "left"
+						: "center",
 					wordBreak: "break-word",
 					display: "block",
 					whiteSpace: icon?.svg ? "nowrap" : "normal"
@@ -249,185 +250,112 @@ const AutoFitMiddle = ({
 	)
 }
 
-// ── Query helpers ─────────────────────────────────────────────────────────────
+// ── FeaturePager ──────────────────────────────────────────────────────────────
 
-async function queryStatValue(
-	ds: ArcGISQueriableDataSource,
-	field: string | undefined,
-	statisticType: string,
-	configWhere: string
-): Promise<number | null> {
-	try {
-		const opts = { scope: QScope.InRuntimeView as QueryScope }
-		if (statisticType === "count") {
-			const result = await ds.queryCount(
-				{ where: configWhere } as ArcGISQueryParams,
-				opts
-			)
-			return (result as any).count ?? null
-		}
-		if (!field) return null
-		const result = await ds.query(
-			{
-				where: configWhere,
-				outStatistics: [
-					{
-						statisticType,
-						onStatisticField: field,
-						outStatisticFieldName: "result"
-					} as StatisticDefinition
-				]
-			} as ArcGISQueryParams,
-			opts
-		)
-		const records = (result as any).records ?? []
-		if (records.length > 0) {
-			const data: { [key: string]: any } = records[0].getData?.() ?? {}
-			const val = data.result ?? Object.values(data)[0]
-			return typeof val === "number" ? val : null
-		}
-		return null
-	} catch (err) {
-		console.warn("Indicator: stats query failed", err)
-		return null
-	}
+interface FeaturePagerProps {
+	current: number
+	total: number
+	onPrev: () => void
+	onNext: () => void
 }
 
-async function queryFeatureVal(
-	ds: ArcGISQueriableDataSource,
-	field: string,
-	configWhere: string
-): Promise<number | null> {
-	try {
-		const opts = { scope: QScope.InRuntimeView as QueryScope }
-		const result = await ds.query(
-			{ where: configWhere, outFields: [field], num: 1 } as ArcGISQueryParams,
-			opts
-		)
-		const records = (result as any).records ?? []
-		if (records.length > 0) {
-			const val = records[0].getData?.()?.[field]
-			return typeof val === "number" ? val : null
-		}
-		return null
-	} catch (err) {
-		console.warn("Indicator: feature query failed", err)
-		return null
+const FeaturePager = ({
+	current,
+	total,
+	onPrev,
+	onNext
+}: FeaturePagerProps) => {
+	const btnStyle: React.CSSProperties = {
+		background: "none",
+		border: "none",
+		cursor: "pointer",
+		fontSize: 14,
+		fontWeight: 700,
+		lineHeight: 1,
+		padding: "2px 6px",
+		color: "inherit",
+		opacity: 0.7
 	}
-}
-
-function getConfigWhere(ds: ArcGISQueriableDataSource, expr: any): string {
-	if (!expr) return "1=1"
-	try {
-		return dataSourceUtils.getArcGISSQL(expr, ds as any)?.sql || "1=1"
-	} catch {
-		return "1=1"
-	}
+	return (
+		<div
+			style={{
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center",
+				gap: 4,
+				flexShrink: 0,
+				padding: "2px 0",
+				fontSize: 13,
+				userSelect: "none"
+			}}
+		>
+			<button style={btnStyle} onClick={onPrev} aria-label="Previous feature">
+				{"<"}
+			</button>
+			<span>
+				{current + 1}/{total}
+			</span>
+			<button style={btnStyle} onClick={onNext} aria-label="Next feature">
+				{">"}
+			</button>
+		</div>
+	)
 }
 
 // ── Widget ────────────────────────────────────────────────────────────────────
 
-const Widget = (props: AllWidgetProps<IMConfig>) => {
+export default function Widget(props: AllWidgetProps<IMConfig>) {
 	const { config, useDataSources } = props
 
-	const [mainValue, setMainValue] = React.useState<number | null>(null)
-	const [refValue, setRefValue] = React.useState<number | null>(null)
+	// ── State ──────────────────────────────────────────────────────────────
+
+	const [statValue, setStatValue] = React.useState<number | null>(null)
+	const [statRefValue, setStatRefValue] = React.useState<number | null>(null)
+	const [featureMainValues, setFeatureMainValues] = React.useState<
+		Array<number | null>
+	>([])
+	const [featureRefValues, setFeatureRefValues] = React.useState<
+		Array<number | null>
+	>([])
+	const [featureIndex, setFeatureIndex] = React.useState(0)
 	const [lastUpdate, setLastUpdate] = React.useState<Date | null>(null)
 	const [loading, setLoading] = React.useState(false)
-
-	const prevMainValueRef = React.useRef<number | null>(null)
 	const [mainTrigger, setMainTrigger] = React.useState(0)
 	const [refTrigger, setRefTrigger] = React.useState(0)
 
+	// ── Refs ───────────────────────────────────────────────────────────────
+
 	const mainDsRef = React.useRef<ArcGISQueriableDataSource | null>(null)
 	const refDsRef = React.useRef<ArcGISQueriableDataSource | null>(null)
+	const prevMainValueRef = React.useRef<number | null>(null)
 
-	// Fields are stored in useDataSources[n].fields by the FieldSelector in settings
+	// ── Derived fields ─────────────────────────────────────────────────────
+
 	const indField = useDataSources?.[0]?.fields?.[0]
-	const refField = useDataSources?.[1]?.fields?.[0] ?? indField
+	// Feature+Feature ref → useDataSources[0].fields[1] (same DS, second field)
+	// Otherwise → useDataSources[1].fields[0] (separate DS for Statistic ref)
+	const refField =
+		config.indType === "Feature" && config.refType === "Feature"
+			? (useDataSources?.[0]?.fields?.[1] ?? indField)
+			: (useDataSources?.[1]?.fields?.[0] ?? indField)
 
-	// ── Main query ─────────────────────────────────────────────────────────
+	// ── Derived values ─────────────────────────────────────────────────────
 
-	React.useEffect(() => {
-		const ds = mainDsRef.current
-		if (!ds) return
-		const configWhere = getConfigWhere(ds, config.indQuery)
-		setLoading(true)
-		const run = async () => {
-			let val: number | null = null
-			try {
-				if (config.indType === "Feature") {
-					if (indField) val = await queryFeatureVal(ds, indField, configWhere)
-				} else {
-					val = await queryStatValue(
-						ds,
-						indField,
-						config.mainStatisticType || "count",
-						configWhere
-					)
-				}
-			} finally {
-				prevMainValueRef.current = mainValue
-				setMainValue(val)
-				setLastUpdate(new Date())
-				setLoading(false)
-			}
-		}
-		run()
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [
-		mainTrigger,
-		indField,
-		config.indType,
-		config.mainStatisticType,
-		config.indQuery
-	])
+	const isFeatureMode = config.indType === "Feature"
+	const featureCount = featureMainValues.length
+	const isConfigured = !!useDataSources?.[0]
+	const showRef = config.refType && config.refType !== "none"
 
-	// ── Reference query ────────────────────────────────────────────────────
+	const mainValue =
+		isFeatureMode && featureCount > 0
+			? (featureMainValues[featureIndex] ?? null)
+			: statValue
+	const refValue =
+		isFeatureMode && config.refType === "Feature" && featureRefValues.length > 0
+			? (featureRefValues[featureIndex] ?? null)
+			: statRefValue
 
-	React.useEffect(() => {
-		if (!config.refType || config.refType === "none") {
-			setRefValue(null)
-			return
-		}
-		if (config.refType === "FixedValue") {
-			setRefValue(config.refFixedValue ?? null)
-			return
-		}
-		if (config.refType === "PreviousValue") {
-			setRefValue(prevMainValueRef.current)
-			return
-		}
-
-		const ds = refDsRef.current ?? mainDsRef.current
-		if (!ds) return
-		const configWhere = getConfigWhere(ds, config.refQuery)
-		const run = async () => {
-			let val: number | null = null
-			if (config.refType === "Feature") {
-				if (refField) val = await queryFeatureVal(ds, refField, configWhere)
-			} else {
-				val = await queryStatValue(
-					ds,
-					refField,
-					config.refStatisticType || "count",
-					configWhere
-				)
-			}
-			setRefValue(val)
-		}
-		run()
-	}, [
-		refTrigger,
-		refField,
-		config.refType,
-		config.refStatisticType,
-		config.refFixedValue,
-		config.refQuery,
-		mainValue
-	])
-
-	// ── Computed values ────────────────────────────────────────────────────
+	// ── Computed / formatted values ────────────────────────────────────────
 
 	const computed = React.useMemo(
 		() => computeAllValues(mainValue, refValue),
@@ -437,11 +365,24 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
 		() => buildExpressionValues(computed, config as any),
 		[computed, config]
 	)
-	const topText = resolveExpressions(config.topText, exprValues)
-	const middleText = resolveExpressions(config.middleText, exprValues)
-	const bottomText = resolveExpressions(config.bottomText, exprValues)
 
-	// ── DataSource handlers ────────────────────────────────────────────────
+	const isBelow =
+		config.conditionalFormat &&
+		mainValue !== null &&
+		refValue !== null &&
+		mainValue < refValue
+
+	const styles = getActiveStyles(config as any, isBelow)
+
+	const topText = resolveExpressions(styles.topText, exprValues)
+	const middleText = resolveExpressions(styles.middleText, exprValues)
+	const bottomText = resolveExpressions(styles.bottomText, exprValues)
+
+	const topGrow = fontSizeToFlexGrow(styles.topTextMaxSize)
+	const middleGrow = fontSizeToFlexGrow(styles.middleTextMaxSize)
+	const bottomGrow = fontSizeToFlexGrow(styles.bottomTextMaxSize)
+
+	// ── Callbacks ──────────────────────────────────────────────────────────
 
 	const handleMainDsCreated = React.useCallback((ds: DataSource) => {
 		mainDsRef.current = ds as ArcGISQueriableDataSource
@@ -457,29 +398,129 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
 	const handleRefQueryRequired = React.useCallback(() => {
 		setRefTrigger((v) => v + 1)
 	}, [])
+	const handlePrevFeature = React.useCallback(() => {
+		setFeatureIndex((prev) => (prev <= 0 ? featureCount - 1 : prev - 1))
+	}, [featureCount])
+	const handleNextFeature = React.useCallback(() => {
+		setFeatureIndex((prev) => (prev >= featureCount - 1 ? 0 : prev + 1))
+	}, [featureCount])
 
-	// ── Layout ─────────────────────────────────────────────────────────────
+	// ── Main query effect ──────────────────────────────────────────────────
 
-	const topGrow = fontSizeToFlexGrow(config.topTextMaxSize)
-	const middleGrow = fontSizeToFlexGrow(config.middleTextMaxSize)
-	const bottomGrow = fontSizeToFlexGrow(config.bottomTextMaxSize)
-	const showRef = config.refType && config.refType !== "none"
-	const isConfigured = !!useDataSources?.[0]
+	React.useEffect(() => {
+		const ds = mainDsRef.current
+		if (!ds) return
+		const configWhere = getConfigWhere(ds, config.indQuery)
+		setLoading(true)
+		const run = async () => {
+			try {
+				if (config.indType === "Feature") {
+					if (indField) {
+						const fields =
+							refField && refField !== indField
+								? [indField, refField]
+								: [indField]
+						const result = await queryFeatureFieldValues(
+							ds,
+							fields,
+							configWhere
+						)
+						prevMainValueRef.current = mainValue
+						setFeatureMainValues(result[indField] ?? [])
+						setFeatureRefValues(result[refField ?? indField] ?? [])
+						const count = (result[indField] ?? []).length
+						setFeatureIndex((prev) => (prev >= count ? 0 : prev))
+					} else {
+						prevMainValueRef.current = mainValue
+						setFeatureMainValues([])
+					}
+				} else {
+					const val = await queryStatValue(
+						ds,
+						indField,
+						config.mainStatisticType || "count",
+						configWhere
+					)
+					prevMainValueRef.current = mainValue
+					setStatValue(val)
+				}
+			} finally {
+				setLastUpdate(new Date())
+				setLoading(false)
+			}
+		}
+		run()
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [
+		mainTrigger,
+		indField,
+		refField,
+		config.indType,
+		config.mainStatisticType,
+		config.indQuery
+	])
 
-	// ── Relative time helper ───────────────────────────────────────────────
+	// ── Reference query effect ─────────────────────────────────────────────
 
-	const relativeTime = (date: Date): string => {
-		const diff = Math.floor((Date.now() - date.getTime()) / 1000)
-		if (diff < 60) return "Updated just now"
-		if (diff < 3600) return `Updated ${Math.floor(diff / 60)}m ago`
-		if (diff < 86400) return `Updated ${Math.floor(diff / 3600)}h ago`
-		return `Updated ${date.toLocaleDateString()}`
-	}
+	React.useEffect(() => {
+		if (!config.refType || config.refType === "none") {
+			setStatRefValue(null)
+			setFeatureRefValues([])
+			return
+		}
+		if (config.indType === "Feature" && config.refType === "Feature") {
+			return
+		}
+		if (config.refType === "FixedValue") {
+			setStatRefValue(config.refFixedValue ?? null)
+			return
+		}
+		if (config.refType === "PreviousValue") {
+			setStatRefValue(prevMainValueRef.current)
+			return
+		}
+
+		const ds = refDsRef.current ?? mainDsRef.current
+		if (!ds) return
+		const configWhere = getConfigWhere(ds, config.refQuery)
+		const run = async () => {
+			if (config.refType === "Feature") {
+				if (refField) {
+					const result = await queryFeatureFieldValues(
+						ds,
+						[refField],
+						configWhere
+					)
+					setFeatureRefValues(result[refField] ?? [])
+				} else {
+					setFeatureRefValues([])
+				}
+			} else {
+				const val = await queryStatValue(
+					ds,
+					refField,
+					config.refStatisticType || "count",
+					configWhere
+				)
+				setStatRefValue(val)
+			}
+		}
+		run()
+	}, [
+		refTrigger,
+		refField,
+		config.indType,
+		config.refType,
+		config.refStatisticType,
+		config.refFixedValue,
+		config.refQuery,
+		mainValue
+	])
 
 	// ── Render ─────────────────────────────────────────────────────────────
 
 	return (
-		<div
+		<Paper
 			style={{
 				width: "100%",
 				height: "100%",
@@ -569,7 +610,7 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
 						transition: "opacity 0.2s"
 					}}
 				>
-					{config.topText ? (
+					{styles.topText ? (
 						<div
 							style={{
 								flex: `${topGrow} ${topGrow} 0`,
@@ -579,13 +620,13 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
 						>
 							<AutoFitText
 								text={topText}
-								color={config.topTextColor || "inherit"}
+								color={styles.topTextColor || "inherit"}
 								fontWeight="normal"
 							/>
 						</div>
 					) : null}
 
-					{config.middleText ? (
+					{styles.middleText ? (
 						<div
 							style={{
 								flex: `${middleGrow} ${middleGrow} 0`,
@@ -595,15 +636,15 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
 						>
 							<AutoFitMiddle
 								text={middleText}
-								color={config.middleTextColor || "inherit"}
-								icon={config.icon}
+								color={styles.middleTextColor || "inherit"}
+								icon={styles.icon}
 								iconPosition={config.iconPosition ?? "left"}
 								fontWeight={700}
 							/>
 						</div>
 					) : null}
 
-					{config.bottomText ? (
+					{styles.bottomText ? (
 						<div
 							style={{
 								flex: `${bottomGrow} ${bottomGrow} 0`,
@@ -613,7 +654,7 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
 						>
 							<AutoFitText
 								text={bottomText}
-								color={config.bottomTextColor || "inherit"}
+								color={styles.bottomTextColor || "inherit"}
 								fontWeight="normal"
 							/>
 						</div>
@@ -621,12 +662,22 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
 				</div>
 			)}
 
+			{/* ── Feature pager ── */}
+			{isFeatureMode && featureCount > 1 && (
+				<FeaturePager
+					current={featureIndex}
+					total={featureCount}
+					onPrev={handlePrevFeature}
+					onNext={handleNextFeature}
+				/>
+			)}
+
 			{/* ── Last update timestamp ── */}
 			{config.showLastUpdateTime && lastUpdate && (
 				<div
 					style={{
 						flexShrink: 0,
-						textAlign: "right",
+						textAlign: "left",
 						fontSize: 10,
 						lineHeight: 1.4,
 						color: config.lastUpdateTimeTextColor || "currentColor",
@@ -638,8 +689,6 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
 					{relativeTime(lastUpdate)}
 				</div>
 			)}
-		</div>
+		</Paper>
 	)
 }
-
-export default Widget

@@ -223,3 +223,82 @@ export function mergeWhereClauses(a: string, b: string): string {
 	if (!cleanB) return cleanA
 	return `(${cleanA}) AND (${cleanB})`
 }
+
+// ── Conditional format style resolution ───────────────────────────────────────
+
+export interface ActiveStyles {
+	topText: string
+	topTextColor: string
+	topTextMaxSize: string
+	middleText: string
+	middleTextColor: string
+	middleTextMaxSize: string
+	bottomText: string
+	bottomTextColor: string
+	bottomTextMaxSize: string
+	icon: any
+}
+
+/**
+ * Return the set of text/color/size/icon properties to use based on whether
+ * the value is below the reference.  When `isBelow` is true, the "Below"
+ * variant from config is used (falling back to the default if unset).
+ */
+export function getActiveStyles(
+	config: Pick<
+		Config,
+		| "topText"
+		| "topTextColor"
+		| "topTextMaxSize"
+		| "middleText"
+		| "middleTextColor"
+		| "middleTextMaxSize"
+		| "bottomText"
+		| "bottomTextColor"
+		| "bottomTextMaxSize"
+		| "icon"
+		| "topTextBelow"
+		| "topTextColorBelow"
+		| "topTextMaxSizeBelow"
+		| "middleTextBelow"
+		| "middleTextColorBelow"
+		| "middleTextMaxSizeBelow"
+		| "bottomTextBelow"
+		| "bottomTextColorBelow"
+		| "bottomTextMaxSizeBelow"
+		| "iconBelow"
+	>,
+	isBelow: boolean
+): ActiveStyles {
+	const pick = <T>(below: T | undefined, above: T): T =>
+		isBelow ? (below ?? above) : above
+
+	return {
+		topText: pick(config.topTextBelow, config.topText),
+		topTextColor: pick(config.topTextColorBelow, config.topTextColor),
+		topTextMaxSize: pick(config.topTextMaxSizeBelow, config.topTextMaxSize),
+		middleText: pick(config.middleTextBelow, config.middleText),
+		middleTextColor: pick(config.middleTextColorBelow, config.middleTextColor),
+		middleTextMaxSize: pick(
+			config.middleTextMaxSizeBelow,
+			config.middleTextMaxSize
+		),
+		bottomText: pick(config.bottomTextBelow, config.bottomText),
+		bottomTextColor: pick(config.bottomTextColorBelow, config.bottomTextColor),
+		bottomTextMaxSize: pick(
+			config.bottomTextMaxSizeBelow,
+			config.bottomTextMaxSize
+		),
+		icon: pick(config.iconBelow, config.icon)
+	}
+}
+
+// ── Relative time ─────────────────────────────────────────────────────────────
+
+export function relativeTime(date: Date): string {
+	const diff = Math.floor((Date.now() - date.getTime()) / 1000)
+	if (diff < 60) return "Updated just now"
+	if (diff < 3600) return `Updated ${Math.floor(diff / 60)}m ago`
+	if (diff < 86400) return `Updated ${Math.floor(diff / 3600)}h ago`
+	return `Updated ${date.toLocaleDateString()}`
+}

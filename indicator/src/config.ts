@@ -19,20 +19,16 @@ export type FontSize =
 	| "xx-large"
 
 export interface Config {
-	icon?: IconResult
 	iconPosition?: "left" | "right"
 	indQuery: IMSqlExpression
 	refQuery: IMSqlExpression
-	indField: string
 	indType: IndicatorType
 	mainStatisticType: StatisticType
+	conditionalFormat: boolean
 
-	refField?: string
 	refType: ReferenceType
 	refStatisticType: StatisticType
 	refFixedValue?: number
-
-	infoText: string
 
 	topText: string
 	topTextColor: string
@@ -43,8 +39,19 @@ export interface Config {
 	bottomText: string
 	bottomTextColor: string
 	bottomTextMaxSize: FontSize
+	icon?: IconResult
 
-	valueStyle: "Decimal" | "Percentage"
+	topTextBelow: string
+	topTextColorBelow: string
+	topTextMaxSizeBelow: FontSize
+	middleTextBelow: string
+	middleTextColorBelow: string
+	middleTextMaxSizeBelow: FontSize
+	bottomTextBelow: string
+	bottomTextColorBelow: string
+	bottomTextMaxSizeBelow: FontSize
+	iconBelow?: IconResult
+
 	valueDigitGrouping: boolean
 	valueMinDecimalPlaces?: number
 	valueMaxDecimalPlaces?: number
