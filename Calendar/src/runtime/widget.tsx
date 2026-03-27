@@ -1,5 +1,6 @@
 import {
 	React,
+	Immutable,
 	type AllWidgetProps,
 	type DataSource,
 	DataSourceComponent,
@@ -43,8 +44,11 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 	const isConfigured =
 		config.dataSets &&
 		config.dataSets.length > 0 &&
-		config.dataSets[0].useDataSources &&
-		config.dataSets[0].useDataSources.length === 1 &&
+		config.dataSets[0].dataSourceId &&
+		props.useDataSources?.some(
+			(widgetDataSource) =>
+				widgetDataSource.dataSourceId === config.dataSets[0].dataSourceId
+		) &&
 		config.dataSets[0].startDateField &&
 		config.dataSets[0].endDateField
 
@@ -143,14 +147,13 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 	}
 
 	const handleClearSelection = () => {
-		/// Loop through all datasets, if there is a selection, clear it and post a message.
-		datasources.forEach((ds) => {
-			if (ds.getSelectedRecords().length > 0) {
-				ds.clearSelection()
+		datasources.forEach((currentDataSource) => {
+			if (currentDataSource.getSelectedRecords().length > 0) {
+				currentDataSource.clearSelection()
 				const message = new DataRecordsSelectionChangeMessage(
 					props.widgetId,
 					[],
-					[props.useDataSources[0].dataSourceId]
+					[currentDataSource.id]
 				)
 				MessageManager.getInstance().publishMessage(message)
 			}
@@ -169,7 +172,11 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 			.replace(",", "")
 
 		config.dataSets?.forEach((dsConfig) => {
-			const useDataSource = dsConfig.useDataSources[0]
+			const matchedDataSource = props.useDataSources?.find(
+				(widgetDataSource) =>
+					widgetDataSource.dataSourceId === dsConfig.dataSourceId
+			)
+			if (!matchedDataSource) return
 			let queryParams: SqlQueryParams = {
 				where: "1=1"
 			}
@@ -181,7 +188,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 
 			setQueryByDsId((prev) => ({
 				...prev,
-				[useDataSource.dataSourceId]: queryParams.where
+				[matchedDataSource.dataSourceId]: queryParams.where
 			}))
 		})
 	}
@@ -259,37 +266,47 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 			/>
 			{config.dataSets && config.dataSets.length > 0 && (
 				<>
-					{config.dataSets.map((dsConfig, index) => (
-						<DataSourceComponent
-							key={index}
-							useDataSource={dsConfig.useDataSources[0]}
-							query={
-								{
-									where:
-										queryByDsId[dsConfig.useDataSources[0].dataSourceId] ||
-										"1=1",
-									outFields: ["*"],
-									returnGeometry: true
-								} as FeatureLayerQueryParams
-							}
-							widgetId={props.widgetId}
-						>
-							{(ds: DataSource) => {
-								if (ds && ds.getStatus() === DataSourceStatus.Loaded) {
-									setDatasources((prevDatasources) => {
-										// Avoids adding duplicates
-										if (!prevDatasources.includes(ds)) {
-											return [...prevDatasources, ds]
-										}
-										return prevDatasources
-									})
-									// Data source is loaded — populate calendar events
-									fillCalendarEvents(ds, dsConfig.asMutable({ deep: true }))
+					{config.dataSets.map((dsConfig) => {
+						const matchedDataSource = props.useDataSources?.find(
+							(widgetDataSource) =>
+								widgetDataSource.dataSourceId === dsConfig.dataSourceId
+						)
+						if (!matchedDataSource) return null
+
+						return (
+							<DataSourceComponent
+								key={dsConfig.id}
+								useDataSource={Immutable(matchedDataSource)}
+								query={
+									{
+										where: queryByDsId[matchedDataSource.dataSourceId] || "1=1",
+										outFields: ["*"],
+										returnGeometry: true
+									} as FeatureLayerQueryParams
 								}
-								return null
-							}}
-						</DataSourceComponent>
-					))}
+								widgetId={props.widgetId}
+							>
+								{(loadedDataSource: DataSource) => {
+									if (
+										loadedDataSource &&
+										loadedDataSource.getStatus() === DataSourceStatus.Loaded
+									) {
+										setDatasources((prevDatasources) => {
+											if (!prevDatasources.includes(loadedDataSource)) {
+												return [...prevDatasources, loadedDataSource]
+											}
+											return prevDatasources
+										})
+										fillCalendarEvents(
+											loadedDataSource,
+											dsConfig.asMutable({ deep: true })
+										)
+									}
+									return null
+								}}
+							</DataSourceComponent>
+						)
+					})}
 				</>
 			)}
 		</>

@@ -1,5 +1,4 @@
 import type { ImmutableObject } from "seamless-immutable"
-import type { UseDataSource } from "jimu-core"
 
 export interface colorset {
 	id: string
@@ -8,10 +7,9 @@ export interface colorset {
 }
 
 export interface data {
-	id: string // Unique ID for React keys
-	useDataSources?: UseDataSource[]
+	id: string
+	dataSourceId?: string
 
-	// Individual field keys selected in the settings. Store as a single field name (jimuName).
 	labelField?: string
 	startDateField?: string
 	endDateField?: string
@@ -19,7 +17,6 @@ export interface data {
 	descriptionField?: string
 	colorsetField?: string
 
-	// Color settings
 	defaultEventColor?: string
 	colorsets?: colorset[]
 }
