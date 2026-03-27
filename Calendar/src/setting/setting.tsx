@@ -29,6 +29,51 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 		config?.dataSets?.[0]?.id
 	)
 
+	// Migrate old config format: move useDataSources from each dataset to widget-level props
+	React.useEffect(() => {
+		if (!config?.dataSets) return
+		const mutableDataSets = config.dataSets.asMutable({ deep: true })
+		const needsMigration = mutableDataSets.some(
+			(dataset: any) =>
+				Array.isArray(dataset.useDataSources) &&
+				dataset.useDataSources.length > 0
+		)
+		if (!needsMigration) return
+
+		const collectedDataSources: UseDataSource[] = [
+			...(props.useDataSources || [])
+		]
+		const migratedDataSets = mutableDataSets.map((dataset: any) => {
+			if (
+				!Array.isArray(dataset.useDataSources) ||
+				dataset.useDataSources.length === 0
+			) {
+				return dataset
+			}
+			const legacyDataSource = dataset.useDataSources[0]
+			if (
+				!collectedDataSources.some(
+					(existing) => existing.dataSourceId === legacyDataSource.dataSourceId
+				)
+			) {
+				collectedDataSources.push(legacyDataSource)
+			}
+			const { useDataSources: _removed, ...rest } = dataset
+			return { ...rest, dataSourceId: legacyDataSource.dataSourceId }
+		})
+
+		const newConfig = (config || Immutable({})).set(
+			"dataSets",
+			migratedDataSets
+		)
+		props.onSettingChange({
+			id,
+			config: newConfig,
+			useDataSources: collectedDataSources
+		})
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [])
+
 	// helper to get a mutable copy of datasets
 	const getDataSets = () =>
 		config?.dataSets ? config.dataSets.asMutable({ deep: true }) : []
