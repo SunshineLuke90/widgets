@@ -1,0 +1,72 @@
+name: Build widgets to GH Pages
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  builder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      - name: Download Experience Builder
+        run: |
+          URL=$(curl -s 'https://downloads.arcgis.com/dms/rest/download/secured/arcgis-experience-builder-1.19.zip?f=json&folder=software%2FExperienceBuilder%2F1.19' | jq -r '.url')
+          curl -L -o exb.zip "$URL"
+
+      - name: Unzip Experience Builder
+        run: unzip -q exb.zip -d exb
+
+      - name: Checkout widgets
+        uses: actions/checkout@v4
+        with:
+          repository: SunshineLuke90/widgets
+          path: exb/client/your-extensions/widgets
+
+      - name: NPM install in client folder
+        run: npm ci
+        working-directory: exb/client
+
+      - name: Perform Linter
+        run: npx eslint
+        working-directory: exb/client
+
+      - name: Build widgets
+        run: npm run build:prod
+        working-directory: exb/client
+
+      - name: Copy built widgets to GH Pages folder
+        run: |
+          mkdir -p gh-pages/widgets
+          for widget in exb/client/your-extensions/widgets/*/; do
+            name=$(basename "$widget")
+            if [ -d "exb/client/dist/widgets/$name" ]; then
+              cp -r "exb/client/dist/widgets/$name" gh-pages/widgets/
+            fi
+          done
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: gh-pages
+
+  deploy:
+    needs: builder
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
