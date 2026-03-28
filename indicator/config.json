@@ -1,0 +1,23 @@
+{
+  "indType": "Statistic",
+  "indValueType": "value",
+  "refType": "none",
+  "mainStatisticType": "count",
+  "conditionalFormat": false,
+  "topText": "",
+  "topTextColor": "#000000",
+  "topTextMaxSize": "small",
+  "middleText": "{calculated/value}",
+  "middleTextColor": "#000000",
+  "middleTextMaxSize": "large",
+  "bottomText": "",
+  "bottomTextColor": "#000000",
+  "bottomTextMaxSize": "medium",
+  "iconPosition": "left",
+  "digitGrouping": false,
+  "valueMinDecimalPlaces": 0,
+  "valueMaxDecimalPlaces": 1,
+  "valuePrefix": "",
+  "valueSuffix": "",
+  "valueUnitPrefix": true
+}

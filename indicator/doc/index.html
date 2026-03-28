@@ -1,0 +1,62 @@
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	<!--Import Calcite Stylesheet via CDN. This is easier than having to create react stuff for each static page-->
+	<script
+		type="module"
+		src="https://js.arcgis.com/calcite-components/3.2.1/calcite.esm.js"
+	></script>
+
+	<!--Import Noto Sans so that the website draws properly-->
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link
+		href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wdth,wght@0,62.5..100,100..900;1,62.5..100,100..900&display=swap"
+		rel="stylesheet"
+	/>
+
+	<!--Reference component stylesheet-->
+	<link rel="stylesheet" href="doc/styles.css" />
+
+	<!--Webpage Title-->
+	<title>Indicator Help</title>
+</head>
+<body>
+	<div class="header noto-sans-heavy">
+		<h1>Indicator Widget</h1>
+	</div>
+	<p>
+		This widget is designed to mimick the functionality of the ArcGIS dashboards
+		indicator element, but within Experience Builder. The reason this was needed
+		in the first place is because Experience Builder does not have a good way to
+		display text that fills the entire space of the widget, dynamically. This
+		widget seeks to remedy that, by providing a configuration interface that is
+		as close as possible to the interface within ArcGIS Dashboards.
+	</p>
+	<h2>A few deviations worth noting:</h2>
+	<p>
+		The entire "General" page from the ArcGIS Dashboards element is gone. Most
+		of the content within the general section pertained to a header element that
+		the user could configure, as well as an info button that would provide some
+		extra information to an end user on the indicator. This is all really useful
+		stuff! However, users will likely want to do a lot of configuration when it
+		comes to the format of the header, info button, etc. Thankfully, Experience
+		Builder has plenty of tools for you to build your own informational UI, so
+		this widget does not provide any of those features. If those are features
+		you still want, use a column widget, text widget, button widget, some
+		windows... go wild.
+	</p>
+	<p>
+		One other thing that is slightly different is the use of the icon. You can
+		no longer upload custom .svg elements, but you are able to upload just about
+		any .png or other graphic elements. I'm not to worried about this tradeoff,
+		but if it becomes a problem, I may look at adding ability to add .svg
+		graphics as well.
+	</p>
+	<p>
+		Visit this widget's
+		<a href="https://www.npmjs.com/package/exb-indicator">NPM page</a> for more
+		information. <br /><br />This Experience Builder widget was developed by
+		Lucius Creamer.
+	</p>
+</body>
