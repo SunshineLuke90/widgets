@@ -4,13 +4,14 @@ import { type AllWidgetProps, type DataSource, DataSourceComponent, type Feature
 import { JimuMapViewComponent, type JimuMapView } from 'jimu-arcgis'
 import type { IMConfig } from '../config'
 import defaultMessages from './translations/default'
+// @ts-expect-error - No types available for this package
 import './style.css'
 import { CalciteSlider } from '@esri/calcite-components-react'
 import FeatureLayer from 'esri/layers/FeatureLayer'
 import { createPortal } from 'react-dom'
 
 
-export default function Widget(props: AllWidgetProps<IMConfig>) {
+export default function Widget (props: AllWidgetProps<IMConfig>) {
   const { config, useMapWidgetIds } = props
   const [jimuMapView, setJimuMapView] = React.useState<JimuMapView>(null)
   const [layerVis, setLayerVis] = useState(false)
@@ -20,7 +21,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
   let toggleLayers = []
   const [activeLayerIds, setActiveLayerIds] = useState([])
 
-  let timer
+  let timer: any = null
 
   const isConfigured = useMapWidgetIds?.length > 0
 
@@ -55,10 +56,10 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
       setActiveName(selectedRecords[0].getFieldValue(config.nameField))
       toggleArr = selectedRecords[0].getFieldValue(config.toggleItemUrlArrayField).split(',')
       setNumLayer(toggleArr.length)
-      const layers = []
-      const layerIds = []
+      const layers: any = []
+      const layerIds: any = []
 
-      toggleArr.forEach((item, idx) => {
+      toggleArr.forEach((item: any, idx: any) => {
         layers.push(
           new FeatureLayer({
             url: selectedRecords[0].getFieldValue(config.toggleBaseUrlField) + "/" + item,
@@ -101,12 +102,13 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
     )
   }
 
-  const dataRender = (ds: DataSource, info: IMDataSourceInfo) => {
+  const dataRender = (ds: DataSource, info: IMDataSourceInfo): null => {
     const selectedRecords = ds.getSelectedRecords()
     if (selectedRecords.length <= 0) {
       return null
     }
     handleFIMChange(selectedRecords)
+    return null
   }
 
   const sliderPortal = (layerVis && activeName) ? createPortal(
@@ -153,7 +155,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
         calcite-hydrated
         style={{ width: '90%', marginLeft: 'auto', marginRight: 'auto', marginTop: 30 }}
         onCalciteSliderInput={
-          (e) => { handleViewChange(activeLayerIds, ("sixseven" + e.target.value)) }
+          (e: any) => { handleViewChange(activeLayerIds, ("sixseven" + e.target.value)) }
         }
       />
     </div>,

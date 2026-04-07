@@ -30,7 +30,7 @@ import {
 import TextStyleSetting from "./text-style-setting"
 import NumberFormatSetting from "./number-format-setting"
 
-export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
+export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 	const { id, config, onSettingChange } = props
 	const [expressionvisibility, setExpressionVisibility] = React.useState(false)
 	const [refExpressionVisibility, setRefExpressionVisibility] =
@@ -276,12 +276,12 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 						>
 							<SettingRow>
 								<DataSourceSelector
-									types={Immutable([DataSourceTypes.FeatureLayer])}
+									types={Immutable.from([DataSourceTypes.FeatureLayer])}
 									mustUseDataSource={true}
 									useDataSources={
 										props.useDataSources?.[0]
-											? Immutable([props.useDataSources[0]])
-											: Immutable([])
+											? Immutable.from([props.useDataSources[0]])
+											: Immutable.from([])
 									}
 									useDataSourcesEnabled={props.useDataSourcesEnabled}
 									onChange={onDataSourceChange}
@@ -454,8 +454,8 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 										<FieldSelector
 											useDataSources={
 												props.useDataSources?.[0]
-													? Immutable([props.useDataSources[0]])
-													: Immutable([])
+													? Immutable.from([props.useDataSources[0]])
+													: Immutable.from([])
 											}
 											useDropdown={true}
 											isMultiple={false}
@@ -479,7 +479,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 												(config.indType === "Statistic" &&
 													config.mainStatisticType !== "count") ||
 												config.indType === "Feature"
-													? Immutable([
+													? Immutable.from([
 															"NUMBER" as JimuFieldType,
 															"DATE" as JimuFieldType,
 															"DATE_ONLY" as JimuFieldType,
@@ -567,12 +567,12 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 								<>
 									<SettingRow>
 										<DataSourceSelector
-											types={Immutable([DataSourceTypes.FeatureLayer])}
+											types={Immutable.from([DataSourceTypes.FeatureLayer])}
 											mustUseDataSource={true}
 											useDataSources={
 												props.useDataSources?.[1]
-													? Immutable([props.useDataSources[1]])
-													: Immutable([])
+													? Immutable.from([props.useDataSources[1]])
+													: Immutable.from([])
 											}
 											useDataSourcesEnabled={props.useDataSourcesEnabled}
 											onChange={onRefDataSourceChange}
@@ -692,8 +692,8 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 										<FieldSelector
 											useDataSources={
 												props.useDataSources?.[1]
-													? Immutable([props.useDataSources[1]])
-													: Immutable([])
+													? Immutable.from([props.useDataSources[1]])
+													: Immutable.from([])
 											}
 											useDropdown={true}
 											isMultiple={false}
@@ -716,7 +716,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 											types={
 												config.refStatisticType === "count"
 													? undefined
-													: Immutable([
+													: Immutable.from([
 															"NUMBER" as JimuFieldType,
 															"DATE" as JimuFieldType,
 															"DATE_ONLY" as JimuFieldType,
@@ -761,8 +761,8 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 									<FieldSelector
 										useDataSources={
 											props.useDataSources?.[0]
-												? Immutable([props.useDataSources[0]])
-												: Immutable([])
+												? Immutable.from([props.useDataSources[0]])
+												: Immutable.from([])
 										}
 										useDropdown={true}
 										isMultiple={false}
@@ -788,10 +788,10 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 										}}
 										selectedFields={
 											props.useDataSources?.[0]?.fields?.[1]
-												? Immutable([props.useDataSources[0].fields[1]])
-												: Immutable([])
+												? Immutable.from([props.useDataSources[0].fields[1]])
+												: Immutable.from([])
 										}
-										types={Immutable([
+										types={Immutable.from([
 											"NUMBER" as JimuFieldType,
 											"DATE" as JimuFieldType,
 											"DATE_ONLY" as JimuFieldType,

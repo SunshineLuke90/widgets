@@ -17,13 +17,13 @@ import {
 	CollapsablePanel,
 	NumericInput
 } from "jimu-ui"
-import type { IMConfig, colorset, data } from "../config"
+import type { IMConfig, Config, colorset, data } from "../config"
 import {
 	DataSourceSelector,
 	FieldSelector
 } from "jimu-ui/advanced/data-source-selector"
 
-export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
+export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 	const { id, config } = props
 	const [activeTab, setActiveTab] = React.useState<string | undefined>(
 		config?.dataSets?.[0]?.id
@@ -62,7 +62,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 			return { ...rest, dataSourceId: legacyDataSource.dataSourceId }
 		})
 
-		const newConfig = (config || Immutable({})).set(
+		const newConfig = (config || Immutable.from({} as Config)).set(
 			"dataSets",
 			migratedDataSets
 		)
@@ -85,7 +85,10 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 		)
 		if (datasetIndex === -1) return
 		datasets[datasetIndex] = { ...datasets[datasetIndex], ...newData }
-		const newConfig = (config || Immutable({})).set("dataSets", datasets)
+		const newConfig = (config || Immutable.from({} as Config)).set(
+			"dataSets",
+			datasets
+		)
 		props.onSettingChange({ id, config: newConfig })
 	}
 
@@ -97,7 +100,9 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 		const oldDataSourceId = dataset.dataSourceId
 
 		// Remove old data source from widget-level useDataSources (if any)
-		let updatedWidgetDataSources = (props.useDataSources || []).filter(
+		let updatedWidgetDataSources: UseDataSource[] = [
+			...(props.useDataSources || [])
+		].filter(
 			(widgetDataSource) => widgetDataSource.dataSourceId !== oldDataSourceId
 		)
 
@@ -119,18 +124,21 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 			datasets[datasetIndex] = {
 				...datasets[datasetIndex],
 				dataSourceId: newDataSource?.dataSourceId,
-				labelField: undefined,
-				startDateField: undefined,
-				endDateField: undefined,
-				allDayField: undefined,
-				descriptionField: undefined,
-				colorsetField: undefined,
+				labelField: undefined as string | undefined,
+				startDateField: undefined as string | undefined,
+				endDateField: undefined as string | undefined,
+				allDayField: undefined as string | undefined,
+				descriptionField: undefined as string | undefined,
+				colorsetField: undefined as string | undefined,
 				defaultEventColor: "#3788d8",
 				colorsets: []
 			}
 		}
 
-		const newConfig = (config || Immutable({})).set("dataSets", datasets)
+		const newConfig = (config || Immutable.from({} as Config)).set(
+			"dataSets",
+			datasets
+		)
 
 		props.onSettingChange({
 			id,
@@ -142,7 +150,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 	}
 
 	const addDataset = () => {
-		const newDataset = {
+		const newDataset: data = {
 			id: `ds_${utils.getUUID()}`,
 			labelField: undefined,
 			startDateField: undefined,
@@ -155,7 +163,10 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 		}
 		const datasets = getDataSets()
 		datasets.push(newDataset)
-		const newConfig = (config || Immutable({})).set("dataSets", datasets)
+		const newConfig = (config || Immutable.from({} as Config)).set(
+			"dataSets",
+			datasets
+		)
 		props.onSettingChange({ id, config: newConfig })
 	}
 
@@ -164,12 +175,13 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 		const remainingDatasets = getDataSets().filter(
 			(dataset: any) => dataset.id !== datasetId
 		)
-		const newConfig = (config || Immutable({})).set(
+		const newConfig = (config || Immutable.from({} as Config)).set(
 			"dataSets",
 			remainingDatasets
 		)
 
-		let updatedWidgetDataSources = props.useDataSources || []
+		let updatedWidgetDataSources: UseDataSource[] = (props.useDataSources ||
+			[]) as UseDataSource[]
 		if (toRemove?.dataSourceId) {
 			const stillUsed = remainingDatasets.some(
 				(dataset) => dataset.dataSourceId === toRemove.dataSourceId
@@ -300,14 +312,14 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 								(dataset: ImmutableObject<data>, datasetIndex: number) => {
 									// Key change!
 									const datasetUseDataSources = dataset.dataSourceId
-										? Immutable(
+										? Immutable.from(
 												(props.useDataSources || []).filter(
 													(widgetDataSource) =>
 														widgetDataSource.dataSourceId ===
 														dataset.dataSourceId
 												)
 											)
-										: Immutable([])
+										: Immutable.from([] as UseDataSource[])
 
 									return (
 										<Tab
@@ -318,7 +330,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 										>
 											<SettingRow label={"Data Source"} level={1} flow={"wrap"}>
 												<DataSourceSelector
-													types={Immutable([DataSourceTypes.FeatureLayer])}
+													types={Immutable.from([DataSourceTypes.FeatureLayer])}
 													mustUseDataSource={true}
 													isMultiple={false}
 													useDataSources={datasetUseDataSources}
@@ -352,7 +364,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 															}}
 															selectedFields={
 																dataset?.labelField
-																	? Immutable([dataset.labelField])
+																	? Immutable.from([dataset.labelField])
 																	: datasetUseDataSources?.[0]?.fields
 															}
 														/>
@@ -376,7 +388,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 															}}
 															selectedFields={
 																dataset?.startDateField
-																	? Immutable([dataset.startDateField])
+																	? Immutable.from([dataset.startDateField])
 																	: datasetUseDataSources?.[0]?.fields
 															}
 														/>
@@ -400,7 +412,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 															}}
 															selectedFields={
 																dataset?.endDateField
-																	? Immutable([dataset.endDateField])
+																	? Immutable.from([dataset.endDateField])
 																	: datasetUseDataSources?.[0]?.fields
 															}
 														/>
@@ -424,7 +436,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 															}}
 															selectedFields={
 																dataset?.allDayField
-																	? Immutable([dataset.allDayField])
+																	? Immutable.from([dataset.allDayField])
 																	: datasetUseDataSources?.[0]?.fields
 															}
 														/>
@@ -449,7 +461,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 															}}
 															selectedFields={
 																dataset?.descriptionField
-																	? Immutable([dataset.descriptionField])
+																	? Immutable.from([dataset.descriptionField])
 																	: datasetUseDataSources?.[0]?.fields
 															}
 														/>
@@ -500,7 +512,9 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 																			}}
 																			selectedFields={
 																				dataset?.colorsetField
-																					? Immutable([dataset.colorsetField])
+																					? Immutable.from([
+																							dataset.colorsetField
+																						])
 																					: datasetUseDataSources?.[0]?.fields
 																			}
 																		/>

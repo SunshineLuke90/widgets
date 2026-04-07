@@ -18,7 +18,7 @@ import {
 } from "jimu-ui/advanced/data-source-selector"
 import { IconPicker } from "jimu-ui/advanced/resource-selector"
 
-export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
+export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 	const onMapSelected = (useMapWidgetIds: string[]) => {
 		props.onSettingChange({
 			id: props.id,
@@ -47,7 +47,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 		})
 	}
 
-	const onIconChange = (icon) => {
+	const onIconChange = (icon: any) => {
 		props.onSettingChange({
 			id: props.id,
 			config: {
@@ -77,7 +77,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 				</SettingRow>
 				<SettingRow>
 					<DataSourceSelector
-						types={Immutable([DataSourceTypes.FeatureLayer])}
+						types={Immutable.from([DataSourceTypes.FeatureLayer])}
 						mustUseDataSource={true}
 						useDataSources={props.useDataSources}
 						useDataSourcesEnabled={props.useDataSourcesEnabled}

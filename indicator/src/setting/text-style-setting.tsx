@@ -50,7 +50,7 @@ interface TextStyleSettingProps {
 	intl: any
 }
 
-export default function TextStyleSetting({
+export default function TextStyleSetting ({
 	prefix,
 	suffix = "",
 	label,

@@ -49,7 +49,7 @@ jobs:
       - name: Download Experience Builder
         shell: pwsh
         run: |
-          $jsonResponse = Invoke-RestMethod -Uri 'https://downloads.arcgis.com/dms/rest/download/secured/arcgis-experience-builder-1.19.zip?f=json&folder=software%2FExperienceBuilder%2F1.19'
+          $jsonResponse = Invoke-RestMethod -Uri 'https://downloads.arcgis.com/dms/rest/download/secured/arcgis-experience-builder-1.20.zip?f=json&folder=software%2FExperienceBuilder%2F1.20'
           Invoke-WebRequest -Uri $jsonResponse.url -OutFile exb.zip
 
       - name: Unzip Experience Builder

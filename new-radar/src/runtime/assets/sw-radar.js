@@ -9,7 +9,7 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(self.clients.claim())
 })
 
-function canonicalizeWmsUrl(rawUrl) {
+function canonicalizeWmsUrl (rawUrl) {
     try {
         const u = new URL(rawUrl)
         // keep origin + pathname, sort search params for a canonical key

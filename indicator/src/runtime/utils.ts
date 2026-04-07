@@ -12,7 +12,7 @@ const FONT_SIZE_SCALE: { [key: string]: number } = {
 	"xx-large": 5
 }
 
-export function fontSizeToFlexGrow(size: string): number {
+export function fontSizeToFlexGrow (size: string): number {
 	return FONT_SIZE_SCALE[size] ?? 2.5
 }
 
@@ -25,7 +25,7 @@ export function fontSizeToFlexGrow(size: string): number {
  * Example: applyUnitPrefix(2518, 1) → "2.5k"
  *          applyUnitPrefix(2518, 2) → "2.52k"
  */
-export function applyUnitPrefix(value: number, maxDecimalPlaces = 1): string {
+export function applyUnitPrefix (value: number, maxDecimalPlaces = 1): string {
 	const abs = Math.abs(value)
 	const sign = value < 0 ? "-" : ""
 
@@ -38,7 +38,7 @@ export function applyUnitPrefix(value: number, maxDecimalPlaces = 1): string {
 	return `${sign}${fmt(abs)}`
 }
 
-function trimDecimals(value: number, maxDecimals: number): string {
+function trimDecimals (value: number, maxDecimals: number): string {
 	const factor = Math.pow(10, maxDecimals)
 	const rounded = Math.round(value * factor) / factor
 	// Use a plain locale-independent representation to avoid locale issues in tests
@@ -61,7 +61,7 @@ export interface FormatConfig {
  * Format a numeric value according to the provided format config.
  * Returns "--" when value is null or undefined.
  */
-export function formatValue(
+export function formatValue (
 	value: number | null | undefined,
 	cfg: FormatConfig
 ): string {
@@ -96,7 +96,7 @@ export interface ComputedValues {
 /**
  * Compute all derived indicator values from the main and reference values.
  */
-export function computeAllValues(
+export function computeAllValues (
 	main: number | null,
 	ref: number | null
 ): ComputedValues {
@@ -134,7 +134,7 @@ export function computeAllValues(
  * Replace all `{calculated/<key>}` tokens in `text` with the matching entry
  * from `values`.  Tokens without a matching key are left unchanged.
  */
-export function resolveExpressions(
+export function resolveExpressions (
 	text: string | undefined | null,
 	values: { [key: string]: string }
 ): string {
@@ -150,7 +150,7 @@ export function resolveExpressions(
  * Build the string value map used in expression resolution for an indicator,
  * given pre-computed values and the widget config.
  */
-export function buildExpressionValues(
+export function buildExpressionValues (
 	computed: ComputedValues,
 	config: Pick<
 		Config,
@@ -215,7 +215,7 @@ export function buildExpressionValues(
  * Merge two WHERE clauses with AND.
  * "1=1" is treated as "no filter" and is omitted from the result.
  */
-export function mergeWhereClauses(a: string, b: string): string {
+export function mergeWhereClauses (a: string, b: string): string {
 	const cleanA = !a || a === "1=1" ? "" : a
 	const cleanB = !b || b === "1=1" ? "" : b
 	if (!cleanA && !cleanB) return "1=1"
@@ -244,7 +244,7 @@ export interface ActiveStyles {
  * the value is below the reference.  When `isBelow` is true, the "Below"
  * variant from config is used (falling back to the default if unset).
  */
-export function getActiveStyles(
+export function getActiveStyles (
 	config: Pick<
 		Config,
 		| "topText"
@@ -295,7 +295,7 @@ export function getActiveStyles(
 
 // ── Relative time ─────────────────────────────────────────────────────────────
 
-export function relativeTime(date: Date): string {
+export function relativeTime (date: Date): string {
 	const diff = Math.floor((Date.now() - date.getTime()) / 1000)
 	if (diff < 60) return "Updated just now"
 	if (diff < 3600) return `Updated ${Math.floor(diff / 60)}m ago`

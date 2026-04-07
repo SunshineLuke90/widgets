@@ -5,9 +5,10 @@ import { DataSourceSelector, FieldSelector } from 'jimu-ui/advanced/data-source-
 import type { IMConfig } from '../config'
 import { JimuMapViewComponent, type JimuMapView } from 'jimu-arcgis'
 import defaultMessages from './translations/default'
+// @ts-expect-error - No types available for this package
 import './style.css'
 
-export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
+export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
     const { id, config, useMapWidgetIds } = props
     const [jimuMapView, setJimuMapView] = React.useState<JimuMapView>(null)
 
@@ -28,7 +29,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
     // Save field selection to widget config under separate keys so each FieldSelector is independent
     const onFieldChange = (key: string, fields: IMFieldSchema[]) => {
         const fieldName = fields?.[0]?.jimuName ?? null
-        const newConfig = (config || Immutable({})).set(key, fieldName)
+        const newConfig = (config || Immutable.from({})).set(key, fieldName)
         props.onSettingChange({ id, config: newConfig })
     }
 
@@ -55,7 +56,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
                 <SettingSection title="Field info">
                     <SettingRow>
                         <DataSourceSelector
-                            types={Immutable([DataSourceTypes.FeatureLayer])}
+                            types={Immutable.from([DataSourceTypes.FeatureLayer])}
                             mustUseDataSource={true}
                             useDataSources={props.useDataSources}
                             useDataSourcesEnabled={props.useDataSourcesEnabled}
@@ -71,7 +72,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
                                 isMultiple={false}
                                 isDataSourceDropDownHidden={true}
                                 onChange={(fields) => { onFieldChange('toggleBaseUrlField', fields) }}
-                                selectedFields={config?.toggleBaseUrlField ? Immutable([config.toggleBaseUrlField]) : props.useDataSources?.[0]?.fields}
+                                selectedFields={config?.toggleBaseUrlField ? Immutable.from([config.toggleBaseUrlField]) : props.useDataSources?.[0]?.fields}
                             />
                         </SettingRow>
                     </SettingSection>
@@ -84,7 +85,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
                                 isMultiple={false}
                                 isDataSourceDropDownHidden={true}
                                 onChange={(fields) => { onFieldChange('toggleItemUrlArrayField', fields) }}
-                                selectedFields={config?.toggleItemUrlArrayField ? Immutable([config.toggleItemUrlArrayField]) : props.useDataSources?.[0]?.fields}
+                                selectedFields={config?.toggleItemUrlArrayField ? Immutable.from([config.toggleItemUrlArrayField]) : props.useDataSources?.[0]?.fields}
                             />
                         </SettingRow>
                     </SettingSection>
@@ -97,7 +98,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
                                 isMultiple={false}
                                 isDataSourceDropDownHidden={true}
                                 onChange={(fields) => { onFieldChange('constantUrlArrayField', fields) }}
-                                selectedFields={config?.constantUrlArrayField ? Immutable([config.constantUrlArrayField]) : props.useDataSources?.[0]?.fields}
+                                selectedFields={config?.constantUrlArrayField ? Immutable.from([config.constantUrlArrayField]) : props.useDataSources?.[0]?.fields}
                             />
                         </SettingRow>
                     </SettingSection>
@@ -110,7 +111,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
                                 isMultiple={false}
                                 isDataSourceDropDownHidden={true}
                                 onChange={(fields) => { onFieldChange('nameField', fields) }}
-                                selectedFields={config?.nameField ? Immutable([config.nameField]) : props.useDataSources?.[0]?.fields}
+                                selectedFields={config?.nameField ? Immutable.from([config.nameField]) : props.useDataSources?.[0]?.fields}
                             />
                         </SettingRow>
                     </SettingSection>
@@ -123,7 +124,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
                                 isMultiple={false}
                                 isDataSourceDropDownHidden={true}
                                 onChange={(fields) => { onFieldChange('minHeightField', fields) }}
-                                selectedFields={config?.minHeightField ? Immutable([config.minHeightField]) : props.useDataSources?.[0]?.fields}
+                                selectedFields={config?.minHeightField ? Immutable.from([config.minHeightField]) : props.useDataSources?.[0]?.fields}
                             />
                         </SettingRow>
                     </SettingSection>
@@ -136,7 +137,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
                                 isMultiple={false}
                                 isDataSourceDropDownHidden={true}
                                 onChange={(fields) => { onFieldChange('maxHeightField', fields) }}
-                                selectedFields={config?.maxHeightField ? Immutable([config.maxHeightField]) : props.useDataSources?.[0]?.fields}
+                                selectedFields={config?.maxHeightField ? Immutable.from([config.maxHeightField]) : props.useDataSources?.[0]?.fields}
                             />
                         </SettingRow>
                     </SettingSection>

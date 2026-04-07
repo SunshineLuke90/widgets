@@ -5,25 +5,27 @@ import {
 	type FeatureLayerQueryParams
 } from "jimu-core"
 import noUiSlider, { type API as NoUiSliderAPI, PipsMode } from "nouislider"
+// @ts-expect-error - No types available for this package
 import "nouislider/dist/nouislider.css"
 import type { IMConfig } from "../config"
+// @ts-expect-error - No types available for this package
 import "./style.css"
 import { Paper } from "jimu-ui"
 
 const { useState, useCallback, useRef, useMemo, useEffect } = React
 
 /** Format a number with comma separators. */
-function formatNumber(val: number): string {
+function formatNumber (val: number): string {
 	return val.toLocaleString()
 }
 
 /** Format a date/epoch for display. */
-function formatDate(val: number | Date): string {
+function formatDate (val: number | Date): string {
 	const d = typeof val === "number" ? new Date(val) : val
 	return d.toLocaleDateString()
 }
 
-export default function Widget(props: AllWidgetProps<IMConfig>) {
+export default function Widget (props: AllWidgetProps<IMConfig>) {
 	const { config, id: widgetId, useDataSources } = props
 
 	const isConfigured =

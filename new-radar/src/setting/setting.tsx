@@ -8,10 +8,11 @@ import { React } from "jimu-core"
 import type { IMConfig } from "../config"
 import { Option, Select } from "jimu-ui"
 import { JimuMapViewComponent, type JimuMapView } from "jimu-arcgis"
+import type Layer from "esri/layers/Layer"
 
-export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
+export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 	const [jimuMapView, setJimuMapView] = React.useState<JimuMapView>(null)
-	const [layers, setLayers] = React.useState<__esri.Layer[]>(null)
+	const [layers, setLayers] = React.useState<Layer[]>(null)
 
 	const onMapSelected = (useMapWidgetIds: string[]) => {
 		props.onSettingChange({

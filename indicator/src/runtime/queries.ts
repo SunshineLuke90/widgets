@@ -12,7 +12,7 @@ const { QueryScope: QScope } = require("jimu-core") as {
 
 // ── SQL expression helper ─────────────────────────────────────────────────────
 
-export function getConfigWhere(
+export function getConfigWhere (
 	ds: ArcGISQueriableDataSource,
 	expr: any
 ): string {
@@ -26,7 +26,7 @@ export function getConfigWhere(
 
 // ── Statistic query ───────────────────────────────────────────────────────────
 
-export async function queryStatValue(
+export async function queryStatValue (
 	ds: ArcGISQueriableDataSource,
 	field: string | undefined,
 	statisticType: string,
@@ -77,7 +77,7 @@ export async function queryStatValue(
  *
  * Works for a single field or multiple fields in one query.
  */
-export async function queryFeatureFieldValues(
+export async function queryFeatureFieldValues (
 	ds: ArcGISQueriableDataSource,
 	fields: string[],
 	configWhere: string

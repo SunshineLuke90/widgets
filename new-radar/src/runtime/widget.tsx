@@ -7,6 +7,7 @@ import {
 	CalciteTooltip
 } from "@esri/calcite-components-react"
 import WMSLayer from "@arcgis/core/layers/WMSLayer.js"
+// @ts-expect-error - No types available for this package
 import "./style.css"
 import { JimuMapViewComponent, type JimuMapView } from "jimu-arcgis"
 import {
@@ -27,6 +28,8 @@ import {
 	cleanup
 } from "./radar-utils"
 import type { IMConfig } from "../config"
+import * as reactiveUtils from "esri/core/reactiveUtils"
+import type MapView from "esri/views/MapView"
 
 // =============================================================================
 // CUSTOM HOOKS
@@ -36,7 +39,7 @@ import type { IMConfig } from "../config"
  * Combines useState and useRef to avoid stale closure issues in intervals/callbacks
  * while still triggering React re-renders when needed
  */
-function useRefState<T>(
+function useRefState<T> (
 	initialValue: T
 ): [T, React.RefObject<T>, (value: T) => void] {
 	const [state, setState] = React.useState(initialValue)
@@ -54,7 +57,7 @@ function useRefState<T>(
 // COMPONENT
 // =============================================================================
 
-export default function Widget(props: AllWidgetProps<IMConfig>) {
+export default function Widget (props: AllWidgetProps<IMConfig>) {
 	// -------------------------------------------------------------------------
 	// State and Refs
 	// -------------------------------------------------------------------------
@@ -151,9 +154,9 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 	React.useEffect(() => {
 		if (!wmsBase || !layerName || !jimuMapView) return
 
-		let view: __esri.MapView
-		;(async function init() {
-			view = (await jimuMapView.whenJimuMapViewLoaded()).view as __esri.MapView
+		let view: MapView
+		;(async function init () {
+			view = (await jimuMapView.whenJimuMapViewLoaded()).view as MapView
 			setStatusText("Status: loading...")
 			try {
 				// --- Fetch WMS capabilities and create layer ---
@@ -252,13 +255,12 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 					}, delay)
 				}
 
-				viewWatchHandleRef.current =
-					view.watch?.("stationary", (isStationary) => {
+				viewWatchHandleRef.current = reactiveUtils.watch(
+					() => view.stationary,
+					(isStationary) => {
 						if (isStationary) schedulePrefetch(600)
-					}) ??
-					view.on?.("stationary", () => {
-						schedulePrefetch(600)
-					})
+					}
+				)
 
 				// --- Initial prefetch after view is ready ---
 				await waitForViewReady(view)
@@ -375,7 +377,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 					min={0}
 					max={Math.max(0, frames.length - 1)}
 					value={idx}
-					onCalciteSliderInput={(e) => {
+					onCalciteSliderInput={(e: any) => {
 						const val = Number(e.target.value)
 						setIdx(val)
 						applyFrameRef.current?.(val)
@@ -417,7 +419,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 						step={1}
 						ticks={1}
 						snap
-						onCalciteSliderInput={(e) => {
+						onCalciteSliderInput={(e: any) => {
 							setPlaySpeed(e.target.value as number)
 							restartAnimationRef.current?.()
 						}}
@@ -429,7 +431,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 					<CalciteSelect
 						label="Radar Type"
 						value={layerName}
-						onCalciteSelectChange={(e) => {
+						onCalciteSelectChange={(e: any) => {
 							jimuMapView.view.map.remove(wmsRef.current)
 							setPlaying(false)
 							setLayerName(e.target.value)

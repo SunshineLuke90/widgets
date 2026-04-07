@@ -8,15 +8,17 @@ import {
 import { IconPicker } from "jimu-ui/advanced/resource-selector"
 import { Button, TextInput, Checkbox, Switch, NumericInput } from "jimu-ui"
 import { JimuMapViewComponent, type JimuMapView } from "jimu-arcgis"
+import type Layer from "esri/layers/Layer"
 import type { IMConfig, ABLSView } from "../config"
 import defaultMessages from "./translations/default"
 import { getLayersFromJimuMapView } from "./utils"
+// @ts-expect-error - No types available for this package
 import "./style.css"
 
-export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
+export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 	const { id, config, onSettingChange, useMapWidgetIds } = props
 	const [jimuMapView, setJimuMapView] = React.useState<JimuMapView>(null)
-	const [layers, setLayers] = React.useState<__esri.Layer[]>(null)
+	const [layers, setLayers] = React.useState<Layer[]>(null)
 
 	const onMapSelected = (useMapWidgetIds: string[]) => {
 		onSettingChange({

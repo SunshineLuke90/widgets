@@ -12,7 +12,7 @@ import { SettingRow, SettingSection } from "jimu-ui/advanced/setting-components"
 import { DataSourceSelector } from "jimu-ui/advanced/data-source-selector"
 import type { IMConfig, PrintTemplate } from "../config"
 
-export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
+export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 	const { id, config } = props
 	const [activeTab, setActiveTab] = React.useState<string | undefined>(
 		config?.PrintTemplates?.[0]?.id
@@ -29,7 +29,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 		const index = arr.findIndex((template: any) => template.id === templateId)
 		if (index === -1) return
 		arr[index] = { ...arr[index], ...newData }
-		const newConfig = (config || Immutable({})).set("PrintTemplates", arr)
+		const newConfig = (config || Immutable.from({})).set("PrintTemplates", arr)
 		props.onSettingChange({ id, config: newConfig })
 	}
 
@@ -43,13 +43,13 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 		}
 		const arr = getTemplates()
 		arr.push(newTemplate)
-		const newConfig = (config || Immutable({})).set("PrintTemplates", arr)
+		const newConfig = (config || Immutable.from({})).set("PrintTemplates", arr)
 		props.onSettingChange({ id, config: newConfig })
 	}
 
 	const removePrintTemplate = (templateId: string) => {
 		const arr = getTemplates().filter((t: any) => t.id !== templateId)
-		const newConfig = (config || Immutable({})).set("PrintTemplates", arr)
+		const newConfig = (config || Immutable.from({})).set("PrintTemplates", arr)
 		props.onSettingChange({ id, config: newConfig })
 	}
 	/*
@@ -107,7 +107,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 												flow="wrap"
 											>
 												<DataSourceSelector
-													types={Immutable([DataSourceTypes.FeatureLayer])}
+													types={Immutable.from([DataSourceTypes.FeatureLayer])}
 													mustUseDataSource={true}
 													isMultiple={false}
 													useDataSources={template.useDataSources}
