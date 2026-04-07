@@ -26,9 +26,10 @@ import {
 	CalciteSelect
 } from "calcite-components"
 import { handlePrint } from "./formatUtils"
+// @ts-expect-error - No types available for this package
 import "./style.css"
 
-export default function Widget(props: AllWidgetProps<IMConfig>) {
+export default function Widget (props: AllWidgetProps<IMConfig>) {
 	const { config } = props
 	// Store datasources keyed by datasource ID to avoid duplicates
 	const [datasources, setDatasources] = React.useState<{
@@ -340,7 +341,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 						(t) => t.id === selectedTemplateId
 					)
 					if (template) {
-						doPrint(Immutable(template))
+						doPrint(Immutable.from(template))
 					}
 				}}
 			>
@@ -350,7 +351,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 			{uniqueUseDataSources.map((uds) => (
 				<DataSourceComponent
 					key={uds.dataSourceId}
-					useDataSource={uds}
+					useDataSource={Immutable.from(uds)}
 					query={
 						{
 							where: "1=1",

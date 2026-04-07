@@ -24,7 +24,7 @@ import { NumericInput, Select, Switch, TextInput } from "jimu-ui"
 import { DatePicker } from "jimu-ui/basic/date-picker"
 import { ColorPicker } from "jimu-ui/basic/color-picker"
 
-async function getFieldMinMax(
+async function getFieldMinMax (
 	dataSource: QueriableDataSource,
 	fieldName: string
 ): Promise<{ min: number; max: number } | null> {
@@ -48,7 +48,7 @@ async function getFieldMinMax(
 	return stats ? { min: stats.minValue, max: stats.maxValue } : null
 }
 
-export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
+export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 	const { id, config, onSettingChange } = props
 	const [dataSource, setDataSource] = React.useState<QueriableDataSource>(null)
 	const selectedField = props.useDataSources?.[0]?.fields?.[0]
@@ -98,7 +98,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 			<SettingSection title={"Data"}>
 				<SettingRow label={"Data Source"} flow="wrap">
 					<DataSourceSelector
-						types={Immutable([DataSourceTypes.FeatureLayer])}
+						types={Immutable.from([DataSourceTypes.FeatureLayer])}
 						mustUseDataSource={true}
 						useDataSources={props.useDataSources}
 						useDataSourcesEnabled={props.useDataSourcesEnabled}
@@ -111,7 +111,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 						useDataSources={props.useDataSources}
 						useDropdown={true}
 						isMultiple={false}
-						types={Immutable([
+						types={Immutable.from([
 							"NUMBER" as JimuFieldType,
 							"DATE" as JimuFieldType,
 							"DATE_ONLY" as JimuFieldType,
@@ -285,7 +285,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 										{ value: "BOTTOM", content: "Bottom" }
 									]}
 									value={config.minLabelPosition || "TOP"}
-									onChange={(value) => {
+									onChange={(value: any) => {
 										onSettingChange({
 											id,
 											config: {
@@ -315,7 +315,7 @@ export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
 										{ value: "BOTTOM", content: "Bottom" }
 									]}
 									value={config.maxLabelPosition || "TOP"}
-									onChange={(value) => {
+									onChange={(value: any) => {
 										onSettingChange({
 											id,
 											config: {

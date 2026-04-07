@@ -11,7 +11,8 @@
   ],
   "license": "MIT",
   "publishMessages": [
-    "DATA_RECORDS_SELECTION_CHANGE"
+    "DATA_RECORDS_SELECTION_CHANGE",
+    "DATA_SOURCE_FILTER_CHANGE"
   ],
   "translatedLocales": [
     "en"

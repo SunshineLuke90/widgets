@@ -12,7 +12,7 @@ interface NumberFormatSettingProps {
 	intl: any
 }
 
-export default function NumberFormatSetting({
+export default function NumberFormatSetting ({
 	prefix,
 	config,
 	onChange,

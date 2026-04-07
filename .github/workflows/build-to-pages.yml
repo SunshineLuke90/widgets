@@ -21,7 +21,7 @@ jobs:
 
       - name: Download Experience Builder
         run: |
-          URL=$(curl -s 'https://downloads.arcgis.com/dms/rest/download/secured/arcgis-experience-builder-1.19.zip?f=json&folder=software%2FExperienceBuilder%2F1.19' | jq -r '.url')
+          URL=$(curl -s 'https://downloads.arcgis.com/dms/rest/download/secured/arcgis-experience-builder-1.20.zip?f=json&folder=software%2FExperienceBuilder%2F1.20' | jq -r '.url')
           curl -L -o exb.zip "$URL"
 
       - name: Unzip Experience Builder

@@ -304,7 +304,7 @@ const FeaturePager = ({
 
 // ── Widget ────────────────────────────────────────────────────────────────────
 
-export default function Widget(props: AllWidgetProps<IMConfig>) {
+export default function Widget (props: AllWidgetProps<IMConfig>) {
 	const { config, useDataSources } = props
 
 	// ── State ──────────────────────────────────────────────────────────────
@@ -385,11 +385,11 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 	// ── Callbacks ──────────────────────────────────────────────────────────
 
 	const handleMainDsCreated = React.useCallback((ds: DataSource) => {
-		mainDsRef.current = ds as ArcGISQueriableDataSource
+		mainDsRef.current = ds as unknown as ArcGISQueriableDataSource
 		setMainTrigger((v) => v + 1)
 	}, [])
 	const handleRefDsCreated = React.useCallback((ds: DataSource) => {
-		refDsRef.current = ds as ArcGISQueriableDataSource
+		refDsRef.current = ds as unknown as ArcGISQueriableDataSource
 		setRefTrigger((v) => v + 1)
 	}, [])
 	const handleMainQueryRequired = React.useCallback(() => {

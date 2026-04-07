@@ -3,6 +3,7 @@ import type { IMConfig } from '../config'
 import defaultMessages from './translations/default'
 import { JimuMapViewComponent, type JimuMapView, type JimuLayerView } from 'jimu-arcgis'
 import { Button, Icon } from 'jimu-ui'
+// @ts-expect-error - No types available for this package
 import './style.css'
 import { useCallback, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -11,7 +12,7 @@ import { createPortal } from 'react-dom'
 // Run npm install hls.js in your client directory to install.
 import Hls from 'hls.js'
 
-export default function Widget(props: AllWidgetProps<IMConfig>) {
+export default function Widget (props: AllWidgetProps<IMConfig>) {
   const { useDataSources, useMapWidgetIds } = props
   const [jimuMapView, setJimuMapView] = React.useState<JimuMapView>(null)
 
@@ -42,11 +43,10 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
       setCurrentURL(url)
       setShowVideo(true)
     }
-    return null
   }
 
   // Draggable, resizable, closable video portal
-  const handleMouseMove = (e) => {
+  const handleMouseMove = (e: MouseEvent) => {
     if (dragging) {
       setVideoPos({ x: e.clientX - dragOffset.x, y: e.clientY - dragOffset.y })
     } else if (resizing) {

@@ -7,6 +7,8 @@
  */
 
 import esriRequest from "@arcgis/core/request"
+import type Extent from "esri/geometry/Extent"
+import type MapView from "esri/views/MapView"
 
 // WMS XML namespace (used by some servers; others omit the namespace)
 export const WMS_NS = "http://www.opengis.net/wms"
@@ -16,7 +18,7 @@ export const WMS_NS = "http://www.opengis.net/wms"
  * Many WMS servers (e.g. GeoServer) include the OGC namespace, while others
  * (e.g. the NESDIS fire portal) emit plain XML without a namespace.
  */
-function getElementsByTag(parent: Element | Document, tag: string): Element[] {
+function getElementsByTag (parent: Element | Document, tag: string): Element[] {
 	// Try namespaced first
 	let els = parent.getElementsByTagNameNS(WMS_NS, tag)
 	if (els.length > 0) return Array.from(els)
@@ -28,7 +30,7 @@ function getElementsByTag(parent: Element | Document, tag: string): Element[] {
 /**
  * Find a layer element in WMS capabilities XML by name
  */
-export function findLayerByName(xml: Document, layerName: string): Element | null {
+export function findLayerByName (xml: Document, layerName: string): Element | null {
 	const layers = getElementsByTag(xml, "Layer")
 	for (const layer of layers) {
 		// Look for a direct child <Name> element
@@ -45,7 +47,7 @@ export function findLayerByName(xml: Document, layerName: string): Element | nul
 /**
  * Parse an ISO 8601 duration string (e.g. "PT5M", "PT1H", "PT30S") to milliseconds.
  */
-export function parseIsoDuration(iso: string): number {
+export function parseIsoDuration (iso: string): number {
 	const match = iso.match(
 		/^P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?$/
 	)
@@ -62,7 +64,7 @@ export function parseIsoDuration(iso: string): number {
  * Many WMS servers (including the NESDIS fire portal) reject millisecond
  * precision that JavaScript's Date.toISOString() produces (.000Z).
  */
-function formatWmsTime(date: Date): string {
+function formatWmsTime (date: Date): string {
 	const pad = (n: number) => String(n).padStart(2, "0")
 	return (
 		date.getUTCFullYear() +
@@ -84,7 +86,7 @@ function formatWmsTime(date: Date): string {
  * Expand an ISO 8601 time interval (start/end/period) into discrete timestamps.
  * Only generates the last `maxFrames` timestamps to avoid creating huge arrays.
  */
-export function expandTimeInterval(
+export function expandTimeInterval (
 	intervalStr: string,
 	maxFrames: number
 ): string[] {
@@ -112,7 +114,7 @@ export function expandTimeInterval(
 /**
  * Parse comma-separated times from a text string
  */
-export function parseTimesFromText(text: string): string[] {
+export function parseTimesFromText (text: string): string[] {
 	const trimmed = text.trim()
 
 	// Check if it's an ISO 8601 time interval (start/end/period)
@@ -131,7 +133,7 @@ export function parseTimesFromText(text: string): string[] {
  * Extract time dimension values from a WMS layer element.
  * Checks both <Dimension> and <Extent> elements for time data.
  */
-export function extractTimesFromLayer(layer: Element | null): string[] {
+export function extractTimesFromLayer (layer: Element | null): string[] {
 	if (!layer) return []
 
 	// Try <Dimension name="time">
@@ -158,7 +160,7 @@ export function extractTimesFromLayer(layer: Element | null): string[] {
 /**
  * Fetch and parse WMS capabilities, returning times for a specific layer
  */
-export async function fetchWmsCapabilities(
+export async function fetchWmsCapabilities (
 	wmsBase: string,
 	layerName: string
 ): Promise<{ layer: Element | null; times: string[] }> {
@@ -176,7 +178,7 @@ export async function fetchWmsCapabilities(
 /**
  * Format a timestamp for display - either as relative time or localized string
  */
-export function formatTimestamp(tsText: string, useRelative: boolean): string {
+export function formatTimestamp (tsText: string, useRelative: boolean): string {
 	if (tsText === "—") return tsText
 	const dt = new Date(tsText)
 	if (useRelative) {
@@ -189,10 +191,10 @@ export function formatTimestamp(tsText: string, useRelative: boolean): string {
 /**
  * Build a WMS GetMap URL for a specific time frame
  */
-export function buildGetMapUrl(
+export function buildGetMapUrl (
 	wmsBase: string,
 	layerName: string,
-	extent: __esri.Extent,
+	extent: Extent,
 	width: number,
 	height: number,
 	time: string
@@ -224,7 +226,7 @@ export function buildGetMapUrl(
  * Get a unique key representing the current map extent and size.
  * Useful for detecting when the view has changed and prefetch is needed.
  */
-export function getExtentKey(view: __esri.MapView): string {
+export function getExtentKey (view: MapView): string {
 	try {
 		const e = view.extent
 		if (!e) return ""

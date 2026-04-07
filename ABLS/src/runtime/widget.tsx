@@ -5,12 +5,13 @@ import { JimuMapViewComponent, type JimuMapView } from "jimu-arcgis"
 import type { Config, ABLSView } from "../config"
 import { Icon } from "jimu-ui"
 import defaultMessages from "./translations/default"
+// @ts-expect-error - No types available for this package
 import "./style.css"
 import TimeExtent from "@arcgis/core/time/TimeExtent"
 import { useCallback } from "react"
 import { CalciteButton } from "@esri/calcite-components-react"
 
-export default function Widget(props: AllWidgetProps<Config>) {
+export default function Widget (props: AllWidgetProps<Config>) {
 	const { config, useMapWidgetIds } = props
 	const [jimuMapView, setJimuMapView] = React.useState<JimuMapView>(null)
 	const [activeViewId, setActiveViewId] = React.useState<string>(null)

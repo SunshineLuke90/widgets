@@ -1,10 +1,11 @@
 import type { JimuMapView } from 'jimu-arcgis'
+import type Layer from 'esri/layers/Layer'
 
 
-export function getLayersFromJimuMapView(jimuMapView: JimuMapView): __esri.Layer[] {
-    const layers = []
-    const collectLayers = (layerCollection) => {
-        layerCollection.forEach(layer => {
+export function getLayersFromJimuMapView (jimuMapView: JimuMapView): Layer[] {
+    const layers: Layer[] = []
+    const collectLayers = (layerCollection: { forEach: (callback: (layer: any) => void) => void }) => {
+        layerCollection.forEach((layer: any) => {
             layers.push(layer)
             if (layer.layers) {
                 collectLayers(layer.layers)

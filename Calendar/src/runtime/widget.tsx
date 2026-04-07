@@ -8,9 +8,11 @@ import {
 	DataSourceStatus,
 	MessageManager,
 	DataRecordsSelectionChangeMessage,
+	DataSourceFilterChangeMessage,
 	type SqlQueryParams
 } from "jimu-core"
 import type { data, IMConfig } from "../config"
+// @ts-expect-error - No types available for this package
 import "./style.css"
 
 import FullCalendar from "@fullcalendar/react"
@@ -20,7 +22,7 @@ import timeGridPlugin from "@fullcalendar/timegrid"
 import type { ViewApi } from "@fullcalendar/core"
 import { cssVar } from "polished"
 
-export default function Widget(props: AllWidgetProps<IMConfig>) {
+export default function Widget (props: AllWidgetProps<IMConfig>) {
 	const { config } = props
 	const [datasources, setDatasources] = React.useState<DataSource[]>([])
 	// Store events keyed by datasource ID to support multiple datasources
@@ -133,7 +135,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 		}
 	}
 
-	const handleEventClick = (clickInfo) => {
+	const handleEventClick = (clickInfo: any) => {
 		const eventDs = clickInfo.event.extendedProps.dataSource as DataSource
 		const originalId = clickInfo.event.extendedProps.originalId as string
 		eventDs.selectRecordsByIds([originalId])
@@ -190,6 +192,11 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 				...prev,
 				[matchedDataSource.dataSourceId]: queryParams.where
 			}))
+			const message = new DataSourceFilterChangeMessage(
+				props.widgetId,
+				[matchedDataSource.dataSourceId]
+			)
+			MessageManager.getInstance().publishMessage(message)
 		})
 	}
 
@@ -276,7 +283,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 						return (
 							<DataSourceComponent
 								key={dsConfig.id}
-								useDataSource={Immutable(matchedDataSource)}
+								useDataSource={Immutable.from(matchedDataSource)}
 								query={
 									{
 										where: queryByDsId[matchedDataSource.dataSourceId] || "1=1",

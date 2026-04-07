@@ -7,6 +7,7 @@
  */
 
 import WMSLayer from "@arcgis/core/layers/WMSLayer.js"
+import type MapView from "esri/views/MapView"
 import { fetchWmsCapabilities, buildGetMapUrl } from "./wms-utils"
 import type React from "react"
 
@@ -29,8 +30,8 @@ export const MAX_FRAMES = 30
 /**
  * Wait until the MapView is ready with valid extent and dimensions
  */
-export async function waitForViewReady(
-	view: __esri.MapView,
+export async function waitForViewReady (
+	view: MapView,
 	timeout = 15000
 ): Promise<void> {
 	const start = Date.now()
@@ -40,14 +41,14 @@ export async function waitForViewReady(
 		(!view.extent || (view.width === 0 && view.height === 0)) &&
 		Date.now() - start < timeout
 	) {
-		await new Promise((resolve) => setTimeout(resolve, 200))
+		await new Promise<void>((resolve) => { setTimeout(resolve, 200) })
 	}
 }
 
 /**
  * Register service worker for caching
  */
-export async function registerServiceWorker(): Promise<void> {
+export async function registerServiceWorker (): Promise<void> {
 	if (!("serviceWorker" in navigator) || !("caches" in window)) {
 		console.debug("ServiceWorker or Cache API not available")
 		return
@@ -65,9 +66,9 @@ export async function registerServiceWorker(): Promise<void> {
 /**
  * Prefetch frames for the current extent
  */
-export async function prefetchFrames(
+export async function prefetchFrames (
 	frameList: string[],
-	view: __esri.MapView,
+	view: MapView,
 	wmsBase: string,
 	layerName: string,
 	setStatusText: (text: string) => void
@@ -102,11 +103,11 @@ export async function prefetchFrames(
 /**
  * Refresh times from WMS capabilities
  */
-export async function refreshTimes(params: {
+export async function refreshTimes (params: {
 	framesRef: React.RefObject<string[]>
 	idxRef: React.RefObject<number>
 	sliderRef: React.RefObject<any>
-	view: __esri.MapView
+	view: MapView
 	wmsBase: string
 	layerName: string
 	setFrames: (frames: string[]) => void
@@ -166,7 +167,7 @@ export async function refreshTimes(params: {
 /**
  * Apply a specific frame to the WMS layer
  */
-export function applyFrame(
+export function applyFrame (
 	frameIndex: number,
 	framesRef: React.RefObject<string[]>,
 	wmsRef: React.RefObject<any>,
@@ -194,7 +195,7 @@ export function applyFrame(
 /**
  * Create animation control functions
  */
-export function createAnimationControls(
+export function createAnimationControls (
 	intervalRef: React.RefObject<any>,
 	idxRef: React.RefObject<number>,
 	framesRef: React.RefObject<string[]>,
@@ -233,8 +234,8 @@ export function createAnimationControls(
 /**
  * Add fallback WMSLayer when primary WMS fails
  */
-export function addFallbackLayer(
-	view: __esri.MapView,
+export function addFallbackLayer (
+	view: MapView,
 	setStatusText: (text: string) => void
 ): void {
 	try {
@@ -256,7 +257,7 @@ export function addFallbackLayer(
 /**
  * Cleanup all timers and handles
  */
-export function cleanup(
+export function cleanup (
 	intervalRef: React.RefObject<any>,
 	refreshTimerIdRef: React.RefObject<any>,
 	panZoomTimerRef: React.RefObject<any>,

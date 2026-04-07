@@ -13,7 +13,7 @@ import FeatureLayer from "esri/layers/FeatureLayer"
   formatDate($feature.dateField, 'YYYY-MM-DD HH:mm:ss') => 2024-01-01 13:00:00
 */
 const formatDate = (date: Date, format: string) => {
-	const map = {
+	const map: { [key: string]: string | number } = {
 		MMMMM: date.toLocaleString("default", { month: "long" }),
 		MMM: date.toLocaleString("default", { month: "short" }),
 		MM: ("0" + (date.getMonth() + 1)).slice(-2),
@@ -35,7 +35,7 @@ const formatDate = (date: Date, format: string) => {
 
 	return format.replace(
 		/MMMMM|MMM|MM|M|DDDD|DDD|DD|D|YYYY|YY|hh|h|HH|H|mm|ss|A/g,
-		(matched) => map[matched]
+		(matched) => String(map[matched])
 	)
 }
 

@@ -14,11 +14,6 @@
     "hasConfig": true
   },
   "dependency": [
-    "jimu-arcgis",
-    "jimu-core",
-    "@esri/calcite-components-react"
-  ],
-  "settingDependency": [
     "jimu-arcgis"
   ],
   "translatedLocales": [
