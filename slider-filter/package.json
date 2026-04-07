@@ -1,6 +1,6 @@
 {
   "name": "exb-slider-filter",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A simple slider filter widget for Experience Builder, idea from Jose Barrios.",
   "keywords": [
     "exb-widget",
