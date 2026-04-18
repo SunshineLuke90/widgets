@@ -1,6 +1,6 @@
 {
   "name": "exb-indicator",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A simple indicator widget for Experience Builder, based on the indicator widget from ArcGIS Dashboards.",
   "author": "Lucius Creamer",
   "license": "MIT",
@@ -8,5 +8,10 @@
     "exb-widget",
     "experience-builder",
     "exb"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SunshineLuke90/widgets.git",
+    "directory": "indicator"
+  }
 }

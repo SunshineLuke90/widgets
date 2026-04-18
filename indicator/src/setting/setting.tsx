@@ -832,6 +832,49 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 						</SettingRow>
 						<SettingRow
 							label={props.intl.formatMessage({
+								id: "refreshInterval",
+								defaultMessage: "Refresh Interval"
+							})}
+							flow={"wrap"}
+						>
+							<div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+								<NumericInput
+									min={1}
+									max={9999}
+									value={config.refreshIntervalValue ?? 5}
+									style={{ width: 70 }}
+									onChange={(value) => {
+										onSettingChange({
+											id,
+											config: {
+												...config,
+												refreshIntervalValue: value
+											}
+										})
+									}}
+								/>
+								<Select
+									size="sm"
+									style={{ width: 110 }}
+									value={config.refreshIntervalUnit ?? "minutes"}
+									onChange={(e) => {
+										onSettingChange({
+											id,
+											config: {
+												...config,
+												refreshIntervalUnit: e.target.value
+											}
+										})
+									}}
+								>
+									<option value="seconds">Seconds</option>
+									<option value="minutes">Minutes</option>
+									<option value="hours">Hours</option>
+								</Select>
+							</div>
+						</SettingRow>
+						<SettingRow
+							label={props.intl.formatMessage({
 								id: "conditionalFormatting",
 								defaultMessage: "Conditional Formatting"
 							})}

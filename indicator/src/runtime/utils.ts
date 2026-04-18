@@ -297,8 +297,7 @@ export function getActiveStyles (
 
 export function relativeTime (date: Date): string {
 	const diff = Math.floor((Date.now() - date.getTime()) / 1000)
-	if (diff < 60) return "Updated just now"
+	if (diff < 60) return `Updated ${diff}s ago`
 	if (diff < 3600) return `Updated ${Math.floor(diff / 60)}m ago`
-	if (diff < 86400) return `Updated ${Math.floor(diff / 3600)}h ago`
-	return `Updated ${date.toLocaleDateString()}`
+	return `Updated ${Math.floor(diff / 3600)}h ago`
 }
