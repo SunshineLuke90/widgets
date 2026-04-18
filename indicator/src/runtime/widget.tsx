@@ -405,6 +405,33 @@ export default function Widget (props: AllWidgetProps<IMConfig>) {
 		setFeatureIndex((prev) => (prev >= featureCount - 1 ? 0 : prev + 1))
 	}, [featureCount])
 
+	// ── Display tick (re-renders "Last Updated" text every 5 s) ─────────
+
+	const [, setTick] = React.useState(0)
+	React.useEffect(() => {
+		if (!isConfigured) return
+		const id = setInterval(() => { setTick((v) => v + 1) }, 5000)
+		return () => { clearInterval(id) }
+	}, [isConfigured])
+
+	// ── Data refresh on configurable interval ────────────────────────────
+
+	const refreshMs = React.useMemo(() => {
+		const val = config.refreshIntervalValue ?? 5
+		const unit = config.refreshIntervalUnit ?? "minutes"
+		const multiplier = unit === "hours" ? 3600000 : unit === "minutes" ? 60000 : 1000
+		return Math.max(val * multiplier, 1000)
+	}, [config.refreshIntervalValue, config.refreshIntervalUnit])
+
+	React.useEffect(() => {
+		if (!isConfigured) return
+		const id = setInterval(() => {
+			setMainTrigger((v) => v + 1)
+			setRefTrigger((v) => v + 1)
+		}, refreshMs)
+		return () => { clearInterval(id) }
+	}, [isConfigured, refreshMs])
+
 	// ── Main query effect ──────────────────────────────────────────────────
 
 	React.useEffect(() => {

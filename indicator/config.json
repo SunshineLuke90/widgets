@@ -19,5 +19,7 @@
   "valueMaxDecimalPlaces": 1,
   "valuePrefix": "",
   "valueSuffix": "",
-  "valueUnitPrefix": true
+  "valueUnitPrefix": true,
+  "refreshIntervalValue": 5,
+  "refreshIntervalUnit": "minutes"
 }

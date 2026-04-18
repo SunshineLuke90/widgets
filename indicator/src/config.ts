@@ -73,6 +73,9 @@ export interface Config {
 
 	showLastUpdateTime: boolean
 	lastUpdateTimeTextColor: string
+
+	refreshIntervalValue: number
+	refreshIntervalUnit: "seconds" | "minutes" | "hours"
 }
 
 export type IMConfig = ImmutableObject<Config>

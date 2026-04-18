@@ -8,5 +8,10 @@
     "exb-widget",
     "experience-builder",
     "exb"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SunshineLuke90/widgets.git",
+    "directory": "indicator"
+  }
 }
