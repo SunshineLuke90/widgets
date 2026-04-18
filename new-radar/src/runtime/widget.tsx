@@ -236,6 +236,7 @@ export default function Widget (props: AllWidgetProps<IMConfig>) {
 					if (panZoomTimerRef.current) clearTimeout(panZoomTimerRef.current)
 					panZoomTimerRef.current = setTimeout(async () => {
 						if (prefetchInProgressRef.current) return
+						if (wmsRef.current && !wmsRef.current.visible) return
 						const key = getExtentKey(view)
 						if (!key || key === prevExtentKeyRef.current) return
 
