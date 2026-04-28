@@ -25,6 +25,8 @@ export default function Widget (props: AllWidgetProps<Config>) {
 	const [visibleLayers, setVisibleLayers] = React.useState<Layer[]>([])
 	const [listStyle, setListStyle] = React.useState<React.CSSProperties>({})
 	const buttonsWrapperRef = React.useRef<HTMLDivElement>(null)
+	const listRef = React.useRef<any>(null)
+	const focusButtonOnCollapseRef = React.useRef(false)
 
 	// This is the way that the widget prevents itself from running itself, and from crashing. It checks to see if any maps have been selected, and if any views have been configured.
 	const isConfigured = useMapWidgetIds?.length > 0 && config.views?.length > 0
@@ -119,6 +121,18 @@ export default function Widget (props: AllWidgetProps<Config>) {
 		[jimuMapView]
 	)
 
+	const focusActiveButton = useCallback(() => {
+		if (!activeViewId || !buttonsWrapperRef.current) return
+		const btn = buttonsWrapperRef.current.querySelector(`[data-view-id="${activeViewId}"]`)
+		if (!btn) return
+		const setFocusFn = Reflect.get(btn, 'setFocus')
+		if (typeof setFocusFn === 'function') {
+			setFocusFn.call(btn)
+		} else if (btn instanceof HTMLElement) {
+			btn.focus()
+		}
+	}, [activeViewId])
+
 	React.useEffect(() => {
 		if (expand && buttonsWrapperRef.current) {
 			const rect = buttonsWrapperRef.current.getBoundingClientRect()
@@ -132,6 +146,87 @@ export default function Widget (props: AllWidgetProps<Config>) {
 			)
 		}
 	}, [expand])
+
+	// Focus the first list item shortly after the list opens
+	React.useEffect(() => {
+		if (!expand) return
+		const timer = setTimeout(() => {
+			const firstItem = listRef.current?.querySelector('calcite-list-item')
+			firstItem?.setFocus?.()
+		}, 50)
+		return () => { clearTimeout(timer) }
+	}, [expand])
+
+	// Keyboard navigation: Escape closes the list; ArrowDown on the last item returns focus to the active button
+	React.useEffect(() => {
+		const el = listRef.current
+		if (!expand || !el) return
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === 'Escape') {
+				e.stopPropagation()
+				focusButtonOnCollapseRef.current = true
+				setExpand(false)
+				setExpandedLayers([])
+				setVisibleLayers([])
+				return
+			}
+			if (e.key === 'ArrowDown') {
+				const allItems = Array.from(el.querySelectorAll('calcite-list-item'))
+				const lastItem = allItems[allItems.length - 1]
+				if (lastItem && document.activeElement === lastItem) {
+					e.preventDefault()
+					focusActiveButton()
+				}
+			}
+		}
+		el.addEventListener('keydown', handleKeyDown, true)
+		return () => { el.removeEventListener('keydown', handleKeyDown, true) }
+	}, [expand, focusActiveButton])
+
+	// ArrowUp on the active button navigates to the last item in the open list
+	React.useEffect(() => {
+		if (!expand || !buttonsWrapperRef.current) return
+		const wrapper = buttonsWrapperRef.current
+		const handleButtonKeyDown = (e: KeyboardEvent) => {
+			if (e.key !== 'ArrowUp') return
+			const target = e.target as HTMLElement
+			if (!target.closest(`[data-view-id="${activeViewId}"]`)) return
+			const allItems = Array.from(listRef.current?.querySelectorAll('calcite-list-item') ?? [])
+			const lastItem = allItems[allItems.length - 1] as any
+			if (lastItem) {
+				e.preventDefault()
+				lastItem.setFocus?.()
+			}
+		}
+		wrapper.addEventListener('keydown', handleButtonKeyDown, true)
+		return () => { wrapper.removeEventListener('keydown', handleButtonKeyDown, true) }
+	}, [expand, activeViewId])
+
+	// Click outside both the list and the buttons wrapper collapses the list
+	React.useEffect(() => {
+		if (!expand) return
+		const handleClickOutside = (e: MouseEvent) => {
+			const target = e.target as Node
+			if (
+				!(listRef.current?.contains(target)) &&
+				!(buttonsWrapperRef.current?.contains(target))
+			) {
+				setExpand(false)
+				setExpandedLayers([])
+				setVisibleLayers([])
+			}
+		}
+		document.addEventListener('mousedown', handleClickOutside)
+		return () => { document.removeEventListener('mousedown', handleClickOutside) }
+	}, [expand])
+
+	// After a collapse-with-focus was requested, focus the active button once the list unmounts
+	React.useEffect(() => {
+		if (!expand && focusButtonOnCollapseRef.current) {
+			focusButtonOnCollapseRef.current = false
+			focusActiveButton()
+		}
+	}, [expand, focusActiveButton])
 
 	React.useEffect(() => {
 		// Check if the map is loaded, if views are configured, and if no view is active yet.
@@ -210,6 +305,7 @@ export default function Widget (props: AllWidgetProps<Config>) {
 			<div className="view-buttons-wrapper" ref={buttonsWrapperRef}>
 				{expand && expandedLayers.length > 0 && ReactDOM.createPortal(
 					<calcite-list
+						ref={listRef}
 						label="Expanded Layers"
 						className="expanded-layers-list"
 						selectionMode="multiple"
@@ -227,6 +323,7 @@ export default function Widget (props: AllWidgetProps<Config>) {
 						) => (
 							<calcite-button
 								key={view.id}
+								data-view-id={view.id}
 								className={`view-button ${activeViewId === view.id ? "active" : ""
 									}`}
 								title={view.name}
