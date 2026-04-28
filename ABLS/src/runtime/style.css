@@ -18,3 +18,25 @@
   /* Ensure the label doesn't wrap inside the button and stays readable */
   white-space: nowrap;
 }
+
+.widget-abls .expand-handle-icon {
+  margin-left: 4px;
+  vertical-align: middle;
+  opacity: 0.75;
+}
+
+/* Wrapper that anchors the measurement ref */
+.view-buttons-wrapper {
+  position: relative;
+}
+
+/* Floating layer list rendered via portal into document.body */
+.expanded-layers-list {
+  position: fixed;
+  min-width: 220px;
+  max-width: 360px;
+  width: max-content;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 9999;
+}

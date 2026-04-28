@@ -39,6 +39,7 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 		onSettingChange({
 			id: id,
 			config: {
+				...config,
 				views: value
 			}
 		})
@@ -89,6 +90,22 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 		updateView(view.id, { layerIds: newLayerIds })
 	}
 
+	const onExpandLayerCheckChange = (
+		view: ABLSView,
+		layerId: string,
+		checked: boolean
+	) => {
+		let newLayerIds = view.expandLayerIds ? [...view.expandLayerIds] : []
+		if (checked) {
+			if (!newLayerIds.includes(layerId)) {
+				newLayerIds.push(layerId)
+			}
+		} else {
+			newLayerIds = newLayerIds.filter((id) => id !== layerId)
+		}
+		updateView(view.id, { expandLayerIds: newLayerIds })
+	}
+
 	return (
 		<div className="widget-setting-abls">
 			<SettingSection
@@ -117,6 +134,28 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 					onActiveViewChange={onActiveViewChange}
 				/>
 			)}
+
+			<SettingSection
+				title={props.intl.formatMessage({
+					id: "enableExpand",
+					defaultMessage: defaultMessages.enableExpand
+				})}
+			>
+				<SettingRow label="Enable Layer Expansion">
+					<Switch
+						checked={config.expandEnabled ?? false}
+						onChange={(evt) => {
+							onSettingChange({
+								id: id,
+								config: {
+									...config,
+									expandEnabled: evt.target.checked
+								}
+							})
+						}}
+					/>
+				</SettingRow>
+			</SettingSection>
 
 			{jimuMapView && (
 				<SettingSection
@@ -188,6 +227,30 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 									</SettingRow>
 								))}
 							</div>
+							{config.expandEnabled && (
+								<>
+									<SettingRow
+										flow="wrap"
+										label={props.intl.formatMessage({
+											id: "expandLayers",
+											defaultMessage: defaultMessages.expandLayers
+										})}
+									/>
+									<div className="layer-list">
+										{layers?.map((layer) => (
+											<SettingRow key={layer.id}>
+												<Checkbox
+													checked={view.expandLayerIds?.includes(layer.id)}
+													onChange={(_e, checked) => {
+														onExpandLayerCheckChange(view, layer.id, checked)
+													}}
+												/>
+												<label className="ml-2">{layer.title}</label>
+											</SettingRow>
+										))}
+									</div>
+								</>
+							)}
 							<SettingRow
 								label="Enable Time Filter"
 								className="mt-3 border-top pt-3"
