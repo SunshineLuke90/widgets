@@ -7,7 +7,7 @@
   "author": "Lucius Creamer MOSEMA",
   "description": "This widget allows for users to toggle between pre-configured layer visibility views, allowing for quick and easy layer toggling without reloading the entire page.",
   "copyright": "",
-  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "license": "MIT",
   "properties": {
     "hasSettingPage": true,
     "hasStylePage": false,

@@ -1,4 +1,5 @@
 import { React, jsx } from "jimu-core"
+import ReactDOM from "react-dom"
 //import { lazy } from 'react'
 import type { AllWidgetProps } from "jimu-core"
 import { JimuMapViewComponent, type JimuMapView } from "jimu-arcgis"
@@ -9,21 +10,58 @@ import defaultMessages from "./translations/default"
 import "./style.css"
 import TimeExtent from "@arcgis/core/time/TimeExtent"
 import { useCallback } from "react"
-import { CalciteButton } from "@esri/calcite-components-react"
+import "calcite-components"
+import type Layer from "esri/layers/Layer"
+import chevronDownSvg from "jimu-icons/svg/outlined/directional/down-small.svg"
+import chevronUpSvg from "jimu-icons/svg/outlined/directional/up-small.svg"
 
 export default function Widget (props: AllWidgetProps<Config>) {
 	const { config, useMapWidgetIds } = props
 	const [jimuMapView, setJimuMapView] = React.useState<JimuMapView>(null)
 	const [activeViewId, setActiveViewId] = React.useState<string>(null)
 
+	const [expand, setExpand] = React.useState(false)
+	const [expandedLayers, setExpandedLayers] = React.useState<Layer[]>([])
+	const [visibleLayers, setVisibleLayers] = React.useState<Layer[]>([])
+	const [listStyle, setListStyle] = React.useState<React.CSSProperties>({})
+	const buttonsWrapperRef = React.useRef<HTMLDivElement>(null)
+
 	// This is the way that the widget prevents itself from running itself, and from crashing. It checks to see if any maps have been selected, and if any views have been configured.
 	const isConfigured = useMapWidgetIds?.length > 0 && config.views?.length > 0
+
+	const handleViewExpand = useCallback(
+		(view: ABLSView) => {
+			if (expand && activeViewId === view.id) {
+				setExpand(false)
+				setExpandedLayers([])
+				setVisibleLayers([])
+				return
+			}
+			if (jimuMapView?.view?.map?.allLayers) {
+				const allLayers = jimuMapView.view.map.allLayers.toArray().reverse()
+				allLayers.forEach((layer) => {
+					if (view.expandLayerIds.includes(layer.id)) {
+						setExpandedLayers((prev) => [...prev, layer])
+						if (layer.visible && !visibleLayers.includes(layer)) {
+							setVisibleLayers((prev) => [...prev, layer])
+						}
+						else if (!layer.visible && visibleLayers.includes(layer)) {
+							setVisibleLayers((prev) => prev.filter((l) => l !== layer))
+						}
+					}
+				})
+				setExpand(true)
+			}
+		},
+		[expand, activeViewId, jimuMapView, visibleLayers]
+	)
+
 
 	// The contained elements are performed every time a view button is clicked.
 	const handleViewChange = useCallback(
 		(view: ABLSView) => {
 			if (!jimuMapView || !jimuMapView.view) return
-
+			setExpand(false)
 			setActiveViewId(view.id)
 
 			// 1. Handle Layer Visibility
@@ -82,6 +120,20 @@ export default function Widget (props: AllWidgetProps<Config>) {
 	)
 
 	React.useEffect(() => {
+		if (expand && buttonsWrapperRef.current) {
+			const rect = buttonsWrapperRef.current.getBoundingClientRect()
+			const spaceAbove = rect.top
+			const spaceBelow = window.innerHeight - rect.bottom
+			const openUpward = spaceAbove >= 150 || spaceAbove >= spaceBelow
+			setListStyle(
+				openUpward
+					? { bottom: window.innerHeight - rect.top, left: rect.left }
+					: { top: rect.bottom, left: rect.left }
+			)
+		}
+	}, [expand])
+
+	React.useEffect(() => {
 		// Check if the map is loaded, if views are configured, and if no view is active yet.
 		if (jimuMapView && !activeViewId && config.views?.length > 0) {
 			// Trigger the handler for the first view in the configuration.
@@ -104,6 +156,44 @@ export default function Widget (props: AllWidgetProps<Config>) {
 		)
 	}
 
+	// Build helper structures for nested list rendering
+	const expandedLayerIds = new Set(expandedLayers.map((l) => l.id))
+
+	// Collect IDs of layers that are nested children of a group layer also in expandedLayers.
+	// These will be skipped at the top level and rendered inside their parent instead.
+	const nestedChildIds = new Set<string>()
+	expandedLayers.forEach((layer) => {
+		if (layer.type === "group") {
+			const children: Layer[] = (layer as any).layers?.toArray?.() ?? []
+			children.forEach((child) => {
+				if (expandedLayerIds.has(child.id)) {
+					nestedChildIds.add(child.id)
+				}
+			})
+		}
+	})
+
+	const renderLayerItem = (layer: Layer): React.ReactElement => {
+		if (layer.type === "group") {
+			const children: Layer[] = (layer as any).layers?.toArray?.() ?? []
+			const expandedChildren = children.filter((child) => expandedLayerIds.has(child.id))
+			if (expandedChildren.length > 0) {
+				return (
+					<calcite-list-item expanded key={layer.id} label={layer.title} selected={layer.visible} oncalciteListItemSelect={(e: Event) => { e.stopPropagation(); layer.visible = !layer.visible }}>
+						<calcite-list displayMode="nested" selectionMode="multiple" label="Group Layers">
+							{expandedChildren.map((child) => renderLayerItem(child))}
+						</calcite-list>
+					</calcite-list-item>
+				)
+			}
+		}
+		return (
+			<calcite-list-item key={layer.id} label={layer.title || layer.id} selected={layer.visible} oncalciteListItemSelect={(e: Event) => { e.stopPropagation(); layer.visible = !layer.visible }} />
+		)
+	}
+
+	const topLevelLayers = expandedLayers.filter((layer) => !nestedChildIds.has(layer.id))
+
 	// This return statement will not be run unless the widget has been set up at least to some degree. This is what actually creates the UI for the widget that is visible to the end user
 	return (
 		// Outer Div for the entire widget
@@ -117,30 +207,54 @@ export default function Widget (props: AllWidgetProps<Config>) {
 					}}
 				/>
 			)}
-			<div className="view-buttons-container">
-				{config.views.map(
-					(
-						view //The .map function creates the contained items multiple times, one button for each view in this case.
-					) => (
-						<CalciteButton
-							key={view.id}
-							className={`view-button ${
-								activeViewId === view.id ? "active" : ""
-							}`}
-							title={view.name}
-							onClick={() => {
-								handleViewChange(view)
-							}}
-							appearance={activeViewId === view.id ? "solid" : "transparent"}
-							kind={activeViewId === view.id ? "brand" : "neutral"}
-						>
-							{view.icon && (
-								<Icon icon={view.icon.svg} size="16" className="mr-2" />
-							)}
-							{view.name}
-						</CalciteButton>
-					)
+			<div className="view-buttons-wrapper" ref={buttonsWrapperRef}>
+				{expand && expandedLayers.length > 0 && ReactDOM.createPortal(
+					<calcite-list
+						label="Expanded Layers"
+						className="expanded-layers-list"
+						selectionMode="multiple"
+						displayMode="nested"
+						style={listStyle}
+					>
+						{topLevelLayers.map((layer) => renderLayerItem(layer))}
+					</calcite-list>,
+					document.body
 				)}
+				<div className="view-buttons-container">
+					{config.views.map(
+						(
+							view //The .map function creates the contained items multiple times, one button for each view in this case.
+						) => (
+							<calcite-button
+								key={view.id}
+								className={`view-button ${activeViewId === view.id ? "active" : ""
+									}`}
+								title={view.name}
+								onClick={() => {
+									if (activeViewId === view.id) {
+										handleViewExpand(view)
+										return
+									}
+									handleViewChange(view)
+								}}
+								appearance={activeViewId === view.id ? "solid" : "transparent"}
+								kind={activeViewId === view.id ? "brand" : "neutral"}
+							>
+								{view.icon && (
+									<Icon icon={view.icon.svg} size="16" className="mr-2" />
+								)}
+								{view.name}
+								{view.expandLayerIds?.length > 0 && (
+									<Icon
+										icon={expand && activeViewId === view.id ? chevronUpSvg : chevronDownSvg}
+										size="12"
+										className="expand-handle-icon"
+									/>
+								)}
+							</calcite-button>
+						)
+					)}
+				</div>
 			</div>
 		</div>
 	)

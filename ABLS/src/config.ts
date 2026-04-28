@@ -11,10 +11,12 @@ export interface ABLSView {
   startOffset?: number;
   endOffset?: number;
   tod?: number;
+  expandLayerIds?: string[]; //Array of layer IDs that should be shown when expanded
 }
 
 // Defines the overall widget configuration
 export interface Config {
+  expandEnabled?: boolean;
   views: ABLSView[];
 }
 
