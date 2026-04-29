@@ -10,6 +10,7 @@ import {
 	SettingRow,
 	SettingSection
 } from "jimu-ui/advanced/setting-components"
+import { Switch } from "jimu-ui"
 import defaultI18nMessages from "./translations/default"
 import type { IMConfig } from "../config"
 import {
@@ -64,15 +65,31 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 				})}
 			>
 				<SettingRow>
+					<MapWidgetSelector
+						onSelect={onMapSelected}
+						useMapWidgetIds={props.useMapWidgetIds}
+					/>
+				</SettingRow>
+				<SettingRow>
 					<IconPicker
 						icon={props.config?.icon as any}
 						onChange={onIconChange}
 					/>
 				</SettingRow>
-				<SettingRow>
-					<MapWidgetSelector
-						onSelect={onMapSelected}
-						useMapWidgetIds={props.useMapWidgetIds}
+				<SettingRow
+					label={"Enable Multiple Camera Support"}
+				>
+					<Switch
+						checked={props.config?.multiple || false}
+						onChange={() => {
+							props.onSettingChange({
+								id: props.id,
+								config: {
+									...props.config,
+									multiple: !props.config?.multiple
+								}
+							})
+						}}
 					/>
 				</SettingRow>
 				<SettingRow>
