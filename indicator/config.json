@@ -20,6 +20,7 @@
   "valuePrefix": "",
   "valueSuffix": "",
   "valueUnitPrefix": true,
+  "aggressiveRefresh": false,
   "refreshIntervalValue": 5,
   "refreshIntervalUnit": "minutes"
 }

@@ -21,6 +21,7 @@ import {
 	Button,
 	ButtonGroup,
 	Select,
+	Tooltip,
 	CollapsablePanel,
 	Tabs,
 	Tab,
@@ -310,8 +311,8 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 											dataSource={
 												props.useDataSources?.[0]
 													? DataSourceManager.getInstance().getDataSource(
-															props.useDataSources[0].dataSourceId
-														)
+														props.useDataSources[0].dataSourceId
+													)
 													: null
 											}
 											onChange={(expression: IMSqlExpression) => {
@@ -441,13 +442,13 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 										label={
 											config.indType === "Statistic"
 												? props.intl.formatMessage({
-														id: "selectField",
-														defaultMessage: "Field"
-													})
+													id: "selectField",
+													defaultMessage: "Field"
+												})
 												: props.intl.formatMessage({
-														id: "selectValueField",
-														defaultMessage: "Value Field"
-													})
+													id: "selectValueField",
+													defaultMessage: "Value Field"
+												})
 										}
 										flow={"wrap"}
 									>
@@ -478,13 +479,13 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 											types={
 												(config.indType === "Statistic" &&
 													config.mainStatisticType !== "count") ||
-												config.indType === "Feature"
+													config.indType === "Feature"
 													? Immutable.from([
-															"NUMBER" as JimuFieldType,
-															"DATE" as JimuFieldType,
-															"DATE_ONLY" as JimuFieldType,
-															"TIME_ONLY" as JimuFieldType
-														])
+														"NUMBER" as JimuFieldType,
+														"DATE" as JimuFieldType,
+														"DATE_ONLY" as JimuFieldType,
+														"TIME_ONLY" as JimuFieldType
+													])
 													: undefined
 											}
 										/>
@@ -599,8 +600,8 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 											dataSource={
 												props.useDataSources?.[1]
 													? DataSourceManager.getInstance().getDataSource(
-															props.useDataSources[1].dataSourceId
-														)
+														props.useDataSources[1].dataSourceId
+													)
 													: null
 											}
 											onChange={(expression: IMSqlExpression) => {
@@ -717,11 +718,11 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 												config.refStatisticType === "count"
 													? undefined
 													: Immutable.from([
-															"NUMBER" as JimuFieldType,
-															"DATE" as JimuFieldType,
-															"DATE_ONLY" as JimuFieldType,
-															"TIME_ONLY" as JimuFieldType
-														])
+														"NUMBER" as JimuFieldType,
+														"DATE" as JimuFieldType,
+														"DATE_ONLY" as JimuFieldType,
+														"TIME_ONLY" as JimuFieldType
+													])
 											}
 										/>
 									</SettingRow>
@@ -825,6 +826,64 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 										config: {
 											...config,
 											showLastUpdateTime: !config.showLastUpdateTime
+										}
+									})
+								}}
+							/>
+						</SettingRow>
+						<SettingRow
+							label={(
+								<div
+									style={{
+										display: "inline-flex",
+										alignItems: "center",
+										gap: 6
+									}}
+								>
+									<Tooltip
+										title={props.intl.formatMessage({
+											id: "aggressiveRefreshHelpTooltip",
+											defaultMessage:
+												"Primarily for Arcade data sources. This mode is more expensive and may increase refresh workload."
+										})}
+									>
+										<span
+											style={{
+												display: "inline-flex",
+												alignItems: "center",
+												justifyContent: "center",
+												width: 16,
+												height: 16,
+												borderRadius: "50%",
+												border: "1px solid currentColor",
+												fontSize: 11,
+												fontWeight: 700,
+												lineHeight: 1,
+												cursor: "help",
+												userSelect: "none"
+											}}
+										>
+											i
+										</span>
+									</Tooltip>
+									<span>
+										{props.intl.formatMessage({
+											id: "aggressiveRefresh",
+											defaultMessage: "Aggressive refresh"
+										})}
+									</span>
+								</div>
+							)}
+							flow={"no-wrap"}
+						>
+							<Switch
+								checked={config.aggressiveRefresh ?? false}
+								onChange={() => {
+									onSettingChange({
+										id,
+										config: {
+											...config,
+											aggressiveRefresh: !(config.aggressiveRefresh ?? false)
 										}
 									})
 								}}

@@ -259,6 +259,50 @@ interface FeaturePagerProps {
 	onNext: () => void
 }
 
+type ArcadeRefreshableDataSource = ArcGISQueriableDataSource & {
+	getMainDataSource?: () => ArcGISQueriableDataSource
+	getDataSourceJson?: () => { arcadeScript?: string }
+	setNeedRefresh?: (needRefresh: boolean) => void
+	ready?: () => Promise<unknown>
+	arcadeClientLayer?: unknown
+	arcadeResult?: { layer?: unknown }
+}
+
+async function aggressiveRefreshArcadeDataSource (
+	ds: ArcGISQueriableDataSource | null | undefined
+): Promise<void> {
+	const target = ds as ArcadeRefreshableDataSource | null | undefined
+	if (!target) return
+
+	const dsJson = target.getDataSourceJson?.()
+	if (!dsJson?.arcadeScript) return
+
+	const main = (target.getMainDataSource?.() ?? target) as ArcadeRefreshableDataSource
+	const reset = (item: ArcadeRefreshableDataSource | null | undefined) => {
+		if (!item) return
+		item.arcadeClientLayer = null
+		item.arcadeResult = undefined
+		item.setNeedRefresh?.(true)
+	}
+
+	reset(target)
+	if (main !== target) {
+		reset(main)
+	}
+
+	try {
+		// Re-run DS ready lifecycle to force re-execution of the Arcade script.
+		await main.ready?.()
+	} catch (err) {
+		console.warn("Indicator: aggressive Arcade refresh failed", err)
+	} finally {
+		target.setNeedRefresh?.(false)
+		if (main !== target) {
+			main.setNeedRefresh?.(false)
+		}
+	}
+}
+
 const FeaturePager = ({
 	current,
 	total,
@@ -328,6 +372,7 @@ export default function Widget (props: AllWidgetProps<IMConfig>) {
 	const mainDsRef = React.useRef<ArcGISQueriableDataSource | null>(null)
 	const refDsRef = React.useRef<ArcGISQueriableDataSource | null>(null)
 	const prevMainValueRef = React.useRef<number | null>(null)
+	const aggressiveRefreshInFlightRef = React.useRef(false)
 
 	// ── Derived fields ─────────────────────────────────────────────────────
 
@@ -426,11 +471,28 @@ export default function Widget (props: AllWidgetProps<IMConfig>) {
 	React.useEffect(() => {
 		if (!isConfigured) return
 		const id = setInterval(() => {
-			setMainTrigger((v) => v + 1)
-			setRefTrigger((v) => v + 1)
+			if (!(config.aggressiveRefresh ?? false)) {
+				setMainTrigger((v) => v + 1)
+				setRefTrigger((v) => v + 1)
+				return
+			}
+
+			if (aggressiveRefreshInFlightRef.current) return
+			aggressiveRefreshInFlightRef.current = true
+
+			const run = async () => {
+				await aggressiveRefreshArcadeDataSource(mainDsRef.current)
+				await aggressiveRefreshArcadeDataSource(refDsRef.current)
+				setMainTrigger((v) => v + 1)
+				setRefTrigger((v) => v + 1)
+			}
+
+			void run().finally(() => {
+				aggressiveRefreshInFlightRef.current = false
+			})
 		}, refreshMs)
 		return () => { clearInterval(id) }
-	}, [isConfigured, refreshMs])
+	}, [isConfigured, refreshMs, config.aggressiveRefresh])
 
 	// ── Main query effect ──────────────────────────────────────────────────
 
