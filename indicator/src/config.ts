@@ -73,6 +73,7 @@ export interface Config {
 
 	showLastUpdateTime: boolean
 	lastUpdateTimeTextColor: string
+	aggressiveRefresh: boolean
 
 	refreshIntervalValue: number
 	refreshIntervalUnit: "seconds" | "minutes" | "hours"
