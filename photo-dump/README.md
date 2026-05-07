@@ -1,3 +1,9 @@
+[![npm version][npm-img]][npm-url]
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://raw.githubusercontent.com/SunshineLuke90/widgets/master/photo-dump/LICENSE.md)
+
+[npm-img]: https://img.shields.io/npm/v/exb-photo-dump.svg?style=flat
+[npm-url]: https://www.npmjs.com/package/exb-photo-dump
+
 # Photo Dump
 
 This widget is designed to make the information dump process simple for uploading drone photos into ArcGIS Online via a feature service. The widget allows personnel to upload a zip file, containing geotagged photos (Or a set of individual photos), and after some optional configuration the widget will create a point for each photo, and upload the photo as an attachment for the point. 
