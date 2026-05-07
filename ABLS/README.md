@@ -17,4 +17,13 @@ A prime example of where this widget is used can be found in the [SEMA Daily Bri
 
 Implementation is simple. Just drag the widget into your application, connect it to a map if it doesn't automatically connect, then create a view and select all of the layers you want visible (Including basemap layers). The layer order will be maintained, it's just the visibility that will be changed. The first view that you choose will be what the map will appear with the first time the ABLS widget is loaded.
 
+Expandable layers can also be set, to act as a sort of "quick reference" layer visibility list. The layers in the expandable list can be either layers that would be visible within the view, or layers that would not be visible in the view. This can be helpful for setups where you have multiple themes of data, but within each theme there are reference layers that won't always be needed. Adding a default layers widget would be too much in this case, as there would be so many layers that it's not easy to scroll through, which is where the expandable layers fits in!
+
 If the data you are switching views between is time enabled, you can also apply time filtering on the view. Time filtering is relatively self explanatory, but in general, is used to apply dynamic time filtering as an offset from the current time. This is good for forecast maps, or to view past information, like in an EOC setting. If your layers are not time enabled, do not turn on time filtering to speed up load time.
+
+As of version 1.1.1, the layer selection in the settings panel has been improved in a couple of ways.
+
+1. The layers show in the same order as the drawing order (Higher layers on top)
+2. The layers support group layers and sub layers.
+
+This improves the setup process for the widget when dealing with a map that has lots of layers, especially when it contains many group layers.
