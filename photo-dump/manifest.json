@@ -1,0 +1,26 @@
+{
+  "name": "photo-dump",
+  "label": "Photo Dump",
+  "type": "widget",
+  "version": "1.20.0",
+  "exbVersion": "1.20.0",
+  "author": "Lucius Creamer",
+  "description": "A simple photo dump widget for Experience Builder, allowing users to upload a zip file of photos with geolocation data.",
+  "copyright": "Lucius Creamer 2026",
+  "license": "MIT",
+  "properties": {
+    "hasSettingPage": true,
+    "hasStylePage": false,
+    "hasConfig": true
+  },
+  "dependency": [
+    "jimu-arcgis"
+  ],
+  "translatedLocales": [
+    "en"
+  ],
+  "defaultSize": {
+    "width": 800,
+    "height": 500
+  }
+}
