@@ -6,19 +6,24 @@ import {
 	SettingRow
 } from "jimu-ui/advanced/setting-components"
 import { IconPicker } from "jimu-ui/advanced/resource-selector"
-import { Button, TextInput, Checkbox, Switch, NumericInput } from "jimu-ui"
+import { Button, TextInput, Switch, NumericInput } from "jimu-ui"
 import { JimuMapViewComponent, type JimuMapView } from "jimu-arcgis"
 import type Layer from "esri/layers/Layer"
 import type { IMConfig, ABLSView } from "../config"
 import defaultMessages from "./translations/default"
-import { getLayersFromJimuMapView } from "./utils"
+import { buildLayerTreeRoot, getLayersFromJimuMapView, parseLayerTreeUpdate, toLayerKey, updateExpandedKeysByViewId } from "./utils"
 // @ts-expect-error - No types available for this package
 import "./style.css"
+import { Tree, TreeAlignmentType, TreeCollapseStyle, TreeStyle, type UpdateTreeActionDataType } from "jimu-ui/basic/list-tree"
 
 export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 	const { id, config, onSettingChange, useMapWidgetIds } = props
 	const [jimuMapView, setJimuMapView] = React.useState<JimuMapView>(null)
 	const [layers, setLayers] = React.useState<Layer[]>(null)
+	const [selectedTreeItemKeysByViewId, setSelectedTreeItemKeysByViewId] = React.useState<{ [viewId: string]: string[] }>({})
+	const [expandedTreeItemKeysByViewId, setExpandedTreeItemKeysByViewId] = React.useState<{ [viewId: string]: string[] }>({})
+	const [selectedExpandTreeItemKeysByViewId, setSelectedExpandTreeItemKeysByViewId] = React.useState<{ [viewId: string]: string[] }>({})
+	const [expandedExpandTreeItemKeysByViewId, setExpandedExpandTreeItemKeysByViewId] = React.useState<{ [viewId: string]: string[] }>({})
 
 	const onMapSelected = (useMapWidgetIds: string[]) => {
 		onSettingChange({
@@ -79,14 +84,22 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 		layerId: string,
 		checked: boolean
 	) => {
-		let newLayerIds = view.layerIds ? [...view.layerIds] : []
+		const targetLayerId = toLayerKey(layerId)
+		const currentLayerIds = (selectedTreeItemKeysByViewId[view.id] ?? view.layerIds ?? []).map((id) => toLayerKey(id))
+		let newLayerIds = [...currentLayerIds]
 		if (checked) {
-			if (!newLayerIds.includes(layerId)) {
-				newLayerIds.push(layerId)
+			if (!newLayerIds.includes(targetLayerId)) {
+				newLayerIds.push(targetLayerId)
 			}
 		} else {
-			newLayerIds = newLayerIds.filter((id) => id !== layerId)
+			newLayerIds = newLayerIds.filter((id) => id !== targetLayerId)
 		}
+
+		setSelectedTreeItemKeysByViewId((prev) => ({
+			...prev,
+			[view.id]: newLayerIds
+		}))
+
 		updateView(view.id, { layerIds: newLayerIds })
 	}
 
@@ -95,15 +108,63 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 		layerId: string,
 		checked: boolean
 	) => {
-		let newLayerIds = view.expandLayerIds ? [...view.expandLayerIds] : []
+		const targetLayerId = toLayerKey(layerId)
+		const currentLayerIds = (selectedExpandTreeItemKeysByViewId[view.id] ?? view.expandLayerIds ?? []).map((id) => toLayerKey(id))
+		let newLayerIds = [...currentLayerIds]
 		if (checked) {
-			if (!newLayerIds.includes(layerId)) {
-				newLayerIds.push(layerId)
+			if (!newLayerIds.includes(targetLayerId)) {
+				newLayerIds.push(targetLayerId)
 			}
 		} else {
-			newLayerIds = newLayerIds.filter((id) => id !== layerId)
+			newLayerIds = newLayerIds.filter((id) => id !== targetLayerId)
 		}
+
+		setSelectedExpandTreeItemKeysByViewId((prev) => ({
+			...prev,
+			[view.id]: newLayerIds
+		}))
+
 		updateView(view.id, { expandLayerIds: newLayerIds })
+	}
+
+	const handleGenericLayerTreeUpdate = (
+		view: ABLSView,
+		actionData: UpdateTreeActionDataType,
+		setExpandedKeysByViewId: React.Dispatch<React.SetStateAction<{ [viewId: string]: string[] }>>,
+		onCheckboxChange: (view: ABLSView, layerId: string, checked: boolean) => void
+	) => {
+		const update = parseLayerTreeUpdate(actionData)
+
+		if (update.kind === "expand") {
+			setExpandedKeysByViewId((previousState) => {
+				return updateExpandedKeysByViewId(previousState, view.id, update.layerId, update.expanded)
+			})
+			return
+		}
+
+		if (update.kind === "checkbox") {
+			onCheckboxChange(view, update.layerId, update.checked)
+		}
+	}
+
+	const getSelectedLayerIdsForView = (view: ABLSView): string[] => {
+		return (selectedTreeItemKeysByViewId[view.id] ?? view.layerIds ?? []).map((id) => toLayerKey(id))
+	}
+
+	const getSelectedExpandLayerIdsForView = (view: ABLSView): string[] => {
+		return (selectedExpandTreeItemKeysByViewId[view.id] ?? view.expandLayerIds ?? []).map((id) => toLayerKey(id))
+	}
+
+	const getTreeRenderKey = (view: ABLSView): string => {
+		const selected = getSelectedLayerIdsForView(view).join("|")
+		const expanded = (expandedTreeItemKeysByViewId[view.id] ?? []).map((id) => toLayerKey(id)).join("|")
+		return `${view.id}::${selected}::${expanded}`
+	}
+
+	const getExpandTreeRenderKey = (view: ABLSView): string => {
+		const selected = getSelectedExpandLayerIdsForView(view).join("|")
+		const expanded = (expandedExpandTreeItemKeysByViewId[view.id] ?? []).map((id) => toLayerKey(id)).join("|")
+		return `${view.id}::expand::${selected}::${expanded}`
 	}
 
 	return (
@@ -214,18 +275,34 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 									defaultMessage: defaultMessages.visibleLayers
 								})}
 							/>
-							<div className="layer-list">
-								{layers?.map((layer) => (
-									<SettingRow key={layer.id}>
-										<Checkbox
-											checked={view.layerIds?.includes(layer.id)}
-											onChange={(_e, checked) => {
-												onLayerCheckChange(view, layer.id, checked)
-											}}
-										/>
-										<label className="ml-2">{layer.title}</label>
-									</SettingRow>
-								))}
+							<div className="Replacement-layer-list layer-list">
+								<Tree
+									key={getTreeRenderKey(view)}
+									className="w-100"
+									size="sm"
+									collapseStyle={TreeCollapseStyle.Arrow}
+									dndEnabled={false}
+									isMultiSelection={true}
+									checkboxLinkage={false}
+									treeAlignmentType={TreeAlignmentType.Intact}
+									disableDoubleClickTitle={true}
+									treeStyle={TreeStyle.Basic}
+									singleLineText={true}
+									rootItemVisible={false}
+									onUpdateItem={(actionData) => {
+										handleGenericLayerTreeUpdate(
+											view,
+											actionData,
+											setExpandedTreeItemKeysByViewId,
+											onLayerCheckChange
+										)
+									}}
+									rootItemJson={buildLayerTreeRoot(
+										layers,
+										getSelectedLayerIdsForView(view),
+										expandedTreeItemKeysByViewId[view.id] ?? []
+									)}
+								/>
 							</div>
 							{config.expandEnabled && (
 								<>
@@ -236,18 +313,34 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 											defaultMessage: defaultMessages.expandLayers
 										})}
 									/>
-									<div className="layer-list">
-										{layers?.map((layer) => (
-											<SettingRow key={layer.id}>
-												<Checkbox
-													checked={view.expandLayerIds?.includes(layer.id)}
-													onChange={(_e, checked) => {
-														onExpandLayerCheckChange(view, layer.id, checked)
-													}}
-												/>
-												<label className="ml-2">{layer.title}</label>
-											</SettingRow>
-										))}
+									<div className="Replacement-layer-list layer-list">
+										<Tree
+											key={getExpandTreeRenderKey(view)}
+											className="w-100"
+											size="sm"
+											collapseStyle={TreeCollapseStyle.Arrow}
+											dndEnabled={false}
+											isMultiSelection={true}
+											checkboxLinkage={false}
+											treeAlignmentType={TreeAlignmentType.Intact}
+											disableDoubleClickTitle={true}
+											treeStyle={TreeStyle.Basic}
+											singleLineText={true}
+											rootItemVisible={false}
+											onUpdateItem={(actionData) => {
+												handleGenericLayerTreeUpdate(
+													view,
+													actionData,
+													setExpandedExpandTreeItemKeysByViewId,
+													onExpandLayerCheckChange
+												)
+											}}
+											rootItemJson={buildLayerTreeRoot(
+												layers,
+												getSelectedExpandLayerIdsForView(view),
+												expandedExpandTreeItemKeysByViewId[view.id] ?? []
+											)}
+										/>
 									</div>
 								</>
 							)}
