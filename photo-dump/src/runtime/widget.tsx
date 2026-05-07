@@ -874,9 +874,11 @@ export default function Widget (props: AllWidgetProps<IMConfig>) {
         skippedNoGps: 0,
         skippedAlreadyUploaded: 0
       }
+      const isSingleRun = Boolean(photoIds?.length)
+      const uploadablePhotos: ParsedPhoto[] = []
 
       for (const photo of selectedPhotos) {
-        const isBatchRun = !photoIds?.length
+        const isBatchRun = !isSingleRun
         if (isBatchRun && photo.status === 'uploaded') {
           summary.skippedAlreadyUploaded += 1
           continue
@@ -894,18 +896,57 @@ export default function Widget (props: AllWidgetProps<IMConfig>) {
           continue
         }
 
-        const outcome = await uploadSinglePhoto(layerInfo, photo)
-        updates[photo.id] = {
-          status: outcome.status,
-          issues: outcome.issues
-        }
+        uploadablePhotos.push(photo)
+      }
 
-        if (outcome.status === 'uploaded') {
-          summary.uploaded += 1
-        } else if (outcome.status === 'warning') {
-          summary.warning += 1
-        } else if (outcome.status === 'error') {
-          summary.failed += 1
+      if (isSingleRun) {
+        const photo = uploadablePhotos[0]
+        if (photo) {
+          const outcome = await uploadSinglePhoto(layerInfo, photo)
+          updates[photo.id] = {
+            status: outcome.status,
+            issues: outcome.issues
+          }
+
+          if (outcome.status === 'uploaded') {
+            summary.uploaded += 1
+          } else if (outcome.status === 'warning') {
+            summary.warning += 1
+          } else if (outcome.status === 'error') {
+            summary.failed += 1
+          }
+        }
+      } else {
+        const uploadResults = await Promise.all(
+          uploadablePhotos.map(async (photo) => {
+            try {
+              const outcome = await uploadSinglePhoto(layerInfo, photo)
+              return { photo, outcome }
+            } catch (error: any) {
+              return {
+                photo,
+                outcome: {
+                  status: 'error' as PhotoStatus,
+                  issues: appendUniqueIssue(photo.issues, error?.message || 'Upload failed.')
+                }
+              }
+            }
+          })
+        )
+
+        for (const { photo, outcome } of uploadResults) {
+          updates[photo.id] = {
+            status: outcome.status,
+            issues: outcome.issues
+          }
+
+          if (outcome.status === 'uploaded') {
+            summary.uploaded += 1
+          } else if (outcome.status === 'warning') {
+            summary.warning += 1
+          } else if (outcome.status === 'error') {
+            summary.failed += 1
+          }
         }
       }
 
@@ -921,7 +962,6 @@ export default function Widget (props: AllWidgetProps<IMConfig>) {
         })
       )
 
-      const isSingleRun = Boolean(photoIds?.length)
       if (isSingleRun) {
         const first = selectedPhotos[0]
         const outcome = updates[first.id]
