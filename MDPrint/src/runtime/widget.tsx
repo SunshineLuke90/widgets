@@ -19,12 +19,7 @@ import {
 	Paper,
 	TextArea
 } from "jimu-ui"
-import {
-	CalciteAlert,
-	CalciteButton,
-	CalciteOption,
-	CalciteSelect
-} from "calcite-components"
+import "calcite-components"
 import { handlePrint } from "./formatUtils"
 // @ts-expect-error - No types available for this package
 import "./style.css"
@@ -178,11 +173,11 @@ export default function Widget (props: AllWidgetProps<IMConfig>) {
 			</header>
 			<div className="mdprint-scroll">
 				<span style={{ fontSize: "14px" }}>Template</span>
-				<CalciteSelect
+				<calcite-select
 					label="Select Print Template"
 					scale="s"
 					value={selectedTemplateId}
-					onCalciteSelectChange={(e: any) => {
+					oncalciteSelectChange={(e: any) => {
 						const templateId = (e.target as HTMLCalciteSelectElement).value
 						setSelectedTemplateId(templateId)
 					}}
@@ -191,14 +186,14 @@ export default function Widget (props: AllWidgetProps<IMConfig>) {
 						(template: ImmutableObject<PrintTemplate>) => {
 							const records = getSelectedRecordsForTemplate(template)
 							return (
-								<CalciteOption key={template.id} value={template.id}>
+								<calcite-option key={template.id} value={template.id}>
 									{template.label +
 										(records.length > 0 ? ` (${records.length} selected)` : "")}
-								</CalciteOption>
+								</calcite-option>
 							)
 						}
 					)}
-				</CalciteSelect>
+				</calcite-select>
 				{/* Show markdown and CSS editors for the currently selected template */}
 				{selectedTemplateId &&
 					config.PrintTemplates.map(
@@ -331,7 +326,7 @@ export default function Widget (props: AllWidgetProps<IMConfig>) {
 					)}
 			</div>
 
-			<CalciteButton
+			<calcite-button
 				appearance="solid"
 				disabled={!selectedTemplateId || selectedCount === 0}
 				style={{ marginTop: "8px" }}
@@ -346,7 +341,7 @@ export default function Widget (props: AllWidgetProps<IMConfig>) {
 				}}
 			>
 				Print {selectedCount > 0 ? `(${selectedCount} selected)` : ""}
-			</CalciteButton>
+			</calcite-button>
 			{/* Render a DataSourceComponent for each unique datasource */}
 			{uniqueUseDataSources.map((uds) => (
 				<DataSourceComponent
@@ -378,20 +373,20 @@ export default function Widget (props: AllWidgetProps<IMConfig>) {
 					}}
 				/>
 			))}
-			<CalciteAlert
+			<calcite-alert
 				open={alertOpen || undefined}
 				kind="danger"
 				icon="exclamation-mark-triangle"
 				autoClose
 				autoCloseDuration="medium"
 				label="Error alert"
-				onCalciteAlertClose={() => {
+				oncalciteAlertClose={() => {
 					setAlertOpen(false)
 				}}
 			>
 				<div slot="title">Error</div>
 				<div slot="message">{alertMessage}</div>
-			</CalciteAlert>
+			</calcite-alert>
 		</Paper>
 	)
 }
