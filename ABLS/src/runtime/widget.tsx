@@ -21,15 +21,20 @@ export default function Widget (props: AllWidgetProps<Config>) {
 
 	const [expand, setExpand] = React.useState(false)
 	const [expandedLayers, setExpandedLayers] = React.useState<Layer[]>([])
+	const [expandedForViewId, setExpandedForViewId] = React.useState<string>(null)
 
 	// This is the way that the widget prevents itself from running itself, and from crashing. It checks to see if any maps have been selected, and if any views have been configured.
 	const isConfigured = useMapWidgetIds?.length > 0 && config.views?.length > 0
 
 	const handleViewExpand = useCallback(
 		(view: ABLSView) => {
+			if (activeViewId !== view.id) {
+				return
+			}
 			if (expand && activeViewId === view.id) {
 				setExpand(false)
 				setExpandedLayers([])
+				setExpandedForViewId(null)
 				return
 			}
 			if (jimuMapView?.view?.map?.allLayers) {
@@ -38,6 +43,7 @@ export default function Widget (props: AllWidgetProps<Config>) {
 					.reverse()
 					.filter((layer) => view.expandLayerIds.includes(layer.id))
 				setExpandedLayers(nextExpandedLayers)
+				setExpandedForViewId(nextExpandedLayers.length > 0 ? view.id : null)
 				setExpand(nextExpandedLayers.length > 0)
 			}
 		},
@@ -50,6 +56,8 @@ export default function Widget (props: AllWidgetProps<Config>) {
 		(view: ABLSView) => {
 			if (!jimuMapView || !jimuMapView.view) return
 			setExpand(false)
+			setExpandedLayers([])
+			setExpandedForViewId(null)
 			setActiveViewId(view.id)
 
 			// 1. Handle Layer Visibility
@@ -167,6 +175,7 @@ export default function Widget (props: AllWidgetProps<Config>) {
 	}
 
 	const topLevelLayers = expandedLayers.filter((layer) => !nestedChildIds.has(layer.id))
+	const isPopoverOpen = expand && expandedLayers.length > 0 && expandedForViewId === activeViewId
 
 	// This return statement will not be run unless the widget has been set up at least to some degree. This is what actually creates the UI for the widget that is visible to the end user
 	return (
@@ -175,7 +184,9 @@ export default function Widget (props: AllWidgetProps<Config>) {
 			<calcite-popover
 				referenceElement={activeViewId}
 				label="expanded layers"
-				open={expand && expandedLayers.length > 0}
+				open={isPopoverOpen || undefined}
+				triggerDisabled={true}
+				autoClose={false}
 				heading="Layers"
 			>
 				<calcite-list
@@ -223,7 +234,7 @@ export default function Widget (props: AllWidgetProps<Config>) {
 							{view.name}
 							{view.expandLayerIds?.length > 0 && (
 								<Icon
-									icon={expand && activeViewId === view.id ? chevronUpSvg : chevronDownSvg}
+									icon={isPopoverOpen && activeViewId === view.id ? chevronUpSvg : chevronDownSvg}
 									size="12"
 									className="expand-handle-icon"
 								/>
