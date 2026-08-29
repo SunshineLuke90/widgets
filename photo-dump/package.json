@@ -1,0 +1,18 @@
+{
+    "name": "exb-photo-dump",
+    "version": "0.0.1",
+    "description": "A widget for uploading a set of geotagged photos to a point feature service.",
+    "license": "MIT",
+    "author": "Lucius Creamer",
+    "main": "src/runtime/widget.tsx",
+    "keywords": [
+        "exb-widget",
+        "experience-builder",
+        "exb"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/SunshineLuke90/widgets.git",
+        "directory": "photo-dump"
+    }
+}
