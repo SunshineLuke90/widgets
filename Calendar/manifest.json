@@ -2,8 +2,8 @@
   "name": "Calendar",
   "label": "Calendar",
   "type": "widget",
-  "version": "1.19.0",
-  "exbVersion": "1.19.0",
+  "version": "1.21.0",
+  "exbVersion": "1.21.0",
   "author": "Lucius Creamer",
   "description": "This widget uses a calendar from the fullcalendar library, to display ArcGIS Data in interactable calendar format.",
   "dependency": [

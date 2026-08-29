@@ -17,8 +17,9 @@ import "./style.css"
 
 import FullCalendar from "@fullcalendar/react"
 import dayGridPlugin from "@fullcalendar/daygrid"
-import interactionPlugin from "@fullcalendar/interaction"
 import timeGridPlugin from "@fullcalendar/timegrid"
+import listPlugin from "@fullcalendar/list"
+import interactionPlugin from "@fullcalendar/interaction"
 import type { ViewApi } from "@fullcalendar/core"
 import { cssVar } from "polished"
 
@@ -31,17 +32,22 @@ export default function Widget (props: AllWidgetProps<IMConfig>) {
 	}>({})
 
 	// reference to the FullCalendar instance so we can query its current view
-	const calendarRef = React.useRef<FullCalendar>(null)
+	const calendarRef = React.useRef<any>(null)
 
 	const [queryByDsId, setQueryByDsId] = React.useState<{
 		[dsId: string]: string
 	}>({})
 
-	const [filterState, setFilterState] = React.useState(false)
+	const [filterState, setFilterState] = React.useState(config.defaultFilterState)
 
 	// Compute flat events array from all datasources
 	const events = Object.values(eventsByDsId).flat()
 	const [maxEvents, setMaxEvents] = React.useState(100)
+
+	const optionalViews = React.useMemo(() => {
+		if (config.optionalViews) return config.optionalViews.join(',')
+		return undefined
+	}, [config.optionalViews])
 
 	const isConfigured =
 		config.dataSets &&
@@ -53,6 +59,17 @@ export default function Widget (props: AllWidgetProps<IMConfig>) {
 		) &&
 		config.dataSets[0].startDateField &&
 		config.dataSets[0].endDateField
+
+	const parseInitialDate = (value: unknown): Date | undefined => {
+		if (!value) return undefined
+		const date = value instanceof Date ? value : new Date(value as string | number | Date)
+		return Number.isNaN(date.getTime()) ? undefined : date
+	}
+
+	const calendarInitialDate =
+		config.initialDate === undefined
+			? undefined
+			: parseInitialDate(config.initialDate) ?? new Date()
 
 	const fillCalendarEvents = (ds: DataSource, dsConfig: data) => {
 		if (!ds) return
@@ -212,8 +229,9 @@ export default function Widget (props: AllWidgetProps<IMConfig>) {
 		<>
 			<FullCalendar
 				ref={calendarRef}
-				plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
-				initialView="dayGridMonth"
+				plugins={[timeGridPlugin, dayGridPlugin, listPlugin, interactionPlugin]}
+				initialView={config.initialView} // Should be set in config
+				initialDate={calendarInitialDate} // Stored config may be a serialized date string; normalize before use.
 				events={events}
 				eventMaxStack={maxEvents}
 				eventClick={handleEventClick}
@@ -265,10 +283,17 @@ export default function Widget (props: AllWidgetProps<IMConfig>) {
 					week: "Week",
 					day: "Day"
 				}}
+				views={{
+					"3day": {
+						type: 'timeGrid',
+						duration: { days: 3 },
+						buttonText: '3 Day'
+					}
+				}}
 				headerToolbar={{
 					left: "prev,next today clearSelection filterToggle",
 					center: "title",
-					right: "dayGridMonth,timeGridWeek,timeGridDay"
+					right: optionalViews // Needs to be generated from config
 				}}
 			/>
 			{config.dataSets && config.dataSets.length > 0 && (

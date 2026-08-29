@@ -6,13 +6,12 @@
   "author": "Lucius Creamer",
   "main": "src/runtime/widget.tsx",
   "dependencies": {
-    "@fullcalendar/daygrid": "^6.1.20",
-    "@fullcalendar/interaction": "^6.1.20",
+    "@fullcalendar/core": "^6.1.20",
+    "@fullcalendar/daygrid": "6.1.20",
+    "@fullcalendar/interaction": "6.1.20",
+    "@fullcalendar/list": "6.1.20",
     "@fullcalendar/react": "^6.1.20",
-    "@fullcalendar/timegrid": "^6.1.20"
-  },
-  "peerDependencies": {
-    "polished": "4.3.1"
+    "@fullcalendar/timegrid": "6.1.20"
   },
   "keywords": [
     "exb-widget",

@@ -15,19 +15,45 @@ import {
 	Tabs,
 	Tab,
 	CollapsablePanel,
-	NumericInput
+	NumericInput,
+	Select,
+	Option,
+	MultiSelect,
+	MultiSelectItem,
+	Switch
 } from "jimu-ui"
 import type { IMConfig, Config, colorset, data } from "../config"
 import {
 	DataSourceSelector,
 	FieldSelector
 } from "jimu-ui/advanced/data-source-selector"
+import { DatePicker } from "jimu-ui/basic/date-picker"
+
 
 export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
-	const { id, config } = props
+	const {
+		id,
+		config,
+		onSettingChange,
+		useDataSources
+	} = props
 	const [activeTab, setActiveTab] = React.useState<string | undefined>(
 		config?.dataSets?.[0]?.id
 	)
+
+	// Migrate configs missing initial calendar settings
+	React.useEffect(() => {
+		if (!config?.initialView) {
+			onSettingChange({
+				id,
+				config: {
+					...config,
+					initialView: "dayGridMonth",
+					optionalViews: ["dayGridMonth", "timeGridWeek", "timeGridDay"]
+				}
+			})
+		}
+	}, [config, id, onSettingChange])
 
 	// Migrate old config format: move useDataSources from each dataset to widget-level props
 	React.useEffect(() => {
@@ -41,7 +67,7 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 		if (!needsMigration) return
 
 		const collectedDataSources: UseDataSource[] = [
-			...(props.useDataSources || [])
+			...(useDataSources || [])
 		]
 		const migratedDataSets = mutableDataSets.map((dataset: any) => {
 			if (
@@ -66,13 +92,12 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 			"dataSets",
 			migratedDataSets
 		)
-		props.onSettingChange({
+		onSettingChange({
 			id,
 			config: newConfig,
 			useDataSources: collectedDataSources
 		})
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [])
+	}, [config, id, onSettingChange, useDataSources])
 
 	// helper to get a mutable copy of datasets
 	const getDataSets = () =>
@@ -254,9 +279,122 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 		updateDataset(datasetId, { colorsets: updatedColorsets })
 	}
 
+	const parseInitialDate = (value: unknown): Date | undefined => {
+		if (!value) return undefined
+		const date = value instanceof Date ? value : new Date(value as string | number | Date)
+		return Number.isNaN(date.getTime()) ? undefined : date
+	}
+
+	const serializeInitialDate = (value: unknown): string | undefined => {
+		if (value === null || value === undefined || value === "") return undefined
+		const date = parseInitialDate(value)
+		return date ? date.toISOString() : undefined
+	}
+
 	return (
 		<div className="view-layers-toggle-setting">
-			<SettingSection>
+			<SettingSection
+				title="Calendar Defaults"
+			>
+				<SettingRow
+					flow="wrap"
+					level={2}
+					label="Initial View"
+				>
+					<Select
+						value={config.initialView}
+						onChange={(_, value) => {
+							props.onSettingChange({
+								id,
+								config: {
+									...config,
+									initialView: value
+								}
+							})
+						}}
+					>
+						<Option value="timeGridDay">Time Grid Day</Option>
+						<Option value="listDay">List Day</Option>
+						<Option value="3day">3 Day</Option>
+						<Option value="timeGridWeek">Time Grid Week</Option>
+						<Option value="listWeek">List Week</Option>
+						<Option value="dayGridWeek">Day Grid Week</Option>
+						<Option value="listMonth">List Month</Option>
+						<Option value="dayGridMonth">Day Grid Month</Option>
+					</Select>
+				</SettingRow>
+				<SettingRow
+					flow="wrap"
+					level={2}
+					label="Optional Views"
+				>
+					<MultiSelect
+						values={config.optionalViews}
+						onChange={(_, values) => {
+							props.onSettingChange({ id, config: { ...config, optionalViews: values } })
+						}}
+					>
+						<MultiSelectItem
+							label="Time Grid Day"
+							value="timeGridDay"
+						/>
+						<MultiSelectItem
+							label="List Day"
+							value="listDay"
+						/>
+						<MultiSelectItem
+							label="Time Grid 3 Day"
+							value="3day"
+						/>
+						<MultiSelectItem
+							label="Time Grid Week"
+							value="timeGridWeek"
+						/>
+						<MultiSelectItem
+							label="List Week"
+							value="listWeek"
+						/>
+						<MultiSelectItem
+							label="Day Grid Week"
+							value="dayGridWeek"
+						/>
+						<MultiSelectItem
+							label="List Month"
+							value="listMonth"
+						/>
+						<MultiSelectItem
+							label="Day Grid Month"
+							value="dayGridMonth"
+						/>
+					</MultiSelect>
+				</SettingRow>
+				<SettingRow
+					flow="wrap"
+					level={2}
+					label="Initial Date"
+				>
+					<DatePicker
+						selectedDate={
+							config.initialDate === undefined ? undefined : parseInitialDate(config.initialDate)
+						}
+						onChange={(value) => {
+							const nextDate = serializeInitialDate(value)
+							props.onSettingChange({ id, config: { ...config, initialDate: nextDate } })
+						}}
+					/>
+				</SettingRow>
+				<SettingRow
+					flow="no-wrap"
+					level={3}
+					label="Default Filter State"
+				>
+					<Switch
+						checked={config.defaultFilterState}
+						onChange={(_, checked) => {
+							props.onSettingChange({ id, config: { ...config, defaultFilterState: checked } })
+						}}
+					/>
+				</SettingRow>
 				<SettingRow
 					flow={"wrap"}
 					level={2}
@@ -313,12 +451,12 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 									// Key change!
 									const datasetUseDataSources = dataset.dataSourceId
 										? Immutable.from(
-												(props.useDataSources || []).filter(
-													(widgetDataSource) =>
-														widgetDataSource.dataSourceId ===
-														dataset.dataSourceId
-												)
+											(props.useDataSources || []).filter(
+												(widgetDataSource) =>
+													widgetDataSource.dataSourceId ===
+													dataset.dataSourceId
 											)
+										)
 										: Immutable.from([] as UseDataSource[])
 
 									return (
@@ -513,8 +651,8 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 																			selectedFields={
 																				dataset?.colorsetField
 																					? Immutable.from([
-																							dataset.colorsetField
-																						])
+																						dataset.colorsetField
+																					])
 																					: datasetUseDataSources?.[0]?.fields
 																			}
 																		/>
