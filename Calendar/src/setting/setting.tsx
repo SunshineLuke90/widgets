@@ -31,7 +31,12 @@ import { DatePicker } from "jimu-ui/basic/date-picker"
 
 
 export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
-	const { id, config } = props
+	const {
+		id,
+		config,
+		onSettingChange,
+		useDataSources
+	} = props
 	const [activeTab, setActiveTab] = React.useState<string | undefined>(
 		config?.dataSets?.[0]?.id
 	)
@@ -39,7 +44,7 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 	// Migrate configs missing initial calendar settings
 	React.useEffect(() => {
 		if (!config?.initialView) {
-			props.onSettingChange({
+			onSettingChange({
 				id,
 				config: {
 					...config,
@@ -48,7 +53,7 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 				}
 			})
 		}
-	}, [])
+	}, [config, id, onSettingChange])
 
 	// Migrate old config format: move useDataSources from each dataset to widget-level props
 	React.useEffect(() => {
@@ -62,7 +67,7 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 		if (!needsMigration) return
 
 		const collectedDataSources: UseDataSource[] = [
-			...(props.useDataSources || [])
+			...(useDataSources || [])
 		]
 		const migratedDataSets = mutableDataSets.map((dataset: any) => {
 			if (
@@ -87,13 +92,12 @@ export default function Setting (props: AllWidgetSettingProps<IMConfig>) {
 			"dataSets",
 			migratedDataSets
 		)
-		props.onSettingChange({
+		onSettingChange({
 			id,
 			config: newConfig,
 			useDataSources: collectedDataSources
 		})
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [])
+	}, [config, id, onSettingChange, useDataSources])
 
 	// helper to get a mutable copy of datasets
 	const getDataSets = () =>
