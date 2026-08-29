@@ -1,3 +1,10 @@
 {
-    "maxEventCount": 10
+    "maxEventCount": 10,
+    "initialView": "dayGridMonth",
+    "optionalViews": [
+        "dayGridMonth",
+        "timeGridWeek",
+        "timeGridDay"
+    ],
+    "defaultFilterState": false
 }

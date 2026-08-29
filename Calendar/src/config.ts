@@ -1,5 +1,7 @@
 import type { ImmutableObject } from "seamless-immutable"
 
+export type CalendarView = "dayGridWeek" | "dayGridMonth" | "3day" | "timeGridDay" | "timeGridWeek" | "listDay" | "listWeek" | "listMonth"
+
 export interface colorset {
 	id: string
 	fieldValue: string
@@ -24,6 +26,10 @@ export interface data {
 export interface Config {
 	dataSets: data[]
 	maxEventCount: number
+	initialView: CalendarView
+	optionalViews: CalendarView[]
+	defaultFilterState: boolean
+	initialDate?: Date | string | number
 }
 
 export type IMConfig = ImmutableObject<Config>
