@@ -33,6 +33,10 @@ jobs:
           repository: SunshineLuke90/widgets
           path: exb/client/your-extensions/widgets
 
+      - name: install PNPM
+        run: npm i -g pnpm
+        working-directory: exb
+
       - name: NPM install in client folder
         run: pnpm ci
         working-directory: exb/client
